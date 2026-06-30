@@ -977,7 +977,7 @@
 
       var timelineSegmentsHtml = state.advancedSequence.map(function(s){
         var co = COLORS[s.intensity];
-        return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px;"></div>';
+        return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px; width:100%;"></div>';
       }).join('');
 
       var showWarning = false;
@@ -999,7 +999,7 @@
       }
 
       return ''+
-      '<div class="left-container" style="padding: 32px 40px; background: oklch(0.975 0.016 230); position: relative; min-height: 100vh; display: flex; flex-direction: column;">'+
+      '<div class="left-container" style="padding: 64px 60px; background: oklch(0.975 0.016 230); position: relative; min-height: 100vh; display: flex; flex-direction: column;">'+
         '<div>'+
           '<div style="margin-bottom: 24px;">'+
             '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
@@ -1026,23 +1026,27 @@
             '</div>'+
           '</div>'+
 
-          '<div style="background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:16px; padding:18px 24px; margin-bottom:20px; display:flex; flex-direction:column; gap:12px;">'+
-            '<div style="display:flex; justify-content:space-between; align-items:baseline;">'+
-              '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
-              '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
-                fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
-              '</div>'+
-            '</div>'+
-            '<div style="display:flex; gap:3px; height:18px; border-radius:6px; overflow:hidden; background:oklch(0.95 0.012 85); width:100%;">'+
-              (state.advancedSequence.length > 0 ? timelineSegmentsHtml : '<div style="flex:1; background:oklch(0.93 0.01 85);"></div>')+
+          '<div style="background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:16px; padding:18px 24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">'+
+            '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
+            '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
+              fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
             '</div>'+
           '</div>'+
-        '</div>'+
 
-        warningHtml+
+          '<div style="display:flex; gap:32px; align-items:stretch; margin-bottom:24px;">'+
+            '<!-- Vertical Proportional Timeline Bar -->'+
+            '<div style="width:24px; display:flex; flex-direction:column; gap:3px; border-radius:8px; overflow:hidden; background:oklch(0.95 0.012 85); flex-shrink:0; min-height:220px; border:1px solid oklch(0.9 0.016 230); padding:3px 2px;">'+
+              (state.advancedSequence.length > 0 ? timelineSegmentsHtml : '<div style="flex:1; background:oklch(0.93 0.01 85); border-radius:4px;"></div>')+
+            '</div>'+
 
-        '<div style="margin-bottom:20px;" class="timeline-cards-container">'+
-          cardsHtml+
+            '<!-- Right Cards Column -->'+
+            '<div style="flex:1; display:flex; flex-direction:column;">'+
+              warningHtml+
+              '<div class="timeline-cards-container" style="display:flex; flex-direction:column; gap:8px;">'+
+                cardsHtml+
+              '</div>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
 
         '<div style="border-top:1px solid oklch(0.9 0.016 230); padding-top:20px; display:flex; flex-direction:column; gap:16px; margin-top:auto;">'+

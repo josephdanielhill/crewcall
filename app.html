@@ -310,6 +310,7 @@
     }
     if(counts.high+counts.medium+counts.med+counts.low===0){ counts.low=2; }
     state.config.high.count=counts.high; state.config.medium.count=counts.medium; state.config.med.count=counts.med; state.config.low.count=counts.low;
+    state.advancedEdited = false;
     render();
   }
 
@@ -483,8 +484,8 @@
   }
   function finish(){ state.mode='done'; state.elapsed=state.totalDuration; if(state.raf) cancelAnimationFrame(state.raf); completeBeep(); render(); }
   function restart(){ runWorkout(); }
-  function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } render(); }
-  function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; render(); }
+  function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } state.advancedEdited = false; render(); }
+  function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; state.advancedEdited = false; render(); }
 
   function goToAdvance() {
     state.mode = 'advance';
@@ -692,6 +693,7 @@
       state.config[k].rate = data.config[k].rate;
     });
 
+    state.advancedEdited = false;
     if (state.mode === 'advance') {
       var preview = buildPreview();
       state.advancedSequence = preview.map(function(s){
@@ -701,7 +703,6 @@
           rate: state.config[s.intensity].rate
         };
       });
-      state.advancedEdited = false;
     }
     
     render();

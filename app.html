@@ -578,12 +578,15 @@
         low:    { count: state.config.low.count,    rate: state.config.low.rate }
       }
     };
+    if (state.mode === 'advance' || state.isAdvancedWorkout) {
+      configData.advancedSequence = state.advancedSequence;
+    }
     var json = JSON.stringify(configData, null, 2);
     var blob = new Blob([json], {type: 'application/json'});
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     
-    var totalIntervals = state.config.high.count + state.config.medium.count + state.config.med.count + state.config.low.count;
+    var totalIntervals = state.mode === 'advance' || state.isAdvancedWorkout ? state.advancedSequence.length : state.config.high.count + state.config.medium.count + state.config.med.count + state.config.low.count;
     var filename = 'crewcall-' + state.targetMin + 'min-' + totalIntervals + 'intervals.json';
     
     link.download = filename;
@@ -610,6 +613,23 @@
       alert('Invalid session length in configuration. Target time must be between 10 and 90 minutes.');
       return;
     }
+
+    if (data.advancedSequence && Array.isArray(data.advancedSequence)) {
+      state.targetMin = data.targetMin;
+      state.advancedSequence = data.advancedSequence.map(function(s){
+        return {
+          intensity: s.intensity,
+          len: s.len,
+          rate: s.rate
+        };
+      });
+      state.advancedEdited = true;
+      state.mode = 'advance';
+      render();
+      showToast('Custom timeline loaded successfully!');
+      return;
+    }
+
     if (!data.config || typeof data.config !== 'object') {
       alert('Invalid configuration object.');
       return;
@@ -653,6 +673,18 @@
       state.config[k].count = data.config[k].count;
       state.config[k].rate = data.config[k].rate;
     });
+
+    if (state.mode === 'advance') {
+      var preview = buildPreview();
+      state.advancedSequence = preview.map(function(s){
+        return {
+          intensity: s.intensity,
+          len: s.len,
+          rate: state.config[s.intensity].rate
+        };
+      });
+      state.advancedEdited = false;
+    }
     
     render();
     showToast('Configuration loaded successfully!');
@@ -754,26 +786,27 @@
   });
 
   app.addEventListener('drop', function(e){
-    var dragging = app.querySelector('.dragging');
-    if (!dragging) return;
     e.preventDefault();
-
-    var cards = app.querySelectorAll('.timeline-card');
-    var newSeq = [];
-    cards.forEach(function(c){
-      var idx = parseInt(c.getAttribute('data-index'), 10);
-      newSeq.push(state.advancedSequence[idx]);
-    });
-    state.advancedSequence = newSeq;
-    state.advancedEdited = true;
-    render();
   });
 
   app.addEventListener('dragend', function(e){
     var dragging = app.querySelector('.dragging');
+    var cards = app.querySelectorAll('.timeline-card');
+    if (cards.length > 0) {
+      var newSeq = [];
+      cards.forEach(function(c){
+        var idx = parseInt(c.getAttribute('data-index'), 10);
+        if (state.advancedSequence[idx]) {
+          newSeq.push(state.advancedSequence[idx]);
+        }
+      });
+      state.advancedSequence = newSeq;
+      state.advancedEdited = true;
+    }
     if (dragging) {
       dragging.classList.remove('dragging');
     }
+    render();
   });
 
   function esc(s){ return String(s); }
@@ -943,7 +976,13 @@
               '<div style="font-family:\'Space Grotesk\'; font-weight:600; font-size:18px; letter-spacing:0.12em; color:oklch(0.5 0.022 255);">ADVANCED TIMELINE EDITOR</div>'+
               '<div style="font-size:14px; color:oklch(0.55 0.012 70); margin-top:4px;">Customize intervals, drag blocks to rearrange, or tune stroke rates.</div>'+
             '</div>'+
-            '<div style="display:flex; gap:10px;">'+
+            '<div style="display:flex; gap:10px; flex-wrap:wrap;">'+
+              '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
+                '<span>📂</span>Import'+
+              '</button>'+
+              '<button data-act="downloadConfig" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
+                '<span>💾</span>Export'+
+              '</button>'+
               '<button data-act="resetAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
                 '<span>🔄</span>Reset'+
               '</button>'+

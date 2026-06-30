@@ -5,25 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CrewCall — Intelligent Interval Rowing Coach</title>
 <meta name="description" content="Set the time, stack the work. CrewCall is a smart interval rowing coach that auto-scales your session, arrangement, and pace. Built-in audio cues keep your eyes on the rhythm.">
-<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-dark: oklch(0.12 0.012 250);
-    --bg-card: oklch(0.16 0.015 250);
-    --border-subtle: oklch(0.24 0.02 250 / 0.7);
-    --text-primary: oklch(0.97 0.005 250);
-    --text-secondary: oklch(0.7 0.015 250);
+    --bg-dark: oklch(0.975 0.016 230);          /* Pastel light blue */
+    --bg-card: oklch(1 0 0);                    /* Pure white cards */
+    --border-subtle: oklch(0.91 0.016 230);     /* Light blue borders */
+    --text-primary: oklch(0.26 0.022 255);      /* Dark slate blue */
+    --text-secondary: oklch(0.52 0.022 255);    /* Medium slate blue */
     
-    --color-high: oklch(0.71 0.145 27);      /* Coral */
-    --color-medium: oklch(0.83 0.12 82);     /* Gold */
-    --color-low: oklch(0.80 0.095 158);      /* Mint */
+    --color-high: oklch(0.71 0.145 27);         /* Coral */
+    --color-medium: oklch(0.83 0.12 82);        /* Gold */
+    --color-low: oklch(0.80 0.095 158);         /* Mint */
     
-    --glow-high: oklch(0.71 0.145 27 / 0.25);
-    --glow-medium: oklch(0.83 0.12 82 / 0.25);
-    --glow-low: oklch(0.80 0.095 158 / 0.25);
+    --glow-high: oklch(0.71 0.145 27 / 0.1);
+    --glow-medium: oklch(0.83 0.12 82 / 0.1);
+    --glow-low: oklch(0.80 0.095 158 / 0.1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,12 +43,12 @@
     background: var(--bg-dark);
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.26 0.015 250);
+    background: oklch(0.88 0.016 230);
     border-radius: 8px;
     border: 2px solid var(--bg-dark);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.35 0.02 250);
+    background: oklch(0.8 0.02 230);
   }
 
   /* Grid Background Effect */
@@ -57,9 +56,9 @@
     position: absolute;
     inset: 0;
     background-image: 
-      radial-gradient(circle at 50% 0px, oklch(0.25 0.06 250 / 0.15), transparent 800px),
-      linear-gradient(var(--bg-dark) 1px, transparent 1px),
-      linear-gradient(90deg, var(--bg-dark) 1px, transparent 1px);
+      radial-gradient(circle at 50% 0px, oklch(0.92 0.03 230 / 0.8), transparent 800px),
+      linear-gradient(oklch(0.94 0.016 230) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.94 0.016 230) 1px, transparent 1px);
     background-size: 100% 100%, 64px 64px, 64px 64px;
     background-position: center top;
     z-index: 0;
@@ -93,13 +92,13 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-subtle);
-    background: oklch(0.12 0.012 250 / 0.7);
+    background: oklch(0.975 0.016 230 / 0.7);
     z-index: 100;
     transition: background 0.3s, border 0.3s;
   }
   header.scrolled {
-    background: oklch(0.1 0.012 250 / 0.9);
-    border-bottom: 1px solid oklch(0.28 0.02 250 / 0.9);
+    background: oklch(0.96 0.016 230 / 0.9);
+    border-bottom: 1px solid oklch(0.88 0.016 230);
   }
   header .container {
     display: flex;
@@ -114,20 +113,12 @@
     text-decoration: none;
     color: var(--text-primary);
   }
-  .logo-img {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px oklch(0.80 0.095 158 / 0.15);
-  }
   .logo-text {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 20px;
     font-weight: 700;
     letter-spacing: 0.14em;
-    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
   }
 
   /* Buttons */
@@ -147,34 +138,34 @@
     font-family: 'Space Grotesk', sans-serif;
   }
   .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-dark);
+    background: #005B96;
+    color: oklch(1 0 0);
     border: none;
   }
   .btn-primary:hover {
-    background: oklch(1 0 0);
+    background: #004a7a;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px oklch(1 0 0 / 0.25);
+    box-shadow: 0 8px 25px oklch(0.3 0.022 255 / 0.15);
   }
   .btn-accent {
-    background: var(--color-low);
-    color: oklch(0.15 0.015 158);
+    background: #005B96;
+    color: oklch(1 0 0);
     border: none;
-    box-shadow: 0 0 20px var(--glow-low);
+    box-shadow: 0 0 20px oklch(0.3 0.022 255 / 0.1);
   }
   .btn-accent:hover {
-    background: oklch(0.85 0.11 158);
+    background: #004a7a;
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px oklch(0.80 0.095 158 / 0.4);
+    box-shadow: 0 10px 30px oklch(0.3 0.022 255 / 0.2);
   }
   .btn-outline {
     background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
+    color: #005B96;
+    border: 1px solid oklch(0.8 0.016 230);
   }
   .btn-outline:hover {
-    background: oklch(0.2 0.015 250);
-    border-color: var(--text-secondary);
+    background: oklch(0.95 0.016 230);
+    border-color: #005B96;
   }
 
   /* Hero Section */
@@ -199,18 +190,16 @@
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--color-low);
-    background: oklch(0.80 0.095 158 / 0.08);
+    color: #005B96;
+    background: oklch(0.9 0.02 230 / 0.5);
     padding: 6px 16px;
     border-radius: 20px;
-    border: 1px solid oklch(0.80 0.095 158 / 0.15);
+    border: 1px solid oklch(0.8 0.02 230);
   }
   .hero-title {
     font-size: clamp(40px, 6vw, 76px);
     line-height: 0.95;
-    background: linear-gradient(135deg, var(--text-primary) 30%, oklch(0.7 0.01 250) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
   }
   .hero-description {
     font-size: clamp(17px, 2.5vw, 21px);
@@ -226,8 +215,8 @@
 
   /* Pulse animation for CTA */
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px oklch(0.80 0.095 158 / 0.2); }
-    50% { box-shadow: 0 0 35px oklch(0.80 0.095 158 / 0.4); }
+    0%, 100% { box-shadow: 0 0 20px oklch(0.3 0.022 255 / 0.1); }
+    50% { box-shadow: 0 0 35px oklch(0.3 0.022 255 / 0.25); }
   }
   .pulse-btn {
     animation: pulse 3s infinite ease-in-out;
@@ -269,8 +258,8 @@
   }
   .feature-card:hover {
     transform: translateY(-5px);
-    border-color: oklch(0.35 0.02 250);
-    box-shadow: 0 12px 40px oklch(0 0 0 / 0.3);
+    border-color: oklch(0.8 0.02 230);
+    box-shadow: 0 12px 40px oklch(0.3 0.022 255 / 0.06);
   }
   .feature-card::before {
     content: '';
@@ -294,7 +283,7 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 24px;
-    background: oklch(0.2 0.015 250);
+    background: oklch(0.95 0.016 230);
     border: 1px solid var(--border-subtle);
   }
   .feature-card.high .feature-icon-wrapper { color: var(--color-high); background: oklch(0.71 0.145 27 / 0.06); border-color: oklch(0.71 0.145 27 / 0.15); }
@@ -314,7 +303,7 @@
   /* Interactive Gallery Section */
   .showcase {
     padding: 100px 0;
-    background: oklch(0.1 0.012 250 / 0.4);
+    background: oklch(0.95 0.015 230 / 0.5);
     border-top: 1px solid var(--border-subtle);
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -324,7 +313,7 @@
     gap: 8px;
     margin-bottom: 40px;
     flex-wrap: wrap;
-    background: oklch(0.14 0.012 250);
+    background: oklch(0.95 0.016 230);
     padding: 6px;
     border-radius: 16px;
     border: 1px solid var(--border-subtle);
@@ -348,10 +337,10 @@
     color: var(--text-primary);
   }
   .gallery-tab.active {
-    background: var(--bg-dark);
+    background: var(--bg-card);
     color: var(--text-primary);
     border: 1px solid var(--border-subtle);
-    box-shadow: 0 4px 15px oklch(0 0 0 / 0.25);
+    box-shadow: 0 4px 15px oklch(0.3 0.022 255 / 0.05);
   }
   .gallery-content {
     position: relative;
@@ -359,7 +348,7 @@
     overflow: hidden;
     border: 1px solid var(--border-subtle);
     background: var(--bg-card);
-    box-shadow: 0 25px 60px oklch(0 0 0 / 0.5);
+    box-shadow: 0 25px 60px oklch(0.3 0.022 255 / 0.1);
     aspect-ratio: 1280 / 850;
     width: 100%;
     max-width: 1000px;
@@ -390,10 +379,10 @@
     left: 24px;
     right: 24px;
     padding: 20px 28px;
-    background: oklch(0.12 0.012 250 / 0.85);
+    background: oklch(1 0 0 / 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.24 0.02 250 / 0.6);
+    border: 1px solid oklch(0.9 0.016 230 / 0.8);
     border-radius: 16px;
     max-width: 500px;
   }
@@ -419,7 +408,7 @@
   .cta-box {
     max-width: 800px;
     margin: 0 auto;
-    background: linear-gradient(135deg, var(--bg-card) 0%, oklch(0.14 0.015 250) 100%);
+    background: linear-gradient(135deg, var(--bg-card) 0%, oklch(0.98 0.015 230) 100%);
     border: 1px solid var(--border-subtle);
     border-radius: 32px;
     padding: 64px 40px;
@@ -427,7 +416,7 @@
     flex-direction: column;
     align-items: center;
     gap: 32px;
-    box-shadow: 0 20px 50px oklch(0 0 0 / 0.4);
+    box-shadow: 0 20px 50px oklch(0.3 0.022 255 / 0.08);
     position: relative;
     overflow: hidden;
   }
@@ -436,8 +425,8 @@
     position: absolute;
     width: 250px;
     height: 250px;
-    background: radial-gradient(circle, var(--color-low) 0%, transparent 70%);
-    opacity: 0.06;
+    background: radial-gradient(circle, #005B96 0%, transparent 70%);
+    opacity: 0.05;
     top: -125px;
     right: -125px;
   }
@@ -455,7 +444,7 @@
   footer {
     border-top: 1px solid var(--border-subtle);
     padding: 48px 0;
-    background: oklch(0.08 0.008 250);
+    background: oklch(0.95 0.016 230);
   }
   .footer-content {
     display: flex;
@@ -529,7 +518,6 @@
 <header id="header">
   <div class="container">
     <a href="#" class="logo-group">
-      <img src="favicon.png" alt="CrewCall logo" class="logo-img">
       <span class="logo-text">CREWCALL</span>
     </a>
     <a href="app.html" class="btn btn-outline" style="padding: 10px 20px; font-size: 13px;">Open Coach</a>
@@ -696,7 +684,6 @@
 <footer>
   <div class="container footer-content">
     <a href="#" class="logo-group">
-      <img src="favicon.png" alt="CrewCall logo" class="logo-img" style="width: 28px; height: 28px;">
       <span class="logo-text" style="font-size: 16px;">CREWCALL</span>
     </a>
     <div class="footer-copy">&copy; 2026 CrewCall. Designed for rows of any duration.</div>

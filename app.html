@@ -9,25 +9,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:oklch(0.975 0.006 85);}
+  html,body{margin:0;padding:0;background:oklch(0.975 0.016 230);}
   body{font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
   ::-webkit-scrollbar{width:8px;}
-  ::-webkit-scrollbar-thumb{background:oklch(0.85 0.01 85);border-radius:8px;}
+  ::-webkit-scrollbar-thumb{background:oklch(0.85 0.016 230);border-radius:8px;}
   @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.025);}}
   button{font-family:inherit;}
 
-  .btn-start{background:oklch(0.3 0.012 70);}
-  .btn-start:hover{background:oklch(0.24 0.012 70);}
-  .btn-soft:hover{background:oklch(0.97 0.006 85);}
+  .btn-start{background:#005B96;}
+  .btn-start:hover{background:#004a7a;}
+  .btn-soft:hover{background:oklch(0.97 0.016 230);}
   .btn-danger:hover{background:oklch(0.97 0.02 27);}
   .btn-surprise:hover{background:oklch(0.97 0.025 27);}
-  .btn-stepper:hover{background:oklch(0.95 0.006 85);}
-  .btn-stepper-soft:hover{background:oklch(0.95 0.006 85);}
+  .btn-stepper:hover{background:oklch(0.95 0.016 230);}
+  .btn-stepper-soft:hover{background:oklch(0.95 0.016 230);}
   .btn-disabled{opacity:0.3;pointer-events:none;}
 </style>
 </head>
 <body>
-<div id="app" style="display:flex;height:100vh;width:100%;overflow:hidden;color:oklch(0.26 0.012 70);"></div>
+<div id="app" style="display:flex;height:100vh;width:100%;overflow:hidden;color:oklch(0.26 0.022 255);"></div>
 
 <script>
 (function(){
@@ -331,9 +331,9 @@
   function renderLeft(v){
     if(v.isSetup){
       return ''+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:64px 60px;background:oklch(0.972 0.006 85);">'+
+      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:64px 60px;background:oklch(0.972 0.016 230);">'+
         '<div>'+
-          '<div style="font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);">CREWCALL</div>'+
+          '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
           '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:24px;">'+
@@ -342,7 +342,7 @@
               '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:120px;line-height:0.9;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.setupTotalText+'</div>'+
               '<div style="margin-top:10px;display:flex;align-items:center;gap:12px;">'+
                 '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Total session</span>'+
-                '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.5 0.012 70);background:oklch(0.93 0.008 85);padding:3px 11px;border-radius:20px;">Goal '+v.targetText+'</span>'+
+                '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.5 0.022 255);background:oklch(0.93 0.016 230);padding:3px 11px;border-radius:20px;">Goal '+v.targetText+'</span>'+
               '</div>'+
             '</div>'+
             '<div style="padding-bottom:14px;">'+
@@ -366,7 +366,7 @@
     }
     if(v.isActive){
       return ''+
-      '<div style="position:absolute;inset:0;background:oklch(0.965 0.004 85);overflow:hidden;">'+
+      '<div style="position:absolute;inset:0;background:oklch(0.965 0.016 230);overflow:hidden;">'+
         '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;"></div>'+
         '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:48px 56px;">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
@@ -409,7 +409,7 @@
     }
     if(v.isDone){
       return ''+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;background:oklch(0.972 0.006 85);">'+
+      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;background:oklch(0.972 0.016 230);">'+
         '<div style="font-size:30px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:oklch(0.46 0.09 160);">Complete</div>'+
         '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:140px;line-height:0.95;letter-spacing:-0.02em;color:oklch(0.3 0.012 70);margin:14px 0 6px;">'+v.totalText+'</div>'+
         '<div style="font-size:16px;letter-spacing:0.06em;color:oklch(0.55 0.012 70);">'+v.setupCount+' intervals · nicely done</div>'+

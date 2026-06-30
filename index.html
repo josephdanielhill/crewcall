@@ -19,10 +19,6 @@
     --color-high: oklch(0.71 0.145 27);         /* Coral */
     --color-medium: oklch(0.83 0.12 82);        /* Gold */
     --color-low: oklch(0.80 0.095 158);         /* Mint */
-    
-    --glow-high: oklch(0.71 0.145 27 / 0.1);
-    --glow-medium: oklch(0.83 0.12 82 / 0.1);
-    --glow-low: oklch(0.80 0.095 158 / 0.1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,303 +33,309 @@
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
+    width: 9px;
   }
   ::-webkit-scrollbar-track {
     background: var(--bg-dark);
   }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.88 0.016 230);
+    background: oklch(0.85 0.016 230);
     border-radius: 8px;
-    border: 2px solid var(--bg-dark);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.8 0.02 230);
+    background: oklch(0.78 0.02 230);
   }
 
-  /* Entrance Animations */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-fade-in-up {
-    opacity: 0;
-    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  .delay-1 { animation-delay: 0.15s; }
-  .delay-2 { animation-delay: 0.3s; }
-  .delay-3 { animation-delay: 0.45s; }
-  .delay-4 { animation-delay: 0.6s; }
-
-  /* Background Elements */
-  .grid-overlay {
-    position: absolute;
-    inset: 0;
-    background-image: 
-      radial-gradient(circle at 50% 0px, oklch(0.92 0.03 230 / 0.8), transparent 800px),
-      linear-gradient(oklch(0.94 0.016 230) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.94 0.016 230) 1px, transparent 1px);
-    background-size: 100% 100%, 64px 64px, 64px 64px;
-    background-position: center top;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  @keyframes floatBlob {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-30px, -20px) scale(1.05); }
-  }
-  
-  .bg-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.35;
-    animation: floatBlob 12s infinite ease-in-out;
-  }
-  .blob-1 {
-    top: -100px;
-    right: -50px;
-    width: 450px;
-    height: 450px;
-    background: oklch(0.9 0.04 230);
-  }
-  .blob-2 {
-    top: 500px;
-    left: -150px;
-    width: 500px;
-    height: 500px;
-    background: oklch(0.85 0.095 158 / 0.2);
-    animation-duration: 16s;
-  }
+  a { text-decoration: none; color: inherit; }
 
   /* Typography */
   h1, h2, h3, .font-heading {
     font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.05;
   }
 
-  /* Container */
-  .container {
-    max-width: 1200px;
+  /* Nav */
+  nav {
+    max-width: 1120px;
     margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Header */
-  header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-subtle);
-    background: oklch(0.975 0.016 230 / 0.7);
-    z-index: 100;
-    transition: background 0.3s, border 0.3s;
-  }
-  header.scrolled {
-    background: oklch(0.96 0.016 230 / 0.9);
-    border-bottom: 1px solid oklch(0.88 0.016 230);
-  }
-  header .container {
+    padding: 30px 40px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
-    height: 100%;
   }
-  .logo-group {
+  .nav-links {
     display: flex;
     align-items: center;
-    gap: 12px;
-    text-decoration: none;
+    gap: 34px;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+  .nav-link {
+    letter-spacing: 0.01em;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover {
     color: var(--text-primary);
   }
-  .logo-text {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    color: var(--text-primary);
+  .btn-nav-cta {
+    background: #005B96;
+    color: oklch(0.97 0.006 85);
+    padding: 11px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .btn-nav-cta:hover {
+    background: #004a7a;
+    transform: translateY(-1px);
   }
 
-  /* Buttons */
-  .btn {
+  /* Hero Section */
+  .hero-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 56px 40px 30px;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .hero-badge {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    font-family: 'Space Grotesk', sans-serif;
-  }
-  .btn-primary {
-    background: #005B96;
-    color: oklch(1 0 0);
-    border: none;
-  }
-  .btn-primary:hover {
-    background: #004a7a;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px oklch(0.3 0.022 255 / 0.15);
-  }
-  .btn-accent {
-    background: #005B96;
-    color: oklch(1 0 0);
-    border: none;
-    box-shadow: 0 0 20px oklch(0.3 0.022 255 / 0.1);
-  }
-  .btn-accent:hover {
-    background: #004a7a;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px oklch(0.3 0.022 255 / 0.2);
-  }
-  .btn-outline {
-    background: transparent;
-    color: #005B96;
-    border: 1px solid oklch(0.8 0.016 230);
-  }
-  .btn-outline:hover {
-    background: oklch(0.95 0.016 230);
-    border-color: #005B96;
-  }
-
-  /* Hero Section Layout */
-  .hero {
-    padding-top: 160px;
-    padding-bottom: 100px;
-    position: relative;
-  }
-  .hero-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 48px;
-    align-items: center;
-  }
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 28px;
-    text-align: left;
-  }
-  .hero-tagline {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    gap: 9px;
+    font-size: 13px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: #005B96;
-    background: oklch(0.9 0.02 230 / 0.5);
-    padding: 6px 16px;
-    border-radius: 20px;
-    border: 1px solid oklch(0.8 0.02 230);
+    background: oklch(0.92 0.02 230);
+    padding: 7px 15px;
+    border-radius: 30px;
+    font-weight: 600;
+    width: fit-content;
+  }
+  .hero-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-high);
   }
   .hero-title {
-    font-size: clamp(38px, 5.5vw, 68px);
-    line-height: 0.95;
+    font-size: clamp(42px, 5.5vw, 62px);
     color: var(--text-primary);
+    margin: 26px 0 0;
   }
-  .hero-description {
-    font-size: clamp(16px, 2.2vw, 19px);
-    line-height: 1.5;
+  .hero-desc {
+    font-size: 19px;
+    line-height: 1.6;
     color: var(--text-secondary);
-    max-width: 580px;
+    max-width: 480px;
+    margin: 24px 0 0;
+    text-wrap: pretty;
   }
+  
   .hero-actions {
     display: flex;
-    gap: 16px;
-    width: 100%;
+    align-items: center;
+    gap: 14px;
+    margin-top: 36px;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    background: #005B96;
+    color: oklch(0.97 0.006 85);
+    padding: 18px 30px;
+    border-radius: 15px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    animation: breathe 4.5s ease-in-out infinite;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .btn-hero-primary:hover {
+    background: #004a7a;
+    transform: translateY(-2px);
+  }
+  .btn-hero-primary-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-low);
+  }
+  .btn-hero-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 18px 26px;
+    border-radius: 15px;
+    border: 1px solid oklch(0.84 0.016 230);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .btn-hero-outline:hover {
+    background: oklch(0.965 0.016 230);
+    transform: translateY(-2px);
   }
 
-  /* Pulse animation for CTA */
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px oklch(0.3 0.022 255 / 0.1); }
-    50% { box-shadow: 0 0 35px oklch(0.3 0.022 255 / 0.25); }
+  .hero-stats {
+    display: flex;
+    gap: 44px;
+    margin-top: 48px;
   }
-  .pulse-btn {
-    animation: pulse 3s infinite ease-in-out;
+  .stat-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 34px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-lbl {
+    margin-top: 5px;
+    font-size: 13px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
 
   /* Interactive Sandbox Widget Styling */
-  .sandbox-card {
-    background: var(--bg-card);
+  .sandbox-widget {
+    position: relative;
+    border-radius: 26px;
     border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 32px;
-    box-shadow: 0 20px 45px oklch(0.3 0.022 255 / 0.07);
+    background: oklch(0.985 0.015 230);
+    overflow: hidden;
+    box-shadow: 0 30px 60px -30px oklch(0.3 0.022 255 / 0.15);
+  }
+  .sandbox-display {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    background: oklch(0.94 0.016 230);
+  }
+  .sandbox-active-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 60%;
+    background: var(--color-medium);
+    transition: background 0.4s ease, height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.85;
+  }
+  .sandbox-display-content {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    position: relative;
-    z-index: 10;
-  }
-  .sandbox-header {
-    display: flex;
     justify-content: space-between;
+    padding: 28px 30px;
+  }
+  .sandbox-display-header {
+    display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: 16px;
+    justify-content: space-between;
   }
-  .sandbox-header h4 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-  }
-  .sandbox-badge {
-    display: inline-flex;
+  .sandbox-display-indicator {
+    display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-low);
-    background: oklch(0.8 0.095 158 / 0.1);
-    padding: 4px 10px;
-    border-radius: 12px;
-    border: 1px solid oklch(0.8 0.095 158 / 0.2);
+    gap: 10px;
   }
-  .sandbox-dot-live {
-    width: 6px;
-    height: 6px;
-    background: var(--color-low);
+  .sandbox-display-dot {
+    width: 11px;
+    height: 11px;
     border-radius: 50%;
-    animation: pulseDot 1.5s infinite;
+    background: oklch(0.52 0.12 70);
+    transition: background 0.4s ease;
   }
-  @keyframes pulseDot {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+  .sandbox-display-tag {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .sandbox-display-next {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+  .sandbox-display-next-val {
+    font-weight: 600;
+    transition: color 0.4s ease;
   }
 
-  .sandbox-control-group {
+  .sandbox-display-center {
+    text-align: center;
+  }
+  .sandbox-display-label {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    transition: color 0.4s ease;
+  }
+  .sandbox-display-timer {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 88px;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    margin-top: 4px;
+    transition: color 0.4s ease;
+  }
+  .sandbox-display-sub {
+    margin-top: 4px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .sandbox-timeline {
+    display: flex;
+    gap: 3px;
+    height: 9px;
+  }
+  .sandbox-timeline-seg {
+    height: 100%;
+    border-radius: 2px;
+    transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+  }
+
+  /* Sandbox Interactive Controls */
+  .sandbox-controls {
+    padding: 24px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .sandbox-slider-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-  .sandbox-control-label {
+  .sandbox-slider-label {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
@@ -343,7 +345,7 @@
   .sandbox-slider {
     width: 100%;
     height: 6px;
-    background: oklch(0.9 0.016 230);
+    background: oklch(0.92 0.016 230);
     border-radius: 3px;
     outline: none;
     -webkit-appearance: none;
@@ -364,205 +366,202 @@
   }
 
   .sandbox-steppers {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .sandbox-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: oklch(0.975 0.016 230 / 0.5);
-    padding: 10px 16px;
-    border-radius: 14px;
-    border: 1px solid oklch(0.94 0.016 230);
-  }
-  .sandbox-row-left {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
-  .sandbox-row-color {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+  .sandbox-stepper-cell {
+    background: oklch(0.975 0.016 230 / 0.5);
+    border: 1px solid oklch(0.94 0.016 230);
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
-  .sandbox-row-name {
-    font-size: 14px;
+  .sandbox-cell-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
-  .sandbox-row-rate {
-    font-size: 11px;
-    color: var(--text-secondary);
-    background: var(--bg-card);
-    padding: 2px 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border-subtle);
+  .sandbox-cell-color {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
   }
-  .sandbox-row-controls {
+  .sandbox-cell-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
-  .sandbox-row-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+  .sandbox-cell-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
     border: 1px solid var(--border-subtle);
     background: var(--bg-card);
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
   }
-  .sandbox-row-btn:hover:not(:disabled) {
+  .sandbox-cell-btn:hover:not(:disabled) {
     background: oklch(0.95 0.016 230);
     border-color: #005B96;
   }
-  .sandbox-row-btn:disabled {
+  .sandbox-cell-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
   }
-  .sandbox-row-count {
+  .sandbox-cell-count {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    min-width: 16px;
+    min-width: 14px;
     text-align: center;
   }
 
-  .sandbox-output-group {
+  /* Intensities Section */
+  .intensities-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 84px 40px 30px;
+  }
+  .intensities-header {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border-top: 1px solid var(--border-subtle);
-    padding-top: 18px;
-  }
-  .sandbox-output-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-  .sandbox-timeline-container {
-    height: 18px;
-    border-radius: 8px;
-    display: flex;
-    overflow: hidden;
-    gap: 2px;
-    background: oklch(0.93 0.016 230);
-    padding: 2px;
-    border: 1px solid var(--border-subtle);
-  }
-  .sandbox-timeline-seg {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
-    cursor: pointer;
-    position: relative;
-  }
-  .sandbox-timeline-seg:hover {
-    filter: brightness(0.95);
-  }
-  .sandbox-summary {
-    display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    font-size: 12px;
-    font-weight: 600;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .section-lbl {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
     color: var(--text-secondary);
   }
-
-  /* Features Grid */
-  .features {
-    padding: 100px 0;
-    position: relative;
+  .section-title-large {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 38px;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin: 10px 0 0;
   }
-  .section-header {
-    text-align: center;
-    max-width: 600px;
-    margin: 0 auto 64px;
-  }
-  .section-title {
-    font-size: clamp(30px, 4vw, 44px);
-    margin-bottom: 16px;
-  }
-  .section-subtitle {
-    font-size: 16px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-  }
-  
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
-  }
-  .feature-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 20px;
-    padding: 36px;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  .feature-card:hover {
-    transform: translateY(-5px);
-    border-color: oklch(0.8 0.02 230);
-    box-shadow: 0 12px 40px oklch(0.3 0.022 255 / 0.06);
-  }
-  .feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: transparent;
-    transition: background 0.3s;
-  }
-  .feature-card.high:hover::before { background: var(--color-high); }
-  .feature-card.medium:hover::before { background: var(--color-medium); }
-  .feature-card.low:hover::before { background: var(--color-low); }
-
-  .feature-icon-wrapper {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-    background: oklch(0.95 0.016 230);
-    border: 1px solid var(--border-subtle);
-  }
-  .feature-card.high .feature-icon-wrapper { color: var(--color-high); background: oklch(0.71 0.145 27 / 0.06); border-color: oklch(0.71 0.145 27 / 0.15); }
-  .feature-card.medium .feature-icon-wrapper { color: var(--color-medium); background: oklch(0.83 0.12 82 / 0.06); border-color: oklch(0.83 0.12 82 / 0.15); }
-  .feature-card.low .feature-icon-wrapper { color: var(--color-low); background: oklch(0.80 0.095 158 / 0.06); border-color: oklch(0.80 0.095 158 / 0.15); }
-
-  .feature-card h3 {
-    font-size: 22px;
-    margin-bottom: 12px;
-  }
-  .feature-card p {
+  .section-desc-right {
     font-size: 15px;
     color: var(--text-secondary);
-    line-height: 1.6;
+    max-width: 320px;
+    text-wrap: pretty;
   }
 
-  /* Interactive Gallery Section */
-  .showcase {
-    padding: 100px 0;
-    background: oklch(0.95 0.015 230 / 0.5);
-    border-top: 1px solid var(--border-subtle);
-    border-bottom: 1px solid var(--border-subtle);
+  .intensities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 38px;
+  }
+  .intensity-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px 26px;
+    background: var(--bg-card);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .intensity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px oklch(0.3 0.022 255 / 0.05);
+  }
+  .intensity-card-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .intensity-card-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+  }
+  .intensity-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .intensity-card-rate {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 46px;
+    color: var(--text-primary);
+    margin-top: 22px;
+    font-variant-numeric: tabular-nums;
+  }
+  .intensity-card-rate span {
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .intensity-card-desc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 14px 0 0;
+  }
+
+  /* How It Works Section */
+  .how-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 84px 40px 30px;
+  }
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 38px;
+  }
+  .how-card {
+    border-radius: 20px;
+    padding: 30px 28px;
+    background: oklch(0.965 0.012 230);
+    border: 1px solid oklch(0.9 0.016 230);
+    transition: transform 0.2s ease;
+  }
+  .how-card:hover {
+    transform: translateY(-2px);
+  }
+  .how-card-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+  .how-card-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 14px;
+    letter-spacing: -0.01em;
+  }
+  .how-card-desc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin: 10px 0 0;
+  }
+
+  /* App Screenshots Gallery Section */
+  .showcase-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 84px 40px 30px;
   }
   .gallery-tabs {
     display: flex;
@@ -656,106 +655,150 @@
     line-height: 1.4;
   }
 
-  /* CTA Section */
-  .cta-section {
-    padding: 120px 0;
+  /* Final CTA Section */
+  .final-cta-section {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 70px 40px 40px;
+  }
+  .final-cta-card {
+    border-radius: 26px;
+    background: oklch(0.3 0.022 255);
+    color: oklch(0.97 0.006 85);
+    padding: 64px 56px;
     text-align: center;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px oklch(0.3 0.022 255 / 0.15);
   }
-  .cta-box {
-    max-width: 800px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, var(--bg-card) 0%, oklch(0.98 0.015 230) 100%);
-    border: 1px solid var(--border-subtle);
-    border-radius: 32px;
-    padding: 64px 40px;
+  .final-cta-timeline {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 32px;
-    box-shadow: 0 20px 50px oklch(0.3 0.022 255 / 0.08);
-    position: relative;
+    gap: 3px;
+    height: 10px;
+    width: 280px;
+    max-width: 70%;
+    margin: 0 auto 30px;
+    border-radius: 6px;
     overflow: hidden;
   }
-  .cta-box::before {
-    content: '';
-    position: absolute;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, #005B96 0%, transparent 70%);
-    opacity: 0.05;
-    top: -125px;
-    right: -125px;
+  .final-cta-timeline-seg {
+    height: 100%;
+    border-radius: 2px;
   }
-  .cta-title {
-    font-size: clamp(28px, 4vw, 48px);
+  .final-cta-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4.5vw, 40px);
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: oklch(1 0 0);
   }
-  .cta-box p {
-    font-size: clamp(16px, 2vw, 18px);
-    color: var(--text-secondary);
-    max-width: 500px;
-    line-height: 1.5;
+  .final-cta-desc {
+    font-size: 17px;
+    color: oklch(0.85 0.016 230);
+    margin: 16px auto 0;
+    max-width: 440px;
+  }
+  .btn-final-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+    background: oklch(0.97 0.006 85);
+    color: oklch(0.28 0.022 255);
+    padding: 18px 34px;
+    border-radius: 15px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 34px;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .btn-final-cta:hover {
+    background: oklch(1 0 0);
+    transform: translateY(-2px);
+  }
+  .btn-final-cta-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-low);
   }
 
   /* Footer */
   footer {
-    border-top: 1px solid var(--border-subtle);
-    padding: 48px 0;
-    background: oklch(0.95 0.016 230);
-  }
-  .footer-content {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 30px 40px 56px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 24px;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
   }
-  .footer-copy {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  .footer-links {
+  .footer-logo {
     display: flex;
-    gap: 24px;
+    align-items: center;
+    gap: 10px;
   }
-  .footer-link {
+  .footer-logo-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-low);
+  }
+  .footer-logo-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+  .footer-text-right {
     font-size: 14px;
     color: var(--text-secondary);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .footer-link:hover {
-    color: var(--text-primary);
   }
 
   /* Responsive Design */
   @media (max-width: 992px) {
-    .hero-grid {
+    .hero-section {
       grid-template-columns: 1fr;
       gap: 56px;
       text-align: center;
     }
     .hero-content {
       align-items: center;
-      text-align: center;
+    }
+    .hero-desc {
+      margin-left: auto;
+      margin-right: auto;
     }
     .hero-actions {
       justify-content: center;
     }
+    .hero-stats {
+      justify-content: center;
+    }
+    .intensities-grid {
+      grid-template-columns: 1fr;
+    }
+    .how-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 768px) {
-    .hero {
-      padding-top: 120px;
-      padding-bottom: 70px;
+    nav {
+      padding: 20px;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .hero-section {
+      padding: 40px 20px;
     }
     .hero-actions {
       flex-direction: column;
       width: 100%;
       max-width: 280px;
-      margin: 0 auto;
     }
-    .btn {
+    .btn-hero-primary, .btn-hero-outline {
       width: 100%;
       justify-content: center;
     }
@@ -777,8 +820,13 @@
     .gallery-image-panel.active {
       display: block;
     }
-    .cta-box {
-      padding: 48px 24px;
+    .final-cta-card {
+      padding: 40px 24px;
+    }
+    footer {
+      flex-direction: column;
+      gap: 16px;
+      padding: 30px 20px;
     }
   }
 </style>
@@ -789,110 +837,125 @@
 <div class="bg-blob blob-1"></div>
 <div class="bg-blob blob-2"></div>
 
-<!-- Header -->
-<header id="header">
-  <div class="container">
-    <a href="#" class="logo-group">
-      <span class="logo-text">CREWCALL</span>
-    </a>
-    <a href="app.html" class="btn btn-outline" style="padding: 10px 20px; font-size: 13px;">Open Coach</a>
+<!-- Navigation -->
+<nav>
+  <a href="#" class="logo-group">
+    <span class="logo-text">CREWCALL</span>
+  </a>
+  <div class="nav-links">
+    <a href="#intensities" class="nav-link">Intensities</a>
+    <a href="#how" class="nav-link">How it works</a>
+    <a href="app.html" class="btn-nav-cta">Open Coach</a>
   </div>
-</header>
+</nav>
 
 <!-- Hero Section -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-grid">
-      <!-- Left Column: Content -->
-      <div class="hero-content animate-fade-in-up delay-1">
-        <div class="hero-tagline">Rowing Session Architect</div>
-        <h1 class="hero-title">Stack the work.<br>Control the rhythm.</h1>
-        <p class="hero-description">
-          CrewCall is a smart interval rowing coach designed to shape your workout. Set your target time, define the intensity mix, and row while dynamic audio cues guide your pace.
-        </p>
-        <div class="hero-actions">
-          <a href="app.html" class="btn btn-accent pulse-btn" style="flex: 1; max-width: 240px;">
-            Start Training Free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </a>
-          <a href="#features" class="btn btn-outline">Explore Features</a>
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Interval rowing coach
+    </div>
+    <h1 class="hero-title">Row in intervals.<br>Stay on cadence.</h1>
+    <p class="hero-desc">
+      Set a target time, stack the work, and CrewCall builds a balanced session — coaching you through every phase with stroke targets and audio cues.
+    </p>
+    <div class="hero-actions">
+      <a href="app.html" class="btn-hero-primary">
+        <span class="btn-hero-primary-dot"></span>Start a session
+      </a>
+      <a href="#how" class="btn-hero-outline">How it works</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-val">3</div>
+        <div class="stat-lbl">Intensities</div>
+      </div>
+      <div>
+        <div class="stat-val">10–90</div>
+        <div class="stat-lbl">Minute sessions</div>
+      </div>
+      <div>
+        <div class="stat-val">∞</div>
+        <div class="stat-lbl">Combinations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Sandbox Simulator Card -->
+  <div>
+    <div class="sandbox-widget">
+      <!-- Top Session Active Display -->
+      <div class="sandbox-display">
+        <div class="sandbox-active-bg" id="sandbox-bg"></div>
+        <div class="sandbox-display-content">
+          <div class="sandbox-display-header">
+            <div class="sandbox-display-indicator">
+              <span class="sandbox-display-dot" id="sandbox-dot"></span>
+              <span class="sandbox-display-tag" id="sandbox-tag">Interval 1 / 7</span>
+            </div>
+            <div class="sandbox-display-next">Next&nbsp;·&nbsp;<span class="sandbox-display-next-val" id="sandbox-next" style="color: var(--color-high);">High</span></div>
+          </div>
+          <div class="sandbox-display-center">
+            <div class="sandbox-display-label" id="sandbox-label">Medium</div>
+            <div class="sandbox-display-timer" id="sandbox-timer">2:30</div>
+            <div class="sandbox-display-sub">remaining in phase</div>
+          </div>
+          <div class="sandbox-timeline" id="sandbox-timeline">
+            <!-- Rendered via JS -->
+          </div>
         </div>
       </div>
-      
-      <!-- Right Column: Interactive Sandbox Sandbox -->
-      <div class="animate-fade-in-up delay-2">
-        <div class="sandbox-card">
-          <div class="sandbox-header">
-            <h4>Live Scaling Preview</h4>
-            <span class="sandbox-badge">
-              <span class="sandbox-dot-live"></span>
-              Interactive Demo
-            </span>
-          </div>
-          
-          <!-- Target Time Slider -->
-          <div class="sandbox-control-group">
-            <div class="sandbox-control-label">
-              <span>Session Target Time</span>
-              <span id="sandbox-time-val">20 mins</span>
-            </div>
-            <input type="range" min="10" max="60" step="5" value="20" class="sandbox-slider" id="sandbox-slider">
-          </div>
-          
-          <!-- Steppers -->
-          <div class="sandbox-steppers">
-            <!-- High (Coral) -->
-            <div class="sandbox-row">
-              <div class="sandbox-row-left">
-                <span class="sandbox-row-color" style="background: var(--color-high);"></span>
-                <span class="sandbox-row-name" style="color: oklch(0.45 0.15 27);">High</span>
-                <span class="sandbox-row-rate">30 spm</span>
-              </div>
-              <div class="sandbox-row-controls">
-                <button class="sandbox-row-btn" onclick="adjustSandbox('high', -1)">−</button>
-                <span class="sandbox-row-count" id="sandbox-count-high">2</span>
-                <button class="sandbox-row-btn" onclick="adjustSandbox('high', 1)" id="sandbox-add-high">+</button>
-              </div>
-            </div>
 
-            <!-- Medium (Gold) -->
-            <div class="sandbox-row">
-              <div class="sandbox-row-left">
-                <span class="sandbox-row-color" style="background: var(--color-medium);"></span>
-                <span class="sandbox-row-name" style="color: oklch(0.52 0.12 70);">Medium</span>
-                <span class="sandbox-row-rate">28 spm</span>
-              </div>
-              <div class="sandbox-row-controls">
-                <button class="sandbox-row-btn" onclick="adjustSandbox('medium', -1)">−</button>
-                <span class="sandbox-row-count" id="sandbox-count-medium">2</span>
-                <button class="sandbox-row-btn" onclick="adjustSandbox('medium', 1)" id="sandbox-add-medium">+</button>
-              </div>
-            </div>
+      <!-- Controls & Setup Panel -->
+      <div class="sandbox-controls">
+        <!-- Target Time Slider -->
+        <div class="sandbox-slider-group">
+          <div class="sandbox-slider-label">
+            <span>Target Session Length</span>
+            <span id="sandbox-time-val">20 mins</span>
+          </div>
+          <input type="range" min="10" max="60" step="5" value="20" class="sandbox-slider" id="sandbox-slider">
+        </div>
 
-            <!-- Low (Mint) -->
-            <div class="sandbox-row">
-              <div class="sandbox-row-left">
-                <span class="sandbox-row-color" style="background: var(--color-low);"></span>
-                <span class="sandbox-row-name" style="color: oklch(0.46 0.09 160);">Low</span>
-                <span class="sandbox-row-rate">24 spm</span>
-              </div>
-              <div class="sandbox-row-controls">
-                <button class="sandbox-row-btn" onclick="adjustSandbox('low', -1)">−</button>
-                <span class="sandbox-row-count" id="sandbox-count-low">3</span>
-                <button class="sandbox-row-btn" onclick="adjustSandbox('low', 1)" id="sandbox-add-low">+</button>
-              </div>
+        <!-- Steppers Grid -->
+        <div class="sandbox-steppers">
+          <!-- High -->
+          <div class="sandbox-stepper-cell">
+            <div class="sandbox-cell-header">
+              <span class="sandbox-cell-color" style="background: var(--color-high);"></span>
+              <span style="color: oklch(0.45 0.15 27);">High</span>
+            </div>
+            <div class="sandbox-cell-controls">
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('high', -1)">−</button>
+              <span class="sandbox-cell-count" id="sandbox-count-high">2</span>
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('high', 1)" id="sandbox-add-high">+</button>
             </div>
           </div>
-          
-          <!-- Live Scaled Output -->
-          <div class="sandbox-output-group">
-            <div class="sandbox-output-label">Visual Session Plan</div>
-            <div class="sandbox-timeline-container" id="sandbox-timeline">
-              <!-- Rendered via JS -->
+
+          <!-- Medium -->
+          <div class="sandbox-stepper-cell">
+            <div class="sandbox-cell-header">
+              <span class="sandbox-cell-color" style="background: var(--color-medium);"></span>
+              <span style="color: oklch(0.52 0.12 70);">Med</span>
             </div>
-            <div class="sandbox-summary">
-              <span id="sandbox-summary-text">7 intervals total</span>
-              <span style="color: #005B96;">Auto-Scales Automatically</span>
+            <div class="sandbox-cell-controls">
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('medium', -1)">−</button>
+              <span class="sandbox-cell-count" id="sandbox-count-medium">2</span>
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('medium', 1)" id="sandbox-add-medium">+</button>
+            </div>
+          </div>
+
+          <!-- Low -->
+          <div class="sandbox-stepper-cell">
+            <div class="sandbox-cell-header">
+              <span class="sandbox-cell-color" style="background: var(--color-low);"></span>
+              <span style="color: oklch(0.46 0.09 160);">Low</span>
+            </div>
+            <div class="sandbox-cell-controls">
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('low', -1)">−</button>
+              <span class="sandbox-cell-count" id="sandbox-count-low">3</span>
+              <button class="sandbox-cell-btn" onclick="adjustSandbox('low', 1)" id="sandbox-add-low">+</button>
             </div>
           </div>
         </div>
@@ -901,82 +964,79 @@
   </div>
 </section>
 
-<!-- Features Grid -->
-<section id="features" class="features">
-  <div class="container">
-    <div class="section-header animate-fade-in-up">
-      <h2 class="section-title">Engineered for Rowing Performance</h2>
-      <p class="section-subtitle">A simple, zero-fluff training companion that adjusts to your goals instantly. No accounts, no ads, just high-quality interval architecture.</p>
+<!-- Intensities Section -->
+<section id="intensities" class="intensities-section">
+  <div class="intensities-header">
+    <div>
+      <div class="section-lbl">Three gears</div>
+      <h2 class="section-title-large">Every session is built from three intensities.</h2>
     </div>
-    
-    <div class="features-grid">
-      <!-- Auto-scaling -->
-      <div class="feature-card low animate-fade-in-up delay-1">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"></path><path d="m3 7 9 6 9-6"></path></svg>
-        </div>
-        <h3>Intelligent Auto-Scaling</h3>
-        <p>Your session length remains locked. Add or remove intervals, and every single segment length dynamically stretches or shrinks to fill the exact target time. Stack the work, CrewCall does the math.</p>
-      </div>
+    <p class="section-desc-right">Each phase carries its own stroke-rate target, so you always know how hard to pull.</p>
+  </div>
 
-      <!-- Presets -->
-      <div class="feature-card medium animate-fade-in-up delay-2">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-        </div>
-        <h3>Coordinated Intensity Rates</h3>
-        <p>Row through structured zones calibrated to keep your heart rate dialled. Low intervals set a steady base at 24 strokes, Medium intervals test you at 28 strokes, and High intervals challenge you at 30+ strokes.</p>
+  <div class="intensities-grid">
+    <!-- HIGH -->
+    <div class="intensity-card">
+      <div class="intensity-card-header">
+        <span class="intensity-card-dot" style="background: var(--color-high);"></span>
+        <span class="intensity-card-title" style="color: oklch(0.45 0.15 27);">High</span>
       </div>
+      <div class="intensity-card-rate">30<span> spm</span></div>
+      <p class="intensity-card-desc">Short, sharp bursts. Empty the tank, then recover. Designed for maximum cardio push.</p>
+    </div>
+    <!-- MEDIUM -->
+    <div class="intensity-card">
+      <div class="intensity-card-header">
+        <span class="intensity-card-dot" style="background: var(--color-medium);"></span>
+        <span class="intensity-card-title" style="color: oklch(0.52 0.12 70);">Medium</span>
+      </div>
+      <div class="intensity-card-rate">28<span> spm</span></div>
+      <p class="intensity-card-desc">Sustainable working pace. The backbone of your endurance work and core session blocks.</p>
+    </div>
+    <!-- LOW -->
+    <div class="intensity-card">
+      <div class="intensity-card-header">
+        <span class="intensity-card-dot" style="background: var(--color-low);"></span>
+        <span class="intensity-card-title" style="color: oklch(0.46 0.09 160);">Low</span>
+      </div>
+      <div class="intensity-card-rate">24<span> spm</span></div>
+      <p class="intensity-card-desc">Easy recovery strokes to catch your breath, reset posture, and roll into the next hard set.</p>
+    </div>
+  </div>
+</section>
 
-      <!-- Audio Coach -->
-      <div class="feature-card high animate-fade-in-up delay-3">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-        </div>
-        <h3>Eyes-Free Audio Guidance</h3>
-        <p>Focus on your stroke, not the screen. Seamless audio transitions use custom beep pitches to signal low, medium, and high intensity boundaries, along with a discrete 3-second countdown tick.</p>
-      </div>
+<!-- How It Works Section -->
+<section id="how" class="how-section">
+  <div class="section-lbl">How it works</div>
+  <h2 class="section-title-large" style="max-width:560px;">Set the time, stack the work, press start.</h2>
 
-      <!-- Arrangement -->
-      <div class="feature-card medium animate-fade-in-up delay-1">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M12 2v20M20 20L4 4"></path></svg>
-        </div>
-        <h3>Endurance-Driven Bias</h3>
-        <p>The builder applies a structured cycle bias (low → medium → high → medium) while actively preventing back-to-back repetitions. This ensures a balanced build and flush cycle for maximum cardio loading.</p>
-      </div>
-
-      <!-- Surprise Engine -->
-      <div class="feature-card low animate-fade-in-up delay-2">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8"></path><path d="M12 18h.01"></path></svg>
-        </div>
-        <h3>Surprise Me Builder</h3>
-        <p>Paralyzed by decision? Hit the Surprise Me button. The engine generates a completely randomized, fully balanced sequence of interval ratios conforming to your target duration in a single click.</p>
-      </div>
-
-      <!-- Minimal Design -->
-      <div class="feature-card high animate-fade-in-up delay-3">
-        <div class="feature-icon-wrapper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-        </div>
-        <h3>Pure Performance Interface</h3>
-        <p>No account logs, no telemetry, no tracking. Built using modern oklch color palettes and responsive layout engineering, CrewCall loads instantly and works offline on any device. Ready when you are.</p>
-      </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-card-num">01</div>
+      <div class="how-card-title">Set the length</div>
+      <p class="how-card-desc">Pick your total target workout time in five-minute steps — from a quick ten to a full ninety.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">02</div>
+      <div class="how-card-title">Stack the intervals</div>
+      <p class="how-card-desc">Add high, medium, and low intensity pieces. Every segment length auto-adjusts to perfectly fill your time.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">03</div>
+      <div class="how-card-title">Press start</div>
+      <p class="how-card-desc">A highly glanceable timer dashboard and custom audio beeps guide you through every gear change.</p>
     </div>
   </div>
 </section>
 
 <!-- Interactive Showcase Gallery -->
-<section class="showcase">
+<section class="showcase-section">
   <div class="container">
-    <div class="section-header animate-fade-in-up">
-      <h2 class="section-title">Inside the App</h2>
-      <p class="section-subtitle">A unified, high-contrast dashboard designed to keep your metrics readable even at max-effort stroke rates.</p>
-    </div>
+    <div class="section-lbl" style="text-align: center; margin-bottom: 12px;">Glanceable Dashboard</div>
+    <h2 class="section-title-large" style="text-align: center; margin-bottom: 40px;">Inside the App</h2>
 
     <!-- Tabs -->
-    <div class="gallery-tabs animate-fade-in-up delay-1">
+    <div class="gallery-tabs">
       <button class="gallery-tab active" onclick="switchTab(0)">1. Custom Setup</button>
       <button class="gallery-tab" onclick="switchTab(1)">2. Surprise Layout</button>
       <button class="gallery-tab" onclick="switchTab(2)">3. Running Session</button>
@@ -984,7 +1044,7 @@
     </div>
 
     <!-- Gallery Panel -->
-    <div class="gallery-content animate-fade-in-up delay-2">
+    <div class="gallery-content">
       <!-- Slide 1 -->
       <div class="gallery-image-panel active">
         <img src="setup_screenshot.png" alt="Setup Screen" class="gallery-img">
@@ -1024,41 +1084,39 @@
   </div>
 </section>
 
-<!-- CTA Footer Box -->
-<section class="cta-section">
-  <div class="container">
-    <div class="cta-box animate-fade-in-up">
-      <h2 class="cta-title">Ready to control the slide?</h2>
-      <p>CrewCall runs entirely in your web browser. No installs or app store downloads required. Set your session and start rowing.</p>
-      <a href="app.html" class="btn btn-accent pulse-btn" style="padding: 16px 36px; font-size: 16px;">
-        Open Coach Dashboard
-      </a>
+<!-- Final CTA Section -->
+<section id="start" class="final-cta-section">
+  <div class="final-cta-card">
+    <div class="final-cta-timeline" id="final-cta-timeline">
+      <!-- Rendered via JS -->
     </div>
+    <h2 class="final-cta-title">Your next session is two minutes from starting.</h2>
+    <p class="final-cta-desc">No accounts, no setup screens. Define your targets, and start pulling.</p>
+    <a href="app.html" class="btn-final-cta">
+      <span class="btn-final-cta-dot"></span>Build my session
+    </a>
   </div>
 </section>
 
 <!-- Footer -->
 <footer>
-  <div class="container footer-content">
-    <a href="#" class="logo-group">
-      <span class="logo-text" style="font-size: 16px;">CREWCALL</span>
-    </a>
-    <div class="footer-copy">&copy; 2026 CrewCall. Designed for rows of any duration.</div>
-    <div class="footer-links">
-      <a href="app.html" class="footer-link">Go to App</a>
-      <a href="#" class="footer-link">Back to Top</a>
-    </div>
+  <div class="footer-logo">
+    <span class="footer-logo-dot"></span>
+    <span class="footer-logo-text">CREWCALL</span>
   </div>
+  <div class="footer-text-right">Interval rowing coach · CrewCall</div>
 </footer>
 
 <script>
   // Sticky header class swap
   window.addEventListener('scroll', function() {
     const header = document.getElementById('header');
-    if (window.scrollY > 40) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
+    if (header) {
+      if (window.scrollY > 40) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
     }
   });
 
@@ -1091,10 +1149,17 @@
     medium: 'oklch(0.83 0.12 82)',
     low: 'oklch(0.80 0.095 158)'
   };
+  const INK_COLORS = {
+    high: 'oklch(0.45 0.15 27)',
+    medium: 'oklch(0.52 0.12 70)',
+    low: 'oklch(0.46 0.09 160)'
+  };
+  const SPMS = { high: 30, medium: 28, low: 24 };
   
   let sandboxState = {
     durationMins: 20,
-    counts: { high: 2, medium: 2, low: 3 }
+    counts: { high: 2, medium: 2, low: 3 },
+    activeIdx: 0
   };
 
   function fmtTime(seconds) {
@@ -1155,11 +1220,11 @@
     const totalRatios = (counts.high * RATIOS.high) + (counts.medium * RATIOS.medium) + (counts.low * RATIOS.low);
     
     const timeline = document.getElementById('sandbox-timeline');
-    const summaryText = document.getElementById('sandbox-summary-text');
+    const finalTimeline = document.getElementById('final-cta-timeline');
     
     if (totalRatios === 0) {
-      timeline.innerHTML = '<div style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-secondary);">Add intervals to see your plan</div>';
-      summaryText.innerText = '0 intervals total';
+      timeline.innerHTML = '<div style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-secondary);">Add intervals to see plan</div>';
+      if (finalTimeline) finalTimeline.innerHTML = '';
       return;
     }
     
@@ -1173,17 +1238,56 @@
     
     const seq = arrangeSandboxSeq(counts.high, counts.medium, counts.low);
     const totalIntervals = seq.length;
-    summaryText.innerText = `${totalIntervals} interval${totalIntervals === 1 ? '' : 's'} total`;
+    
+    // Safety check active index
+    if (sandboxState.activeIdx >= totalIntervals) {
+      sandboxState.activeIdx = 0;
+    }
+    const currentActiveType = seq[sandboxState.activeIdx] || 'low';
     
     // Render timeline segments
-    timeline.innerHTML = seq.map((type) => {
+    timeline.innerHTML = seq.map((type, idx) => {
       const len = lengths[type];
       const pct = (len / targetSec) * 100;
-      return `<div class="sandbox-timeline-seg" style="width: ${pct}%; background: ${COLORS[type]};" title="${type.toUpperCase()}: ${fmtTime(len)}"></div>`;
+      const isActive = idx === sandboxState.activeIdx;
+      return `<div class="sandbox-timeline-seg" style="flex: ${len}; background: ${COLORS[type]}; opacity: ${isActive ? '1' : '0.45'};" onclick="setSandboxActive(${idx})" title="${type.toUpperCase()}: ${fmtTime(len)}"></div>`;
     }).join('');
+
+    // Render final CTA static timeline
+    if (finalTimeline) {
+      finalTimeline.innerHTML = seq.map((type) => {
+        const len = lengths[type];
+        return `<div class="final-cta-timeline-seg" style="flex: ${len}; background: ${COLORS[type]};"></div>`;
+      }).join('');
+    }
+    
+    // Update Active Display Card Elements
+    const activeLen = lengths[currentActiveType];
+    const spm = SPMS[currentActiveType];
+    
+    document.getElementById('sandbox-bg').style.height = '62%';
+    document.getElementById('sandbox-bg').style.background = COLORS[currentActiveType];
+    document.getElementById('sandbox-dot').style.background = INK_COLORS[currentActiveType];
+    document.getElementById('sandbox-tag').innerText = `Interval ${sandboxState.activeIdx + 1} / ${totalIntervals}`;
+    document.getElementById('sandbox-tag').style.color = INK_COLORS[currentActiveType];
+    
+    // Next interval info
+    const nextIdx = (sandboxState.activeIdx + 1) % totalIntervals;
+    const nextType = seq[nextIdx];
+    if (nextType) {
+      document.getElementById('sandbox-next').innerText = nextType.toUpperCase();
+      document.getElementById('sandbox-next').style.color = INK_COLORS[nextType];
+    } else {
+      document.getElementById('sandbox-next').innerText = 'FINISH';
+      document.getElementById('sandbox-next').style.color = INK_COLORS.low;
+    }
+    
+    document.getElementById('sandbox-label').innerText = currentActiveType.toUpperCase();
+    document.getElementById('sandbox-label').style.color = INK_COLORS[currentActiveType];
+    document.getElementById('sandbox-timer').innerText = fmtTime(activeLen);
+    document.getElementById('sandbox-timer').style.color = INK_COLORS[currentActiveType];
     
     // Enable/disable add buttons based on auto-scaling minimums (say, 15 seconds min length)
-    // To keep it simple: total intervals <= 12 to avoid overcrowding, and min segment length >= 15s.
     const canAdd = (type) => {
       if (totalIntervals >= 12) return false;
       const testCounts = { ...counts };
@@ -1208,10 +1312,21 @@
     });
   }
 
+  function setSandboxActive(idx) {
+    sandboxState.activeIdx = idx;
+    renderSandbox();
+  }
+
   function adjustSandbox(type, delta) {
     const counts = sandboxState.counts;
     counts[type] = Math.max(0, counts[type] + delta);
     document.getElementById(`sandbox-count-${type}`).innerText = counts[type];
+    
+    // Check if we need to reset active index if elements decreased
+    const total = counts.high + counts.medium + counts.low;
+    if (sandboxState.activeIdx >= total) {
+      sandboxState.activeIdx = 0;
+    }
     renderSandbox();
   }
 
@@ -1219,11 +1334,13 @@
   const slider = document.getElementById('sandbox-slider');
   const sliderLabel = document.getElementById('sandbox-time-val');
   
-  slider.addEventListener('input', (e) => {
-    sandboxState.durationMins = parseInt(e.target.value);
-    sliderLabel.innerText = `${sandboxState.durationMins} mins`;
-    renderSandbox();
-  });
+  if (slider) {
+    slider.addEventListener('input', (e) => {
+      sandboxState.durationMins = parseInt(e.target.value);
+      sliderLabel.innerText = `${sandboxState.durationMins} mins`;
+      renderSandbox();
+    });
+  }
 
   // Initial sandbox render
   renderSandbox();

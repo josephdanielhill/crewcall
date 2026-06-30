@@ -54,6 +54,27 @@
     justify-content: space-between;
     padding: 32px 36px;
   }
+  .setup-metrics-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 40px;
+  }
+  .setup-time-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 110px;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: oklch(0.3 0.012 70);
+  }
+  .setup-count-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 52px;
+    line-height: 1;
+    color: oklch(0.42 0.012 70);
+  }
 
   .btn-start{background:#005B96;}
   .btn-start:hover{background:#004a7a;}
@@ -84,7 +105,7 @@
     .left-container {
       position: relative;
       inset: auto;
-      padding: 48px 24px;
+      padding: 48px 16px;
       gap: 30px;
       min-height: 440px;
       align-items: center;
@@ -96,10 +117,22 @@
       align-items: center;
       width: 100%;
     }
+    .setup-metrics-row {
+      gap: 20px;
+      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
+    }
+    .setup-time-val {
+      font-size: clamp(56px, 14vw, 84px);
+    }
+    .setup-count-val {
+      font-size: clamp(32px, 8vw, 44px);
+    }
     .active-inner {
       position: relative;
       inset: auto;
-      padding: 32px 20px;
+      padding: 32px 16px;
       gap: 32px;
       min-height: 480px;
       width: 100%;
@@ -418,17 +451,17 @@
           '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
           '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
         '</div>'+
-        '<div style="display:flex;flex-direction:column;gap:24px;">'+
-          '<div style="display:flex;align-items:flex-end;gap:40px;">'+
+        '<div style="display:flex;flex-direction:column;gap:24px;width:100%;">'+
+          '<div class="setup-metrics-row">'+
             '<div>'+
-              '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:120px;line-height:0.9;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.setupTotalText+'</div>'+
-              '<div style="margin-top:10px;display:flex;align-items:center;gap:12px;">'+
-                '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Total session</span>'+
-                '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.5 0.022 255);background:oklch(0.93 0.016 230);padding:3px 11px;border-radius:20px;">Goal '+v.targetText+'</span>'+
+              '<div class="setup-time-val">'+v.setupTotalText+'</div>'+
+              '<div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">'+
+                '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.58 0.012 70);white-space:nowrap;">Total session</span>'+
+                '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.5 0.022 255);background:oklch(0.93 0.016 230);padding:3px 11px;border-radius:20px;white-space:nowrap;">Goal '+v.targetText+'</span>'+
               '</div>'+
             '</div>'+
-            '<div style="padding-bottom:14px;">'+
-              '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:52px;line-height:1;color:oklch(0.42 0.012 70);">'+v.setupCount+'</div>'+
+            '<div style="padding-bottom:14px;text-align:center;">'+
+              '<div class="setup-count-val">'+v.setupCount+'</div>'+
               '<div style="margin-top:8px;font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Intervals</div>'+
             '</div>'+
           '</div>'+

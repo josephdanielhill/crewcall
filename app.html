@@ -962,6 +962,24 @@
         return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px;"></div>';
       }).join('');
 
+      var showWarning = false;
+      if (state.advancedSequence.length > 0) {
+        var first = state.advancedSequence[0];
+        var last = state.advancedSequence[state.advancedSequence.length - 1];
+        if (first.intensity !== 'low' || last.intensity !== 'low') {
+          showWarning = true;
+        }
+      }
+
+      var warningHtml = "";
+      if (showWarning) {
+        warningHtml = ''+
+        '<div style="background: oklch(0.98 0.03 82 / 0.7); border: 1px solid oklch(0.85 0.08 82); border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: oklch(0.35 0.1 70); line-height: 1.45;">'+
+          '<span style="font-size: 20px; flex-shrink: 0;">⚠️</span>'+
+          '<div><strong>Warm-up & Cool-down tip:</strong> It is usually best to start your session with a <strong>LOW</strong> intensity block to warm up, and finish with a <strong>LOW</strong> block to cool down.</div>'+
+        '</div>';
+      }
+
       return ''+
       '<div class="left-container" style="padding: 32px 40px; background: oklch(0.975 0.016 230); position: relative; min-height: 100vh; display: flex; flex-direction: column;">'+
         '<div>'+
@@ -998,6 +1016,8 @@
             '</div>'+
           '</div>'+
         '</div>'+
+
+        warningHtml+
 
         '<div style="margin-bottom:20px;" class="timeline-cards-container">'+
           cardsHtml+

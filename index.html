@@ -212,7 +212,7 @@
     color: var(--text-secondary);
   }
 
-  /* Interactive Sandbox Widget Styling */
+  /* Simulated Coach Preview Widget Styling */
   .sandbox-widget {
     position: relative;
     border-radius: 26px;
@@ -223,19 +223,18 @@
   }
   .sandbox-display {
     position: relative;
-    height: 320px;
+    height: 360px;
     overflow: hidden;
-    background: oklch(0.94 0.016 230);
+    background: oklch(0.965 0.004 230);
   }
   .sandbox-active-bg {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 60%;
+    height: 0%;
     background: var(--color-medium);
-    transition: background 0.4s ease, height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    opacity: 0.85;
+    transition: background 0.4s ease, height 0.12s linear;
   }
   .sandbox-display-content {
     position: absolute;
@@ -249,6 +248,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
+    z-index: 5;
   }
   .sandbox-display-indicator {
     display: flex;
@@ -281,6 +282,8 @@
 
   .sandbox-display-center {
     text-align: center;
+    position: relative;
+    z-index: 5;
   }
   .sandbox-display-label {
     font-size: 22px;
@@ -293,7 +296,7 @@
   .sandbox-display-timer {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 500;
-    font-size: 88px;
+    font-size: 108px;
     line-height: 0.92;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
@@ -313,120 +316,37 @@
     display: flex;
     gap: 3px;
     height: 9px;
+    position: relative;
+    z-index: 5;
   }
   .sandbox-timeline-seg {
     height: 100%;
     border-radius: 2px;
     transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, opacity 0.3s ease;
-    cursor: pointer;
   }
 
-  /* Sandbox Interactive Controls */
-  .sandbox-controls {
-    padding: 24px;
-    background: var(--bg-card);
-    border-top: 1px solid var(--border-subtle);
+  .sandbox-footer {
+    padding: 18px 24px;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  .sandbox-slider-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .sandbox-slider-label {
-    display: flex;
+    align-items: center;
     justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+  }
+  .sandbox-footer-lbl {
     font-size: 13px;
-    font-weight: 600;
+    letter-spacing: 0.04em;
     color: var(--text-secondary);
   }
-  .sandbox-slider {
-    width: 100%;
-    height: 6px;
-    background: oklch(0.92 0.016 230);
-    border-radius: 3px;
-    outline: none;
-    -webkit-appearance: none;
-  }
-  .sandbox-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #005B96;
-    cursor: pointer;
-    border: 2px solid var(--bg-card);
-    box-shadow: 0 2px 6px oklch(0.3 0.022 255 / 0.15);
-    transition: transform 0.1s;
-  }
-  .sandbox-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
-  }
-
-  .sandbox-steppers {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .sandbox-stepper-cell {
-    background: oklch(0.975 0.016 230 / 0.5);
-    border: 1px solid oklch(0.94 0.016 230);
-    border-radius: 12px;
-    padding: 8px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .sandbox-cell-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .sandbox-cell-color {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-  .sandbox-cell-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .sandbox-cell-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-card);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .sandbox-cell-btn:hover:not(:disabled) {
-    background: oklch(0.95 0.016 230);
-    border-color: #005B96;
-  }
-  .sandbox-cell-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-  .sandbox-cell-count {
+  .sandbox-footer-badge {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
+    color: #005B96;
+    background: oklch(0.9 0.02 230 / 0.5);
+    padding: 4px 11px;
+    border-radius: 20px;
     font-weight: 600;
-    min-width: 14px;
-    text-align: center;
+    transition: color 0.3s ease, background 0.3s ease;
   }
 
   /* Intensities Section */
@@ -834,8 +754,6 @@
 <body>
 
 <div class="grid-overlay"></div>
-<div class="bg-blob blob-1"></div>
-<div class="bg-blob blob-2"></div>
 
 <!-- Navigation -->
 <nav>
@@ -882,23 +800,23 @@
     </div>
   </div>
 
-  <!-- Interactive Sandbox Simulator Card -->
+  <!-- Simulated Coach Preview Widget Card -->
   <div>
     <div class="sandbox-widget">
-      <!-- Top Session Active Display -->
+      <!-- Session Active Display -->
       <div class="sandbox-display">
         <div class="sandbox-active-bg" id="sandbox-bg"></div>
         <div class="sandbox-display-content">
           <div class="sandbox-display-header">
             <div class="sandbox-display-indicator">
               <span class="sandbox-display-dot" id="sandbox-dot"></span>
-              <span class="sandbox-display-tag" id="sandbox-tag">Interval 1 / 7</span>
+              <span class="sandbox-display-tag" id="sandbox-tag">Interval 1 / 6</span>
             </div>
-            <div class="sandbox-display-next">Next&nbsp;·&nbsp;<span class="sandbox-display-next-val" id="sandbox-next" style="color: var(--color-high);">High</span></div>
+            <div class="sandbox-display-next">Next&nbsp;·&nbsp;<span class="sandbox-display-next-val" id="sandbox-next">High</span></div>
           </div>
           <div class="sandbox-display-center">
-            <div class="sandbox-display-label" id="sandbox-label">Medium</div>
-            <div class="sandbox-display-timer" id="sandbox-timer">2:30</div>
+            <div class="sandbox-display-label" id="sandbox-label">Low</div>
+            <div class="sandbox-display-timer" id="sandbox-timer">0:06</div>
             <div class="sandbox-display-sub">remaining in phase</div>
           </div>
           <div class="sandbox-timeline" id="sandbox-timeline">
@@ -906,59 +824,10 @@
           </div>
         </div>
       </div>
-
-      <!-- Controls & Setup Panel -->
-      <div class="sandbox-controls">
-        <!-- Target Time Slider -->
-        <div class="sandbox-slider-group">
-          <div class="sandbox-slider-label">
-            <span>Target Session Length</span>
-            <span id="sandbox-time-val">20 mins</span>
-          </div>
-          <input type="range" min="10" max="60" step="5" value="20" class="sandbox-slider" id="sandbox-slider">
-        </div>
-
-        <!-- Steppers Grid -->
-        <div class="sandbox-steppers">
-          <!-- High -->
-          <div class="sandbox-stepper-cell">
-            <div class="sandbox-cell-header">
-              <span class="sandbox-cell-color" style="background: var(--color-high);"></span>
-              <span style="color: oklch(0.45 0.15 27);">High</span>
-            </div>
-            <div class="sandbox-cell-controls">
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('high', -1)">−</button>
-              <span class="sandbox-cell-count" id="sandbox-count-high">2</span>
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('high', 1)" id="sandbox-add-high">+</button>
-            </div>
-          </div>
-
-          <!-- Medium -->
-          <div class="sandbox-stepper-cell">
-            <div class="sandbox-cell-header">
-              <span class="sandbox-cell-color" style="background: var(--color-medium);"></span>
-              <span style="color: oklch(0.52 0.12 70);">Med</span>
-            </div>
-            <div class="sandbox-cell-controls">
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('medium', -1)">−</button>
-              <span class="sandbox-cell-count" id="sandbox-count-medium">2</span>
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('medium', 1)" id="sandbox-add-medium">+</button>
-            </div>
-          </div>
-
-          <!-- Low -->
-          <div class="sandbox-stepper-cell">
-            <div class="sandbox-cell-header">
-              <span class="sandbox-cell-color" style="background: var(--color-low);"></span>
-              <span style="color: oklch(0.46 0.09 160);">Low</span>
-            </div>
-            <div class="sandbox-cell-controls">
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('low', -1)">−</button>
-              <span class="sandbox-cell-count" id="sandbox-count-low">3</span>
-              <button class="sandbox-cell-btn" onclick="adjustSandbox('low', 1)" id="sandbox-add-low">+</button>
-            </div>
-          </div>
-        </div>
+      <!-- Footer Info -->
+      <div class="sandbox-footer">
+        <span class="sandbox-footer-lbl">Live session preview</span>
+        <span class="sandbox-footer-badge" id="sandbox-strokes">24 strokes</span>
       </div>
     </div>
   </div>
@@ -1108,18 +977,6 @@
 </footer>
 
 <script>
-  // Sticky header class swap
-  window.addEventListener('scroll', function() {
-    const header = document.getElementById('header');
-    if (header) {
-      if (window.scrollY > 40) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-    }
-  });
-
   // Tab switching logic for gallery
   function switchTab(index) {
     const tabs = document.querySelectorAll('.gallery-tab');
@@ -1142,25 +999,20 @@
     });
   }
 
-  // --- INTERACTIVE SANDBOX LOGIC ---
-  const RATIOS = { high: 2, medium: 3, low: 4 };
+  // --- SIMULATED COACH CLOCK LOGIC ---
   const COLORS = {
-    high: 'oklch(0.71 0.145 27)',
-    medium: 'oklch(0.83 0.12 82)',
-    low: 'oklch(0.80 0.095 158)'
+    high:   { name:'HIGH',   fill:'oklch(0.71 0.145 27)',  ink:'oklch(0.45 0.15 27)',  tint:'oklch(0.93 0.05 27)',  rate:30 },
+    medium: { name:'MEDIUM', fill:'oklch(0.83 0.12 82)',   ink:'oklch(0.52 0.12 70)',  tint:'oklch(0.93 0.06 82)',  rate:28 },
+    low:    { name:'LOW',    fill:'oklch(0.80 0.095 158)', ink:'oklch(0.46 0.09 160)', tint:'oklch(0.93 0.05 158)', rate:24 },
   };
-  const INK_COLORS = {
-    high: 'oklch(0.45 0.15 27)',
-    medium: 'oklch(0.52 0.12 70)',
-    low: 'oklch(0.46 0.09 160)'
-  };
-  const SPMS = { high: 30, medium: 28, low: 24 };
   
-  let sandboxState = {
-    durationMins: 20,
-    counts: { high: 2, medium: 2, low: 3 },
-    activeIdx: 0
-  };
+  const seq = [
+    {k:'low',len:6},{k:'high',len:3},{k:'medium',len:5},
+    {k:'high',len:3},{k:'low',len:6},{k:'medium',len:5},
+  ];
+
+  let activeIdx = 0;
+  let startTime = performance.now();
 
   function fmtTime(seconds) {
     const m = Math.floor(seconds / 60);
@@ -1168,182 +1020,68 @@
     return `${m}:${String(s).padStart(2, '0')}`;
   }
 
-  function arrangeSandboxSeq(h, m, l) {
-    const pools = { high: h, medium: m, low: l };
-    const total = h + m + l;
-    if (total === 0) return [];
+  function tick() {
+    const now = performance.now();
+    const currentItem = seq[activeIdx];
+    const duration = currentItem.len;
+    let elapsed = (now - startTime) / 1000;
     
-    const remaining = { high: pools.high, medium: pools.medium, low: pools.low };
-    const placed = { high: 0, medium: 0, low: 0 };
-    const order = ['low', 'medium', 'high', 'medium'];
-    const seq = [];
-    let prev = null;
-    
-    for (let i = 0; i < total; i++) {
-      let best = null;
-      let bestScore = -Infinity;
-      
-      if (i === 0) {
-        best = remaining.low > 0 ? 'low' : (remaining.medium > 0 ? 'medium' : 'high');
-        seq.push(best);
-        remaining[best]--;
-        placed[best]++;
-        prev = best;
-        continue;
-      }
-      
-      const progress = (i + 1) / total;
-      ['high', 'medium', 'low'].forEach(k => {
-        if (remaining[k] <= 0) return;
-        let score = progress * pools[k] - placed[k];
-        if (k === prev) score -= 1.0;
-        score += order.indexOf(k) * 0.0001;
-        if (score > bestScore) {
-          bestScore = score;
-          best = k;
-        }
-      });
-      
-      seq.push(best);
-      remaining[best]--;
-      placed[best]++;
-      prev = best;
-    }
-    return seq;
-  }
-
-  function renderSandbox() {
-    const targetSec = sandboxState.durationMins * 60;
-    const counts = sandboxState.counts;
-    
-    // Calculate total ratios in stack
-    const totalRatios = (counts.high * RATIOS.high) + (counts.medium * RATIOS.medium) + (counts.low * RATIOS.low);
-    
-    const timeline = document.getElementById('sandbox-timeline');
-    const finalTimeline = document.getElementById('final-cta-timeline');
-    
-    if (totalRatios === 0) {
-      timeline.innerHTML = '<div style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-secondary);">Add intervals to see plan</div>';
-      if (finalTimeline) finalTimeline.innerHTML = '';
-      return;
+    if (elapsed >= duration) {
+      activeIdx = (activeIdx + 1) % seq.length;
+      startTime = now;
+      elapsed = 0;
     }
     
-    // u is the length of one unit of ratio
-    const u = targetSec / totalRatios;
-    const lengths = {
-      high: Math.max(1, Math.round(RATIOS.high * u)),
-      medium: Math.max(1, Math.round(RATIOS.medium * u)),
-      low: Math.max(1, Math.round(RATIOS.low * u))
-    };
+    const cur = seq[activeIdx];
+    const remain = Math.max(0, Math.ceil(cur.len - elapsed));
+    const frac = Math.max(0, Math.min(1, (cur.len - elapsed) / cur.len));
     
-    const seq = arrangeSandboxSeq(counts.high, counts.medium, counts.low);
-    const totalIntervals = seq.length;
+    // Update DOM elements
+    const co = COLORS[cur.k];
+    const nextItem = seq[(activeIdx + 1) % seq.length];
+    const nextCo = COLORS[nextItem.k];
     
-    // Safety check active index
-    if (sandboxState.activeIdx >= totalIntervals) {
-      sandboxState.activeIdx = 0;
-    }
-    const currentActiveType = seq[sandboxState.activeIdx] || 'low';
+    document.getElementById('sandbox-bg').style.height = `${frac * 100}%`;
+    document.getElementById('sandbox-bg').style.background = co.fill;
+    
+    document.getElementById('sandbox-dot').style.background = co.ink;
+    document.getElementById('sandbox-tag').innerText = `Interval ${activeIdx + 1} / ${seq.length}`;
+    document.getElementById('sandbox-tag').style.color = co.ink;
+    
+    document.getElementById('sandbox-next').innerText = nextCo.name;
+    document.getElementById('sandbox-next').style.color = nextCo.ink;
+    
+    document.getElementById('sandbox-label').innerText = co.name;
+    document.getElementById('sandbox-label').style.color = co.ink;
+    
+    document.getElementById('sandbox-timer').innerText = fmtTime(remain);
+    document.getElementById('sandbox-timer').style.color = co.ink;
+    
+    // Update strokes badge
+    const strokeBadge = document.getElementById('sandbox-strokes');
+    strokeBadge.innerText = `${co.rate} strokes`;
+    strokeBadge.style.color = co.ink;
+    strokeBadge.style.background = co.tint;
     
     // Render timeline segments
-    timeline.innerHTML = seq.map((type, idx) => {
-      const len = lengths[type];
-      const pct = (len / targetSec) * 100;
-      const isActive = idx === sandboxState.activeIdx;
-      return `<div class="sandbox-timeline-seg" style="flex: ${len}; background: ${COLORS[type]}; opacity: ${isActive ? '1' : '0.45'};" onclick="setSandboxActive(${idx})" title="${type.toUpperCase()}: ${fmtTime(len)}"></div>`;
+    const timeline = document.getElementById('sandbox-timeline');
+    timeline.innerHTML = seq.map((item, idx) => {
+      const isCurrent = idx === activeIdx;
+      return `<div class="sandbox-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill}; opacity: ${isCurrent ? 1 : 0.4};"></div>`;
     }).join('');
-
-    // Render final CTA static timeline
-    if (finalTimeline) {
-      finalTimeline.innerHTML = seq.map((type) => {
-        const len = lengths[type];
-        return `<div class="final-cta-timeline-seg" style="flex: ${len}; background: ${COLORS[type]};"></div>`;
-      }).join('');
-    }
-    
-    // Update Active Display Card Elements
-    const activeLen = lengths[currentActiveType];
-    const spm = SPMS[currentActiveType];
-    
-    document.getElementById('sandbox-bg').style.height = '62%';
-    document.getElementById('sandbox-bg').style.background = COLORS[currentActiveType];
-    document.getElementById('sandbox-dot').style.background = INK_COLORS[currentActiveType];
-    document.getElementById('sandbox-tag').innerText = `Interval ${sandboxState.activeIdx + 1} / ${totalIntervals}`;
-    document.getElementById('sandbox-tag').style.color = INK_COLORS[currentActiveType];
-    
-    // Next interval info
-    const nextIdx = (sandboxState.activeIdx + 1) % totalIntervals;
-    const nextType = seq[nextIdx];
-    if (nextType) {
-      document.getElementById('sandbox-next').innerText = nextType.toUpperCase();
-      document.getElementById('sandbox-next').style.color = INK_COLORS[nextType];
-    } else {
-      document.getElementById('sandbox-next').innerText = 'FINISH';
-      document.getElementById('sandbox-next').style.color = INK_COLORS.low;
-    }
-    
-    document.getElementById('sandbox-label').innerText = currentActiveType.toUpperCase();
-    document.getElementById('sandbox-label').style.color = INK_COLORS[currentActiveType];
-    document.getElementById('sandbox-timer').innerText = fmtTime(activeLen);
-    document.getElementById('sandbox-timer').style.color = INK_COLORS[currentActiveType];
-    
-    // Enable/disable add buttons based on auto-scaling minimums (say, 15 seconds min length)
-    const canAdd = (type) => {
-      if (totalIntervals >= 12) return false;
-      const testCounts = { ...counts };
-      testCounts[type]++;
-      const testRatios = (testCounts.high * RATIOS.high) + (testCounts.medium * RATIOS.medium) + (testCounts.low * RATIOS.low);
-      const testU = targetSec / testRatios;
-      
-      let minLen = Infinity;
-      ['high', 'medium', 'low'].forEach(k => {
-        if (testCounts[k] > 0) {
-          minLen = Math.min(minLen, RATIOS[k] * testU);
-        }
-      });
-      return minLen >= 15;
-    };
-
-    ['high', 'medium', 'low'].forEach(type => {
-      const btn = document.getElementById(`sandbox-add-${type}`);
-      if (btn) {
-        btn.disabled = !canAdd(type);
-      }
-    });
   }
 
-  function setSandboxActive(idx) {
-    sandboxState.activeIdx = idx;
-    renderSandbox();
+  // Render final CTA static timeline
+  const finalTimeline = document.getElementById('final-cta-timeline');
+  if (finalTimeline) {
+    finalTimeline.innerHTML = seq.map(item => {
+      return `<div class="final-cta-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill};"></div>`;
+    }).join('');
   }
 
-  function adjustSandbox(type, delta) {
-    const counts = sandboxState.counts;
-    counts[type] = Math.max(0, counts[type] + delta);
-    document.getElementById(`sandbox-count-${type}`).innerText = counts[type];
-    
-    // Check if we need to reset active index if elements decreased
-    const total = counts.high + counts.medium + counts.low;
-    if (sandboxState.activeIdx >= total) {
-      sandboxState.activeIdx = 0;
-    }
-    renderSandbox();
-  }
-
-  // Set up slider listener
-  const slider = document.getElementById('sandbox-slider');
-  const sliderLabel = document.getElementById('sandbox-time-val');
-  
-  if (slider) {
-    slider.addEventListener('input', (e) => {
-      sandboxState.durationMins = parseInt(e.target.value);
-      sliderLabel.innerText = `${sandboxState.durationMins} mins`;
-      renderSandbox();
-    });
-  }
-
-  // Initial sandbox render
-  renderSandbox();
+  // Run tick every 70ms
+  setInterval(tick, 70);
+  tick(); // initial call
 </script>
 
 </body>

@@ -16,6 +16,37 @@
   @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.025);}}
   button{font-family:inherit;}
 
+  #app {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    color: oklch(0.26 0.022 255);
+  }
+  .app-left {
+    flex: 0 0 57%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid oklch(0.9 0.016 230);
+  }
+  .app-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: oklch(0.985 0.015 230);
+    min-width: 0;
+  }
+  .left-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 64px 60px;
+    background: oklch(0.972 0.016 230);
+  }
+
   .btn-start{background:#005B96;}
   .btn-start:hover{background:#004a7a;}
   .btn-soft:hover{background:oklch(0.97 0.016 230);}
@@ -24,10 +55,36 @@
   .btn-stepper:hover{background:oklch(0.95 0.016 230);}
   .btn-stepper-soft:hover{background:oklch(0.95 0.016 230);}
   .btn-disabled{opacity:0.3;pointer-events:none;}
+
+  @media (max-width: 768px) {
+    #app {
+      flex-direction: column;
+      height: auto;
+      overflow-y: auto;
+    }
+    .app-left {
+      flex: 0 0 auto;
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid oklch(0.9 0.016 230);
+    }
+    .app-right {
+      flex: 0 0 auto;
+      width: 100%;
+      background: oklch(0.985 0.015 230);
+    }
+    .left-container {
+      position: relative;
+      inset: auto;
+      padding: 36px 20px;
+      gap: 30px;
+      min-height: 400px;
+    }
+  }
 </style>
 </head>
 <body>
-<div id="app" style="display:flex;height:100vh;width:100%;overflow:hidden;color:oklch(0.26 0.022 255);"></div>
+<div id="app"></div>
 
 <script>
 (function(){
@@ -252,7 +309,7 @@
         status: status,
         rowOpacity: status==='done'?0.42:1,
         rowBg: status==='active'?'oklch(1 0 0)':'transparent',
-        rowBorder: status==='active'?'oklch(0.84 0.02 85)':'oklch(0.93 0.006 85)',
+        rowBorder: status==='active'?'oklch(0.84 0.02 230)':'oklch(0.93 0.016 230)',
         phasePctText: status==='active'? pPct+'%' : '0%',
         barOpacity: status==='upcoming'?0.3:1,
       };
@@ -331,7 +388,7 @@
   function renderLeft(v){
     if(v.isSetup){
       return ''+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:64px 60px;background:oklch(0.972 0.016 230);">'+
+      '<div class="left-container">'+
         '<div>'+
           '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
           '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
@@ -366,9 +423,9 @@
     }
     if(v.isActive){
       return ''+
-      '<div style="position:absolute;inset:0;background:oklch(0.965 0.016 230);overflow:hidden;">'+
+      '<div class="left-container" style="background:oklch(0.965 0.016 230);overflow:hidden;">'+
         '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;"></div>'+
-        '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:48px 56px;">'+
+        '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:24px 28px;">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
             '<div style="display:flex;align-items:center;gap:14px;">'+
               '<span style="width:14px;height:14px;border-radius:50%;background:'+v.phaseInk+';"></span>'+
@@ -409,7 +466,7 @@
     }
     if(v.isDone){
       return ''+
-      '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px;background:oklch(0.972 0.016 230);">'+
+      '<div class="left-container" style="justify-content:center;align-items:center;text-align:center;background:oklch(0.972 0.016 230);">'+
         '<div style="font-size:30px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:oklch(0.46 0.09 160);">Complete</div>'+
         '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:140px;line-height:0.95;letter-spacing:-0.02em;color:oklch(0.3 0.012 70);margin:14px 0 6px;">'+v.totalText+'</div>'+
         '<div style="font-size:16px;letter-spacing:0.06em;color:oklch(0.55 0.012 70);">'+v.setupCount+' intervals · nicely done</div>'+
@@ -485,8 +542,8 @@
   function render(){
     var v = renderVals();
     app.innerHTML =
-      '<div style="flex:0 0 57%;position:relative;display:flex;flex-direction:column;border-right:1px solid oklch(0.9 0.006 85);">'+renderLeft(v)+'</div>'+
-      '<div style="flex:1;display:flex;flex-direction:column;background:oklch(0.985 0.005 85);min-width:0;">'+renderRight(v)+'</div>';
+      '<div class="app-left">'+renderLeft(v)+'</div>'+
+      '<div class="app-right">'+renderRight(v)+'</div>';
   }
 
   render();

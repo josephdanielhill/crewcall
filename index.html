@@ -385,7 +385,7 @@
 
   .intensities-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-top: 38px;
   }
@@ -786,7 +786,7 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="stat-val">3</div>
+        <div class="stat-val">4</div>
         <div class="stat-lbl">Intensities</div>
       </div>
       <div>
@@ -861,6 +861,15 @@
       </div>
       <div class="intensity-card-rate">28<span> spm</span></div>
       <p class="intensity-card-desc">Sustainable working pace. The backbone of your endurance work and core session blocks.</p>
+    </div>
+    <!-- MEDIUM -->
+    <div class="intensity-card">
+      <div class="intensity-card-header">
+        <span class="intensity-card-dot" style="background: oklch(0.78 0.09 190);"></span>
+        <span class="intensity-card-title" style="color: oklch(0.48 0.09 190);">Medium</span>
+      </div>
+      <div class="intensity-card-rate">26<span> spm</span></div>
+      <p class="intensity-card-desc">Moderate pace. Ideal for building aerobic capacity and steady state aerobic base.</p>
     </div>
     <!-- LOW -->
     <div class="intensity-card">
@@ -1003,12 +1012,14 @@
   const COLORS = {
     high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  ink:'oklch(0.45 0.15 27)',  tint:'oklch(0.93 0.05 27)',  rate:30 },
     medium: { name:'HARD',    fill:'oklch(0.83 0.12 82)',   ink:'oklch(0.52 0.12 70)',  tint:'oklch(0.93 0.06 82)',  rate:28 },
+    med:    { name:'MEDIUM',  fill:'oklch(0.78 0.09 190)',  ink:'oklch(0.48 0.09 190)', tint:'oklch(0.93 0.05 190)', rate:26 },
     low:    { name:'LOW',     fill:'oklch(0.80 0.095 158)', ink:'oklch(0.46 0.09 160)', tint:'oklch(0.93 0.05 158)', rate:24 },
   };
   
   const seq = [
-    {k:'low',len:6},{k:'high',len:3},{k:'medium',len:5},
-    {k:'high',len:3},{k:'medium',len:5},{k:'low',len:6},
+    {k:'low',len:6},{k:'high',len:3},{k:'medium',len:4},
+    {k:'med',len:5},{k:'medium',len:4},{k:'high',len:3},
+    {k:'med',len:5},{k:'low',len:6},
   ];
 
   let activeIdx = 0;

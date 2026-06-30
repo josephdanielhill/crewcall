@@ -36,16 +36,22 @@
   var COLORS = {
     high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  tint:'oklch(0.93 0.05 27)',  ink:'oklch(0.45 0.15 27)' },
     medium: { name:'HARD',    fill:'oklch(0.83 0.12 82)',   tint:'oklch(0.93 0.06 82)',  ink:'oklch(0.52 0.12 70)' },
+    med:    { name:'MEDIUM',  fill:'oklch(0.78 0.09 190)',  tint:'oklch(0.93 0.05 190)', ink:'oklch(0.48 0.09 190)' },
     low:    { name:'LOW',     fill:'oklch(0.80 0.095 158)', tint:'oklch(0.93 0.05 158)', ink:'oklch(0.46 0.09 160)' },
   };
-  var RATIOS = { high:2, medium:3, low:4 };
+  var RATIOS = { high:2, medium:3, med:3.5, low:4 };
   var MINLEN = 15;
   var SOUND_ENABLED = true;
   var COUNTDOWN_BEEPS = true;
 
   var state = {
     mode: 'setup',
-    config: { high:{count:5,len:45,rate:30}, medium:{count:4,len:90,rate:28}, low:{count:4,len:120,rate:24} },
+    config: {
+      high:   {count:2, len:45,  rate:30},
+      medium: {count:2, len:90,  rate:28},
+      med:    {count:3, len:105, rate:26},
+      low:    {count:4, len:120, rate:24}
+    },
     targetMin: 10,
     elapsed: 0, baseElapsed: 0, runStart: 0,
     sequence: [], ends: [], totalDuration: 0,
@@ -54,7 +60,7 @@
 
   function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), ss=s%60; return m+':'+String(ss).padStart(2,'0'); }
 
-  function arrange(h,m,l){
+  function arrange(h,m,md,l){
     var firstLow = false;
     var lastLow = false;
     var remL = l;
@@ -68,18 +74,18 @@
       remL--;
     }
     
-    var pools = { high: h, medium: m, low: remL };
-    var total = h + m + remL;
-    var remaining = { high: pools.high, medium: pools.medium, low: pools.low };
-    var placed = { high: 0, medium: 0, low: 0 };
-    var order = ['low', 'medium', 'high', 'medium'];
+    var pools = { high: h, medium: m, med: md, low: remL };
+    var total = h + m + md + remL;
+    var remaining = { high: pools.high, medium: pools.medium, med: pools.med, low: pools.low };
+    var placed = { high: 0, medium: 0, med: 0, low: 0 };
+    var order = ['low', 'med', 'medium', 'high', 'medium', 'med'];
     var middleSeq = [];
     var prev = firstLow ? 'low' : null;
     
     for (var i = 0; i < total; i++) {
       var best = null, bestScore = -Infinity;
       var progress = (i + 1) / total;
-      ['high', 'medium', 'low'].forEach(function(k){
+      ['high', 'medium', 'med', 'low'].forEach(function(k){
         if (remaining[k] <= 0) return;
         var score = progress * pools[k] - placed[k];
         if (k === prev) score -= 1.0;
@@ -102,32 +108,32 @@
     return seq;
   }
 
-  function curCounts(){ var c=state.config; return { high:c.high.count, medium:c.medium.count, low:c.low.count }; }
+  function curCounts(){ var c=state.config; return { high:c.high.count, medium:c.medium.count, med:c.med.count, low:c.low.count }; }
   function computeLen(targetSec, counts){
-    var R=RATIOS; var tr=counts.high*R.high+counts.medium*R.medium+counts.low*R.low;
-    if(tr===0) return {high:0,medium:0,low:0};
+    var R=RATIOS; var tr=counts.high*R.high+counts.medium*R.medium+counts.med*R.med+counts.low*R.low;
+    if(tr===0) return {high:0,medium:0,med:0,low:0};
     var u=targetSec/tr;
-    return { high:Math.max(1,Math.round(R.high*u)), medium:Math.max(1,Math.round(R.medium*u)), low:Math.max(1,Math.round(R.low*u)) };
+    return { high:Math.max(1,Math.round(R.high*u)), medium:Math.max(1,Math.round(R.medium*u)), med:Math.max(1,Math.round(R.med*u)), low:Math.max(1,Math.round(R.low*u)) };
   }
-  function minPresentLen(L, counts){ var mn=Infinity; ['high','medium','low'].forEach(function(k){ if(counts[k]>0) mn=Math.min(mn,L[k]); }); return mn; }
+  function minPresentLen(L, counts){ var mn=Infinity; ['high','medium','med','low'].forEach(function(k){ if(counts[k]>0) mn=Math.min(mn,L[k]); }); return mn; }
   function canAdd(k){ if(state.config[k].count>=12) return false; var counts=curCounts(); counts[k]++; var L=computeLen(state.targetMin*60,counts); return minPresentLen(L,counts)>=MINLEN; }
   function canSetTarget(targetSec){ var counts=curCounts(); var L=computeLen(targetSec,counts); return minPresentLen(L,counts)>=MINLEN; }
-  function buildPreview(){ var counts=curCounts(); var L=computeLen(state.targetMin*60,counts); return arrange(counts.high,counts.medium,counts.low).map(function(k){ return {intensity:k,len:L[k]}; }); }
+  function buildPreview(){ var counts=curCounts(); var L=computeLen(state.targetMin*60,counts); return arrange(counts.high,counts.medium,counts.med,counts.low).map(function(k){ return {intensity:k,len:L[k]}; }); }
 
   function surprise(){
-    var tgt=state.targetMin*60; var kinds=['high','medium','low'];
-    var counts={high:0,medium:0,low:2}; var guard=0;
-    var want=5+Math.floor(Math.random()*6);
-    while((counts.high+counts.medium+counts.low)<want && guard<300){
+    var tgt=state.targetMin*60; var kinds=['high','medium','med','low'];
+    var counts={high:0,medium:0,med:0,low:2}; var guard=0;
+    var want=6+Math.floor(Math.random()*6);
+    while((counts.high+counts.medium+counts.med+counts.low)<want && guard<300){
       guard++;
-      var k=kinds[Math.floor(Math.random()*3)];
+      var k=kinds[Math.floor(Math.random()*4)];
       if(counts[k]>=12) continue;
-      var test={high:counts.high,medium:counts.medium,low:counts.low}; test[k]++;
+      var test={high:counts.high,medium:counts.medium,med:counts.med,low:counts.low}; test[k]++;
       var L=computeLen(tgt,test);
       if(minPresentLen(L,test)>=MINLEN){ counts=test; } else break;
     }
-    if(counts.high+counts.medium+counts.low===0){ counts.low=2; }
-    state.config.high.count=counts.high; state.config.medium.count=counts.medium; state.config.low.count=counts.low;
+    if(counts.high+counts.medium+counts.med+counts.low===0){ counts.low=2; }
+    state.config.high.count=counts.high; state.config.medium.count=counts.medium; state.config.med.count=counts.med; state.config.low.count=counts.low;
     render();
   }
 
@@ -151,7 +157,7 @@
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.start(t); o.stop(t+dur+0.03);
   }
-  function transitionBeep(k){ var f = k==='high'?740 : k==='medium'?580 : 460; beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
+  function transitionBeep(k){ var f = k==='high'?740 : k==='medium'?640 : k==='med'?540 : 440; beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
   function countBeep(){ if(!COUNTDOWN_BEEPS) return; beep(430,0.06,0.05); }
   function completeBeep(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ beep(f,0.18,0.07); }, i*150); }); }
 
@@ -204,6 +210,7 @@
     incTarget: function(){ changeTarget(1); }, decTarget: function(){ changeTarget(-1); },
     incHc: function(){ change('high','count',1); }, decHc: function(){ change('high','count',-1); },
     incMc: function(){ change('medium','count',1); }, decMc: function(){ change('medium','count',-1); },
+    incMdc: function(){ change('med','count',1); }, decMdc: function(){ change('med','count',-1); },
     incLc: function(){ change('low','count',1); }, decLc: function(){ change('low','count',-1); },
   };
 
@@ -272,15 +279,15 @@
       previewSegs:previewSegs, segViews:segViews,
       setupTotalText:fmt(pt), setupCount:useSeq.length,
       targetText:fmt(state.targetMin*60),
-      hrate:c.high.rate, mrate:c.medium.rate, lrate:c.low.rate,
+      hrate:c.high.rate, mrate:c.medium.rate, mdrate:c.med.rate, lrate:c.low.rate,
       elapsedText:fmt(state.elapsed), totalText:fmt(total),
       overallPctText: overallPct+'%',
       pauseLabel: state.mode==='paused'?'Resume':'Pause',
       phaseLabel:phaseLabel, phaseFill:phaseFill, phaseInk:phaseInk, phaseRemain:phaseRemain, phaseHeight:phaseHeight, phaseIdx:phaseIdx, nextLabel:nextLabel, nextInk:nextInk, phaseStrokes:phaseStrokes,
-      hc:c.high.count, mc:c.medium.count, lc:c.low.count,
-      hlenText:lenT('high'), mlenText:lenT('medium'), llenText:lenT('low'),
-      hsub:subT('high'), msub:subT('medium'), lsub:subT('low'),
-      addHDisabled: !canAdd('high'), addMDisabled: !canAdd('medium'), addLDisabled: !canAdd('low'),
+      hc:c.high.count, mc:c.medium.count, mdc:c.med.count, lc:c.low.count,
+      hlenText:lenT('high'), mlenText:lenT('medium'), mdlenText:lenT('med'), llenText:lenT('low'),
+      hsub:subT('high'), msub:subT('medium'), mdsub:subT('med'), lsub:subT('low'),
+      addHDisabled: !canAdd('high'), addMDisabled: !canAdd('medium'), addMdDisabled: !canAdd('med'), addLDisabled: !canAdd('low'),
       decTargetDisabled: !(state.targetMin>10 && canSetTarget((state.targetMin-5)*60)), incTargetDisabled: !(state.targetMin<90),
     };
   }
@@ -442,6 +449,7 @@
           '</div>'+
           intensityCard('Extreme','oklch(0.71 0.145 27)','oklch(0.45 0.15 27)','oklch(0.93 0.05 27)',v.hrate,v.hc,v.hsub,'decHc','incHc',v.addHDisabled,v.hlenText)+
           intensityCard('Hard','oklch(0.83 0.12 82)','oklch(0.52 0.12 70)','oklch(0.93 0.06 82)',v.mrate,v.mc,v.msub,'decMc','incMc',v.addMDisabled,v.mlenText)+
+          intensityCard('Medium','oklch(0.78 0.09 190)','oklch(0.48 0.09 190)','oklch(0.93 0.05 190)',v.mdrate,v.mdc,v.mdsub,'decMdc','incMdc',v.addMdDisabled,v.mdlenText)+
           intensityCard('Low','oklch(0.80 0.095 158)','oklch(0.46 0.09 160)','oklch(0.93 0.05 158)',v.lrate,v.lc,v.lsub,'decLc','incLc',v.addLDisabled,v.llenText)+
         '</div>'+
         '<div style="margin-top:auto;padding-top:26px;font-size:13px;color:oklch(0.6 0.012 70);letter-spacing:0.02em;">'+

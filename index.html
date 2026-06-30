@@ -24,7 +24,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
   html, body {
-    background-color: var(--bg-dark);
+    background-color: transparent;
     color: var(--text-primary);
     font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -771,9 +771,78 @@
       padding: 30px 20px;
     }
   }
+
+  /* Frosted Moving Water Backdrop */
+  .water-bg-container {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    background: oklch(0.98 0.01 230);
+  }
+  .water-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+    animation: drift 20s infinite ease-in-out alternate;
+  }
+  .blob-1 {
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(circle, oklch(0.91 0.04 225) 0%, rgba(255,255,255,0) 70%);
+    top: -20vh;
+    left: -10vw;
+    animation-duration: 25s;
+  }
+  .blob-2 {
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, oklch(0.93 0.03 245) 0%, rgba(255,255,255,0) 70%);
+    bottom: -10vh;
+    right: -10vw;
+    animation-duration: 30s;
+    animation-delay: -5s;
+  }
+  .blob-3 {
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, oklch(0.89 0.05 205) 0%, rgba(255,255,255,0) 70%);
+    top: 30vh;
+    left: 40vw;
+    animation-duration: 22s;
+    animation-delay: -10s;
+  }
+  .water-frosted-overlay {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(100px) saturate(110%);
+    background: oklch(0.975 0.016 230 / 0.65);
+  }
+
+  @keyframes drift {
+    0% {
+      transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    50% {
+      transform: translate(8vw, 5vh) scale(1.15) rotate(180deg);
+    }
+    100% {
+      transform: translate(-5vw, -8vh) scale(0.9) rotate(360deg);
+    }
+  }
 </style>
 </head>
 <body>
+
+<div class="water-bg-container">
+  <div class="water-blob blob-1"></div>
+  <div class="water-blob blob-2"></div>
+  <div class="water-blob blob-3"></div>
+  <div class="water-frosted-overlay"></div>
+</div>
 
 <div class="grid-overlay"></div>
 

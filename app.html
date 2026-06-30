@@ -160,6 +160,22 @@
     opacity: 1;
     transform: translateY(0);
   }
+  .timeline-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .timeline-card.dragging {
+    opacity: 0.4;
+    border: 2px dashed oklch(0.7 0.02 230) !important;
+    background: oklch(0.97 0.01 230) !important;
+    transform: scale(0.98);
+  }
+  .timeline-cards-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  .timeline-cards-container::-webkit-scrollbar-thumb {
+    background: oklch(0.85 0.016 230);
+    border-radius: 4px;
+  }
 </style>
 </head>
 <body>
@@ -169,6 +185,8 @@
 <script>
 (function(){
   "use strict";
+
+  var app = document.getElementById('app');
 
   var COLORS = {
     high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  tint:'oklch(0.93 0.05 27)',  ink:'oklch(0.45 0.15 27)' },
@@ -193,6 +211,9 @@
     elapsed: 0, baseElapsed: 0, runStart: 0,
     sequence: [], ends: [], totalDuration: 0,
     lastSegIndex: -1, lastCountTick: null, raf: null, actx: null,
+    advancedSequence: [],
+    advancedEdited: false,
+    isAdvancedWorkout: false,
   };
 
   function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), ss=s%60; return m+':'+String(ss).padStart(2,'0'); }
@@ -360,7 +381,17 @@
   }
 
   function build(){
-    state.sequence=buildPreview();
+    if (state.isAdvancedWorkout) {
+      state.sequence = state.advancedSequence.map(function(s){
+        return {
+          intensity: s.intensity,
+          len: s.len,
+          rate: s.rate
+        };
+      });
+    } else {
+      state.sequence = buildPreview();
+    }
     var t=0;
     state.ends=state.sequence.map(function(s){ t+=s.len; return t; });
     state.totalDuration=t;
@@ -386,12 +417,20 @@
   function segIndexAt(e){ for(var i=0;i<state.ends.length;i++){ if(e<state.ends[i]) return i; } return state.ends.length-1; }
   function segStart(i){ return i===0?0:state.ends[i-1]; }
 
-  function start(){
+  function runWorkout(){
     build(); if(state.sequence.length===0) return;
     ensureAudio();
     state.mode='running'; state.elapsed=0; state.baseElapsed=0; state.runStart=performance.now();
     state.lastSegIndex=-1; state.lastCountTick=null;
     loop(); render();
+  }
+  function start(){
+    state.isAdvancedWorkout = false;
+    runWorkout();
+  }
+  function startAdvanced(){
+    state.isAdvancedWorkout = true;
+    runWorkout();
   }
   function loop(){ if(state.raf) cancelAnimationFrame(state.raf); state.raf=requestAnimationFrame(tick); }
   function tick(){
@@ -417,11 +456,99 @@
     if(state.mode==='running') loop();
     render();
   }
-  function stop(){ state.mode='setup'; if(state.raf) cancelAnimationFrame(state.raf); state.elapsed=0; state.baseElapsed=0; render(); }
+  function stop(){
+    state.mode = state.isAdvancedWorkout ? 'advance' : 'setup';
+    if(state.raf) cancelAnimationFrame(state.raf);
+    state.elapsed=0;
+    state.baseElapsed=0;
+    render();
+  }
   function finish(){ state.mode='done'; state.elapsed=state.totalDuration; if(state.raf) cancelAnimationFrame(state.raf); completeBeep(); render(); }
-  function restart(){ start(); }
+  function restart(){ runWorkout(); }
   function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } render(); }
   function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; render(); }
+
+  function goToAdvance() {
+    state.mode = 'advance';
+    if (!state.advancedSequence || state.advancedSequence.length === 0 || !state.advancedEdited) {
+      var preview = buildPreview();
+      state.advancedSequence = preview.map(function(s){
+        return {
+          intensity: s.intensity,
+          len: s.len,
+          rate: state.config[s.intensity].rate
+        };
+      });
+      state.advancedEdited = false;
+    }
+    render();
+  }
+
+  function exitAdvance() {
+    state.mode = 'setup';
+    render();
+  }
+
+  function resetAdvance() {
+    if (confirm('Are you sure you want to reset the timeline to the current setup configuration?')) {
+      var preview = buildPreview();
+      state.advancedSequence = preview.map(function(s){
+        return {
+          intensity: s.intensity,
+          len: s.len,
+          rate: state.config[s.intensity].rate
+        };
+      });
+      state.advancedEdited = false;
+      render();
+    }
+  }
+
+  function addAdvancedBlock(intensity) {
+    var defaultLens = { high: 45, medium: 90, med: 105, low: 120 };
+    var len = defaultLens[intensity] || 60;
+    var rate = state.config[intensity] ? state.config[intensity].rate : 24;
+    state.advancedSequence.push({
+      intensity: intensity,
+      len: len,
+      rate: rate
+    });
+    state.advancedEdited = true;
+    render();
+  }
+
+  function deleteAdvancedBlock(idx) {
+    state.advancedSequence.splice(idx, 1);
+    state.advancedEdited = true;
+    render();
+  }
+
+  function changeAdvancedRate(idx, delta) {
+    var block = state.advancedSequence[idx];
+    if (!block) return;
+    block.rate = Math.max(10, Math.min(60, block.rate + delta));
+    state.advancedEdited = true;
+    render();
+  }
+
+  function changeAdvancedDur(idx, delta) {
+    var block = state.advancedSequence[idx];
+    if (!block) return;
+    block.len = Math.max(MINLEN, Math.min(900, block.len + delta));
+    state.advancedEdited = true;
+    render();
+  }
+
+  function moveAdvancedBlock(idx, direction) {
+    var seq = state.advancedSequence;
+    var newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= seq.length) return;
+    var temp = seq[idx];
+    seq[idx] = seq[newIdx];
+    seq[newIdx] = temp;
+    state.advancedEdited = true;
+    render();
+  }
 
   function showToast(message) {
     var toast = document.getElementById('toast');
@@ -566,12 +693,87 @@
     uploadConfigBtn: triggerUpload,
   };
 
-  var app = document.getElementById('app');
   app.addEventListener('pointerdown', function(e){
     var el = e.target.closest('[data-act]');
     if(!el) return;
-    var fn = ACTIONS[el.getAttribute('data-act')];
-    if(fn) fn();
+    var act = el.getAttribute('data-act');
+    var idx = el.getAttribute('data-idx');
+    if (idx !== null) {
+      idx = parseInt(idx, 10);
+    }
+
+    if (act === 'advance') {
+      goToAdvance();
+    } else if (act === 'exitAdvance') {
+      exitAdvance();
+    } else if (act === 'resetAdvance') {
+      resetAdvance();
+    } else if (act === 'addBlock') {
+      var intensity = el.getAttribute('data-intensity');
+      addAdvancedBlock(intensity);
+    } else if (act === 'deleteBlock') {
+      deleteAdvancedBlock(idx);
+    } else if (act === 'incRate') {
+      changeAdvancedRate(idx, 1);
+    } else if (act === 'decRate') {
+      changeAdvancedRate(idx, -1);
+    } else if (act === 'incDur') {
+      changeAdvancedDur(idx, 15);
+    } else if (act === 'decDur') {
+      changeAdvancedDur(idx, -15);
+    } else if (act === 'moveUp') {
+      moveAdvancedBlock(idx, -1);
+    } else if (act === 'moveDown') {
+      moveAdvancedBlock(idx, 1);
+    } else if (act === 'startAdvanced') {
+      startAdvanced();
+    } else {
+      var fn = ACTIONS[act];
+      if(fn) fn();
+    }
+  });
+
+  app.addEventListener('dragstart', function(e){
+    var card = e.target.closest('.timeline-card');
+    if (!card) return;
+    e.dataTransfer.setData('text/plain', card.getAttribute('data-index'));
+    card.classList.add('dragging');
+  });
+
+  app.addEventListener('dragover', function(e){
+    var card = e.target.closest('.timeline-card');
+    var dragging = app.querySelector('.dragging');
+    if (!card || !dragging || card === dragging) return;
+
+    e.preventDefault();
+
+    var rect = card.getBoundingClientRect();
+    var next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+    var parent = card.parentNode;
+    parent.insertBefore(dragging, next ? card.nextSibling : card);
+  });
+
+  app.addEventListener('drop', function(e){
+    var dragging = app.querySelector('.dragging');
+    if (!dragging) return;
+    e.preventDefault();
+
+    var cards = app.querySelectorAll('.timeline-card');
+    var newSeq = [];
+    cards.forEach(function(c){
+      var idx = parseInt(c.getAttribute('data-index'), 10);
+      newSeq.push(state.advancedSequence[idx]);
+    });
+    state.advancedSequence = newSeq;
+    state.advancedEdited = true;
+    render();
+  });
+
+  app.addEventListener('dragend', function(e){
+    var dragging = app.querySelector('.dragging');
+    if (dragging) {
+      dragging.classList.remove('dragging');
+    }
   });
 
   function esc(s){ return String(s); }
@@ -580,15 +782,16 @@
     var c=state.config, CO=COLORS;
     var isSetup=state.mode==='setup', isDone=state.mode==='done';
     var isActive=state.mode==='running'||state.mode==='paused';
+    var isAdvance=state.mode==='advance';
 
-    var prev=buildPreview();
+    var prev=isAdvance ? state.advancedSequence : buildPreview();
     var pt=0; var previewSegs=prev.map(function(s){ pt+=s.len; return {flex:s.len, color:CO[s.intensity].fill}; });
     var tgt=state.targetMin*60; var counts=curCounts(); var L=computeLen(tgt,counts);
     var lenT=function(k){ return counts[k]? fmt(L[k]) : '-'; };
     var subT=function(k){ return counts[k]? counts[k]+' × '+fmt(L[k]) : 'none'; };
 
-    var useSeq = isSetup?prev:state.sequence;
-    var acc=0; var ends = isSetup? useSeq.map(function(s){acc+=s.len;return acc;}) : state.ends;
+    var useSeq = (isSetup || isAdvance)?prev:state.sequence;
+    var acc=0; var ends = (isSetup || isAdvance)? useSeq.map(function(s){acc+=s.len;return acc;}) : state.ends;
     var curIdx = isActive? segIndexAt(state.elapsed) : (isDone? useSeq.length-1 : -1);
 
     var segViews = useSeq.map(function(s,i){
@@ -618,15 +821,15 @@
       phaseLabel=co.name; phaseFill=co.fill; phaseInk=co.ink;
       phaseRemain=fmt(Math.ceil(remain)); phaseHeight=(frac*100)+'%';
       phaseIdx=(curIdx+1)+' / '+state.sequence.length;
-      phaseStrokes=String(c[s.intensity].rate);
+      phaseStrokes=String(s.rate !== undefined ? s.rate : c[s.intensity].rate);
       nextLabel = nx?CO[nx.intensity].name:'FINISH'; nextInk = nx?CO[nx.intensity].ink:CO.low.ink;
     }
 
-    var total = isSetup?pt:state.totalDuration;
+    var total = (isSetup || isAdvance)?pt:state.totalDuration;
     var overallPct = (isActive||isDone)&&total? Math.max(0,Math.min(100,(state.elapsed/total)*100)) : 0;
 
     return {
-      isSetup:isSetup, isActive:isActive, isDone:isDone, showList:isActive||isDone,
+      isSetup:isSetup, isActive:isActive, isDone:isDone, showList:isActive||isDone, isAdvance:isAdvance,
       canStart: prev.length>0, cannotStart: prev.length===0,
       previewSegs:previewSegs, segViews:segViews,
       setupTotalText:fmt(pt), setupCount:useSeq.length,
@@ -681,6 +884,120 @@
   }
 
   function renderLeft(v){
+    if(v.isAdvance){
+      var cardsHtml = "";
+      if (state.advancedSequence.length === 0) {
+        cardsHtml = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:220px; border: 2px dashed oklch(0.87 0.012 85); border-radius:18px; color: oklch(0.5 0.012 70); font-size:15px; text-align:center; padding: 20px; background:oklch(1 0 0);">'+
+          '<div style="font-size:32px; margin-bottom:12px;">⏱️</div>'+
+          '<div style="font-weight:600; font-size:16px;">No intervals added yet.</div>'+
+          '<div style="font-size:13px; color:oklch(0.6 0.012 70); margin-top:4px;">Click the buttons below to build your custom plan!</div>'+
+        '</div>';
+      } else {
+        cardsHtml = state.advancedSequence.map(function(s, idx){
+          var co = COLORS[s.intensity];
+          return ''+
+          '<div class="timeline-card" data-index="'+idx+'" draggable="true" style="display:flex; align-items:center; gap:16px; border:1px solid oklch(0.9 0.006 85); border-radius:14px; padding:12px 18px; background:oklch(1 0 0); margin-bottom:8px; cursor:grab; transition:transform 0.2s, box-shadow: 0.2s;">'+
+            '<div style="cursor:grab; color:oklch(0.6 0.012 70); font-size:18px; user-select:none;">⋮⋮</div>'+
+            '<span style="width:12px; height:12px; border-radius:50%; background:'+co.fill+'; flex-shrink:0;"></span>'+
+            '<div style="flex:1; display:flex; flex-direction:column; gap:2px;">'+
+              '<span style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:'+co.ink+';">'+co.name+'</span>'+
+            '</div>'+
+            
+            '<div style="display:flex; align-items:center; gap:6px; background:oklch(0.975 0.012 85); padding:4px 8px; border-radius:10px; border:1px solid oklch(0.91 0.012 85);">'+
+              '<span style="font-size:12px; color:oklch(0.5 0.012 70); font-weight:600;">Rate:</span>'+
+              '<button data-act="decRate" data-idx="'+idx+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">−</button>'+
+              '<span style="font-family:\'Space Grotesk\'; font-size:14px; font-weight:600; min-width:20px; text-align:center; color:oklch(0.3 0.012 70);">'+s.rate+'</span>'+
+              '<button data-act="incRate" data-idx="'+idx+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">+</button>'+
+            '</div>'+
+
+            '<div style="display:flex; align-items:center; gap:6px; background:oklch(0.975 0.012 85); padding:4px 8px; border-radius:10px; border:1px solid oklch(0.91 0.012 85);">'+
+              '<span style="font-size:12px; color:oklch(0.5 0.012 70); font-weight:600;">Dur:</span>'+
+              '<button data-act="decDur" data-idx="'+idx+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">−</button>'+
+              '<span style="font-family:\'Space Grotesk\'; font-size:14px; font-weight:600; min-width:44px; text-align:center; color:oklch(0.3 0.012 70);">'+fmt(s.len)+'</span>'+
+              '<button data-act="incDur" data-idx="'+idx+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">+</button>'+
+            '</div>'+
+
+            '<div style="display:flex; gap:4px;">'+
+              '<button data-act="moveUp" data-idx="'+idx+'" style="border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▲</button>'+
+              '<button data-act="moveDown" data-idx="'+idx+'" style="border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▼</button>'+
+            '</div>'+
+
+            '<button data-act="deleteBlock" data-idx="'+idx+'" style="border:none; background:transparent; cursor:pointer; font-size:16px; color:oklch(0.6 0.1 27); padding:4px; display:flex; align-items:center; justify-content:center; margin-left:8px;" title="Delete Block">🗑️</button>'+
+          '</div>';
+        }).join('');
+      }
+
+      var advTotal = 0;
+      state.advancedSequence.forEach(function(s){ advTotal += s.len; });
+
+      var timelineSegmentsHtml = state.advancedSequence.map(function(s){
+        var co = COLORS[s.intensity];
+        return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px;"></div>';
+      }).join('');
+
+      return ''+
+      '<div class="left-container" style="padding: 32px 40px; background: oklch(0.975 0.016 230); position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between;">'+
+        '<div>'+
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid oklch(0.9 0.016 230); padding-bottom:16px;">'+
+            '<div>'+
+              '<div style="font-family:\'Space Grotesk\'; font-weight:600; font-size:18px; letter-spacing:0.12em; color:oklch(0.5 0.022 255);">ADVANCED TIMELINE EDITOR</div>'+
+              '<div style="font-size:14px; color:oklch(0.55 0.012 70); margin-top:4px;">Customize intervals, drag blocks to rearrange, or tune stroke rates.</div>'+
+            '</div>'+
+            '<div style="display:flex; gap:10px;">'+
+              '<button data-act="resetAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
+                '<span>🔄</span>Reset'+
+              '</button>'+
+              '<button data-act="exitAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
+                '<span>←</span>Back'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
+
+          '<div style="background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:16px; padding:18px 24px; margin-bottom:20px; display:flex; flex-direction:column; gap:12px;">'+
+            '<div style="display:flex; justify-content:space-between; align-items:baseline;">'+
+              '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
+              '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
+                fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
+              '</div>'+
+            '</div>'+
+            '<div style="display:flex; gap:3px; height:18px; border-radius:6px; overflow:hidden; background:oklch(0.95 0.012 85); width:100%;">'+
+              (state.advancedSequence.length > 0 ? timelineSegmentsHtml : '<div style="flex:1; background:oklch(0.93 0.01 85);"></div>')+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div style="flex:1; overflow-y:auto; margin-bottom:20px; padding-right:6px;" class="timeline-cards-container">'+
+          cardsHtml+
+        '</div>'+
+
+        '<div style="border-top:1px solid oklch(0.9 0.016 230); padding-top:20px; display:flex; flex-direction:column; gap:16px;">'+
+          '<div>'+
+            '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:10px; font-weight:600;">Add custom interval block</div>'+
+            '<div style="display:flex; gap:10px; flex-wrap:wrap;">'+
+              '<button data-act="addBlock" data-intensity="high" class="btn-surprise" style="cursor:pointer; border:1px solid oklch(0.8 0.05 27 / 0.3); background:oklch(0.93 0.05 27); color:oklch(0.45 0.15 27); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
+                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.71 0.145 27);"></span>+ Extreme'+
+              '</button>'+
+              '<button data-act="addBlock" data-intensity="medium" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.83 0.12 82 / 0.3); background:oklch(0.93 0.06 82); color:oklch(0.52 0.12 70); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
+                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.83 0.12 82);"></span>+ Hard'+
+              '</button>'+
+              '<button data-act="addBlock" data-intensity="med" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.78 0.09 190 / 0.3); background:oklch(0.93 0.05 190); color:oklch(0.48 0.09 190); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
+                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.78 0.09 190);"></span>+ Medium'+
+              '</button>'+
+              '<button data-act="addBlock" data-intensity="low" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.80 0.095 158 / 0.3); background:oklch(0.93 0.05 158); color:oklch(0.46 0.09 160); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
+                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.80 0.095 158);"></span>+ Low'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
+
+          '<div style="display:flex; justify-content:space-between; align-items:center;">'+
+            '<button data-act="startAdvanced" class="btn-start" style="display:flex; align-items:center; gap:16px; border:none; cursor:pointer; color:oklch(0.97 0.006 85); padding:18px 36px; border-radius:14px; font-size:18px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; animation:breathe 4.5s ease-in-out infinite;">'+
+              '<span style="width:9px; height:9px; border-radius:50%; background:oklch(0.8 0.095 158);"></span>'+
+              'Start session'+
+            '</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }
     if(v.isSetup){
       return ''+
       '<div class="left-container">'+
@@ -827,6 +1144,9 @@
             '<button data-act="downloadConfig" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
               '<span>💾</span>Export interval plan'+
             '</button>'+
+            '<button data-act="advance" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
+              '<span>⚡</span>Advance'+
+            '</button>'+
           '</div>'+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:14px;margin-top:34px;">'+
@@ -875,9 +1195,15 @@
 
   function render(){
     var v = renderVals();
+    var leftStyle = "";
+    var rightStyle = "";
+    if (state.mode === 'advance') {
+      leftStyle = ' style="flex: 1; border-right: none;"';
+      rightStyle = ' style="display: none;"';
+    }
     app.innerHTML =
-      '<div class="app-left">'+renderLeft(v)+'</div>'+
-      '<div class="app-right">'+renderRight(v)+'</div>';
+      '<div class="app-left"' + leftStyle + '>'+renderLeft(v)+'</div>'+
+      '<div class="app-right"' + rightStyle + '>'+renderRight(v)+'</div>';
   }
 
   render();

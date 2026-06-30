@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CrewCall — Interval Rowing Coach</title>
+<title>CrewCall - Interval Rowing Coach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -34,9 +34,9 @@
   "use strict";
 
   var COLORS = {
-    high:   { name:'HIGH',   fill:'oklch(0.71 0.145 27)',  tint:'oklch(0.93 0.05 27)',  ink:'oklch(0.45 0.15 27)' },
-    medium: { name:'MEDIUM', fill:'oklch(0.83 0.12 82)',   tint:'oklch(0.93 0.06 82)',  ink:'oklch(0.52 0.12 70)' },
-    low:    { name:'LOW',    fill:'oklch(0.80 0.095 158)', tint:'oklch(0.93 0.05 158)', ink:'oklch(0.46 0.09 160)' },
+    high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  tint:'oklch(0.93 0.05 27)',  ink:'oklch(0.45 0.15 27)' },
+    medium: { name:'HARD',    fill:'oklch(0.83 0.12 82)',   tint:'oklch(0.93 0.06 82)',  ink:'oklch(0.52 0.12 70)' },
+    low:    { name:'LOW',     fill:'oklch(0.80 0.095 158)', tint:'oklch(0.93 0.05 158)', ink:'oklch(0.46 0.09 160)' },
   };
   var RATIOS = { high:2, medium:3, low:4 };
   var MINLEN = 15;
@@ -55,25 +55,50 @@
   function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), ss=s%60; return m+':'+String(ss).padStart(2,'0'); }
 
   function arrange(h,m,l){
-    var pools={ high:h, medium:m, low:l };
-    var total=h+m+l;
-    if(total===0) return [];
-    var remaining={high:pools.high,medium:pools.medium,low:pools.low}, placed={high:0,medium:0,low:0};
-    var order=['low','medium','high','medium']; // cycle bias: low -> medium -> high -> medium ...
-    var seq=[]; var prev=null;
-    for(var i=0;i<total;i++){
-      var best=null, bestScore=-Infinity;
-      if(i===0){ best = remaining.low>0 ? 'low' : (remaining.medium>0 ? 'medium' : 'high'); seq.push(best); remaining[best]--; placed[best]++; prev=best; continue; }
-      var progress=(i+1)/total;
-      ['high','medium','low'].forEach(function(k){
-        if(remaining[k]<=0) return;
-        var score = progress*pools[k] - placed[k];
-        if(k===prev) score -= 1.0;            // strongly avoid back-to-back repeats
-        score += order.indexOf(k)*0.0001;     // tiny tie-break toward low->med->high feel
-        if(score>bestScore){ bestScore=score; best=k; }
-      });
-      seq.push(best); remaining[best]--; placed[best]++; prev=best;
+    var firstLow = false;
+    var lastLow = false;
+    var remL = l;
+    
+    if (remL > 0) {
+      firstLow = true;
+      remL--;
     }
+    if (remL > 0) {
+      lastLow = true;
+      remL--;
+    }
+    
+    var pools = { high: h, medium: m, low: remL };
+    var total = h + m + remL;
+    var remaining = { high: pools.high, medium: pools.medium, low: pools.low };
+    var placed = { high: 0, medium: 0, low: 0 };
+    var order = ['low', 'medium', 'high', 'medium'];
+    var middleSeq = [];
+    var prev = firstLow ? 'low' : null;
+    
+    for (var i = 0; i < total; i++) {
+      var best = null, bestScore = -Infinity;
+      var progress = (i + 1) / total;
+      ['high', 'medium', 'low'].forEach(function(k){
+        if (remaining[k] <= 0) return;
+        var score = progress * pools[k] - placed[k];
+        if (k === prev) score -= 1.0;
+        score += order.indexOf(k) * 0.0001;
+        if (score > bestScore) {
+          bestScore = score;
+          best = k;
+        }
+      });
+      middleSeq.push(best);
+      remaining[best]--;
+      placed[best]++;
+      prev = best;
+    }
+    
+    var seq = [];
+    if (firstLow) seq.push('low');
+    seq = seq.concat(middleSeq);
+    if (lastLow) seq.push('low');
     return seq;
   }
 
@@ -91,7 +116,7 @@
 
   function surprise(){
     var tgt=state.targetMin*60; var kinds=['high','medium','low'];
-    var counts={high:0,medium:0,low:0}; var guard=0;
+    var counts={high:0,medium:0,low:2}; var guard=0;
     var want=5+Math.floor(Math.random()*6);
     while((counts.high+counts.medium+counts.low)<want && guard<300){
       guard++;
@@ -101,7 +126,7 @@
       var L=computeLen(tgt,test);
       if(minPresentLen(L,test)>=MINLEN){ counts=test; } else break;
     }
-    if(counts.high+counts.medium+counts.low===0){ counts.low=1; }
+    if(counts.high+counts.medium+counts.low===0){ counts.low=2; }
     state.config.high.count=counts.high; state.config.medium.count=counts.medium; state.config.low.count=counts.low;
     render();
   }
@@ -200,7 +225,7 @@
     var prev=buildPreview();
     var pt=0; var previewSegs=prev.map(function(s){ pt+=s.len; return {flex:s.len, color:CO[s.intensity].fill}; });
     var tgt=state.targetMin*60; var counts=curCounts(); var L=computeLen(tgt,counts);
-    var lenT=function(k){ return counts[k]? fmt(L[k]) : '—'; };
+    var lenT=function(k){ return counts[k]? fmt(L[k]) : '-'; };
     var subT=function(k){ return counts[k]? counts[k]+' × '+fmt(L[k]) : 'none'; };
 
     var useSeq = isSetup?prev:state.sequence;
@@ -415,12 +440,12 @@
               stepperBtn('incTarget', v.incTargetDisabled, false, '+')+
             '</div>'+
           '</div>'+
-          intensityCard('High','oklch(0.71 0.145 27)','oklch(0.45 0.15 27)','oklch(0.93 0.05 27)',v.hrate,v.hc,v.hsub,'decHc','incHc',v.addHDisabled,v.hlenText)+
-          intensityCard('Medium','oklch(0.83 0.12 82)','oklch(0.52 0.12 70)','oklch(0.93 0.06 82)',v.mrate,v.mc,v.msub,'decMc','incMc',v.addMDisabled,v.mlenText)+
+          intensityCard('Extreme','oklch(0.71 0.145 27)','oklch(0.45 0.15 27)','oklch(0.93 0.05 27)',v.hrate,v.hc,v.hsub,'decHc','incHc',v.addHDisabled,v.hlenText)+
+          intensityCard('Hard','oklch(0.83 0.12 82)','oklch(0.52 0.12 70)','oklch(0.93 0.06 82)',v.mrate,v.mc,v.msub,'decMc','incMc',v.addMDisabled,v.mlenText)+
           intensityCard('Low','oklch(0.80 0.095 158)','oklch(0.46 0.09 160)','oklch(0.93 0.05 158)',v.lrate,v.lc,v.lsub,'decLc','incLc',v.addLDisabled,v.llenText)+
         '</div>'+
         '<div style="margin-top:auto;padding-top:26px;font-size:13px;color:oklch(0.6 0.012 70);letter-spacing:0.02em;">'+
-          'Session length is fixed. Add or remove intervals and each one’s length adjusts to fit — the more you stack, the shorter each gets. “Surprise me” builds a balanced session for you.'+
+          'Session length is fixed. Add or remove intervals and each one’s length adjusts to fit, so the more you stack, the shorter each gets. “Surprise me” builds a balanced session for you.'+
         '</div>'+
       '</div>';
     }

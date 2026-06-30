@@ -963,7 +963,7 @@
       }).join('');
 
       return ''+
-      '<div class="left-container" style="padding: 32px 40px; background: oklch(0.975 0.016 230); position: absolute; inset: 0; display: flex; flex-direction: column; overflow-y: auto;">'+
+      '<div class="left-container" style="padding: 32px 40px; background: oklch(0.975 0.016 230); position: relative; min-height: 100vh; display: flex; flex-direction: column;">'+
         '<div>'+
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid oklch(0.9 0.016 230); padding-bottom:16px;">'+
             '<div>'+
@@ -1233,6 +1233,11 @@
     if (state.mode === 'advance') {
       leftStyle = ' style="flex: 1; border-right: none;"';
       rightStyle = ' style="display: none;"';
+      app.style.height = 'auto';
+      app.style.overflow = 'visible';
+    } else {
+      app.style.height = '100vh';
+      app.style.overflow = 'hidden';
     }
     app.innerHTML =
       '<div class="app-left"' + leftStyle + '>'+renderLeft(v)+'</div>'+

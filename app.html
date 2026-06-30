@@ -29,6 +29,7 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid oklch(0.9 0.016 230);
+    transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   }
   .app-right {
     flex: 1;
@@ -36,6 +37,17 @@
     flex-direction: column;
     background: oklch(0.985 0.015 230);
     min-width: 0;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #app.mode-advance .app-left {
+    flex: 0 0 100%;
+    border-right: none;
+  }
+  #app.mode-advance .app-right {
+    flex: 0 0 0%;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
   }
   .left-container {
     position: absolute;
@@ -101,6 +113,9 @@
       flex: 0 0 auto;
       width: 100%;
       background: oklch(0.985 0.015 230);
+    }
+    #app.mode-advance .app-right {
+      display: none;
     }
     .left-container {
       position: relative;
@@ -179,7 +194,10 @@
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+  <div class="app-left"></div>
+  <div class="app-right"></div>
+</div>
 <input type="file" id="config-upload-input" accept=".json" style="display:none">
 
 <script>
@@ -1248,20 +1266,22 @@
 
   function render(){
     var v = renderVals();
-    var leftStyle = "";
-    var rightStyle = "";
+    
+    var leftEl = app.querySelector('.app-left');
+    var rightEl = app.querySelector('.app-right');
+
     if (state.mode === 'advance') {
-      leftStyle = ' style="flex: 1; border-right: none;"';
-      rightStyle = ' style="display: none;"';
+      app.classList.add('mode-advance');
       app.style.height = 'auto';
       app.style.overflow = 'visible';
     } else {
+      app.classList.remove('mode-advance');
       app.style.height = '100vh';
       app.style.overflow = 'hidden';
     }
-    app.innerHTML =
-      '<div class="app-left"' + leftStyle + '>'+renderLeft(v)+'</div>'+
-      '<div class="app-right"' + rightStyle + '>'+renderRight(v)+'</div>';
+
+    if (leftEl) leftEl.innerHTML = renderLeft(v);
+    if (rightEl) rightEl.innerHTML = renderRight(v);
   }
 
   render();

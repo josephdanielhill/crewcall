@@ -977,7 +977,7 @@
 
       var timelineSegmentsHtml = state.advancedSequence.map(function(s){
         var co = COLORS[s.intensity];
-        return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px; width:100%;"></div>';
+        return '<div style="flex:'+s.len+'; background:'+co.fill+'; border-radius:2px;"></div>';
       }).join('');
 
       var showWarning = false;
@@ -1005,77 +1005,82 @@
             '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
             '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
           '</div>'+
-          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid oklch(0.9 0.016 230); padding-bottom:16px;">'+
-            '<div>'+
-              '<div style="font-family:\'Space Grotesk\'; font-weight:600; font-size:18px; letter-spacing:0.12em; color:oklch(0.5 0.022 255);">ADVANCED TIMELINE EDITOR</div>'+
-              '<div style="font-size:14px; color:oklch(0.55 0.012 70); margin-top:4px;">Customize intervals, drag blocks to rearrange, or tune stroke rates.</div>'+
+          '<div style="margin-bottom: 24px; border-bottom:1px solid oklch(0.9 0.016 230); padding-bottom:16px;">'+
+            '<div style="font-family:\'Space Grotesk\'; font-weight:600; font-size:18px; letter-spacing:0.12em; color:oklch(0.5 0.022 255);">ADVANCED TIMELINE EDITOR</div>'+
+            '<div style="font-size:14px; color:oklch(0.55 0.012 70); margin-top:4px;">Customize intervals, drag blocks to rearrange, or tune stroke rates.</div>'+
+          '</div>'+
+
+          '<div style="background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:16px; padding:18px 24px; margin-bottom:24px; display:flex; flex-direction:column; gap:12px;">'+
+            '<div style="display:flex; justify-content:space-between; align-items:baseline;">'+
+              '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
+              '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
+                fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
+              '</div>'+
             '</div>'+
-            '<div style="display:flex; gap:10px; flex-wrap:wrap;">'+
-              '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
-                '<span>📂</span>Import'+
-              '</button>'+
-              '<button data-act="downloadConfig" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
-                '<span>💾</span>Export'+
-              '</button>'+
-              '<button data-act="resetAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
-                '<span>🔄</span>Reset'+
-              '</button>'+
-              '<button data-act="exitAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; white-space:nowrap;">'+
-                '<span>←</span>Back'+
-              '</button>'+
+            '<div style="display:flex; gap:3px; height:18px; border-radius:6px; overflow:hidden; background:oklch(0.95 0.012 85); width:100%;">'+
+              (state.advancedSequence.length > 0 ? timelineSegmentsHtml : '<div style="flex:1; background:oklch(0.93 0.01 85);"></div>')+
             '</div>'+
           '</div>'+
 
-          '<div style="background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:16px; padding:18px 24px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">'+
-            '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
-            '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
-              fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
-            '</div>'+
-          '</div>'+
-
-          '<div style="display:flex; gap:32px; align-items:stretch; margin-bottom:24px;">'+
-            '<!-- Vertical Proportional Timeline Bar -->'+
-            '<div style="width:24px; display:flex; flex-direction:column; gap:3px; border-radius:8px; overflow:hidden; background:oklch(0.95 0.012 85); flex-shrink:0; min-height:220px; border:1px solid oklch(0.9 0.016 230); padding:3px 2px;">'+
-              (state.advancedSequence.length > 0 ? timelineSegmentsHtml : '<div style="flex:1; background:oklch(0.93 0.01 85); border-radius:4px;"></div>')+
-            '</div>'+
-
-            '<!-- Right Cards Column -->'+
-            '<div style="flex:1; display:flex; flex-direction:column;">'+
+          '<div style="display:flex; gap:36px; align-items:flex-start;">'+
+            '<!-- Left Column: Cards List -->'+
+            '<div style="flex:1.4; display:flex; flex-direction:column;">'+
               warningHtml+
               '<div class="timeline-cards-container" style="display:flex; flex-direction:column; gap:8px;">'+
                 cardsHtml+
               '</div>'+
             '</div>'+
-          '</div>'+
-        '</div>'+
 
-        '<div style="border-top:1px solid oklch(0.9 0.016 230); padding-top:20px; display:flex; flex-direction:column; gap:16px; margin-top:auto;">'+
-          '<div>'+
-            '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:10px; font-weight:600;">Add custom interval block</div>'+
-            '<div style="display:flex; gap:10px; flex-wrap:wrap;">'+
-              '<button data-act="addBlock" data-intensity="high" class="btn-surprise" style="cursor:pointer; border:1px solid oklch(0.8 0.05 27 / 0.3); background:oklch(0.93 0.05 27); color:oklch(0.45 0.15 27); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
-                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.71 0.145 27);"></span>+ Extreme'+
-              '</button>'+
-              '<button data-act="addBlock" data-intensity="medium" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.83 0.12 82 / 0.3); background:oklch(0.93 0.06 82); color:oklch(0.52 0.12 70); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
-                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.83 0.12 82);"></span>+ Hard'+
-              '</button>'+
-              '<button data-act="addBlock" data-intensity="med" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.78 0.09 190 / 0.3); background:oklch(0.93 0.05 190); color:oklch(0.48 0.09 190); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
-                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.78 0.09 190);"></span>+ Medium'+
-              '</button>'+
-              '<button data-act="addBlock" data-intensity="low" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.80 0.095 158 / 0.3); background:oklch(0.93 0.05 158); color:oklch(0.46 0.09 160); padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">'+
-                '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.80 0.095 158);"></span>+ Low'+
-              '</button>'+
+            '<!-- Right Column: Control Panel -->'+
+            '<div style="flex:1; min-width:300px; max-width:360px; display:flex; flex-direction:column; gap:24px; background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:20px; padding:28px 24px; position:sticky; top:32px;">'+
+              '<!-- Section: Session Control -->'+
+              '<div>'+
+                '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:12px; font-weight:600;">Session Actions</div>'+
+                '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">'+
+                  '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">'+
+                    '<span>📂</span>Import'+
+                  '</button>'+
+                  '<button data-act="downloadConfig" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">'+
+                    '<span>💾</span>Export'+
+                  '</button>'+
+                  '<button data-act="resetAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">'+
+                    '<span>🔄</span>Reset'+
+                  '</button>'+
+                  '<button data-act="exitAdvance" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">'+
+                    '<span>←</span>Back'+
+                  '</button>'+
+                '</div>'+
+              '</div>'+
+
+              '<!-- Section: Add Blocks -->'+
+              '<div style="border-top:1px solid oklch(0.95 0.012 85); padding-top:20px;">'+
+                '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:12px; font-weight:600;">Add custom interval block</div>'+
+                '<div style="display:flex; flex-direction:column; gap:8px;">'+
+                  '<button data-act="addBlock" data-intensity="high" class="btn-surprise" style="cursor:pointer; border:1px solid oklch(0.8 0.05 27 / 0.3); background:oklch(0.93 0.05 27); color:oklch(0.45 0.15 27); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
+                    '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.71 0.145 27);"></span>+ Extreme'+
+                  '</button>'+
+                  '<button data-act="addBlock" data-intensity="medium" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.83 0.12 82 / 0.3); background:oklch(0.93 0.06 82); color:oklch(0.52 0.12 70); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
+                    '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.83 0.12 82);"></span>+ Hard'+
+                  '</button>'+
+                  '<button data-act="addBlock" data-intensity="med" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.78 0.09 190 / 0.3); background:oklch(0.93 0.05 190); color:oklch(0.48 0.09 190); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
+                    '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.78 0.09 190);"></span>+ Medium'+
+                  '</button>'+
+                  '<button data-act="addBlock" data-intensity="low" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.80 0.095 158 / 0.3); background:oklch(0.93 0.05 158); color:oklch(0.46 0.09 160); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
+                    '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.80 0.095 158);"></span>+ Low'+
+                  '</button>'+
+                '</div>'+
+              '</div>'+
+
+              '<!-- Section: Start Session -->'+
+              '<div style="border-top:1px solid oklch(0.95 0.012 85); padding-top:20px; margin-top:auto;">'+
+                '<button data-act="startAdvanced" class="btn-start" style="width:100%; display:flex; align-items:center; justify-content:center; gap:12px; border:none; cursor:pointer; color:oklch(0.97 0.006 85); padding:16px; border-radius:12px; font-size:16px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; animation:breathe 4.5s ease-in-out infinite;">'+
+                  '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.8 0.095 158);"></span>'+
+                  'Start session'+
+                '</button>'+
+              '</div>'+
             '</div>'+
           '</div>'+
-
-          '<div style="display:flex; justify-content:space-between; align-items:center;">'+
-            '<button data-act="startAdvanced" class="btn-start" style="display:flex; align-items:center; gap:16px; border:none; cursor:pointer; color:oklch(0.97 0.006 85); padding:18px 36px; border-radius:14px; font-size:18px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; animation:breathe 4.5s ease-in-out infinite;">'+
-              '<span style="width:9px; height:9px; border-radius:50%; background:oklch(0.8 0.095 158);"></span>'+
-              'Start session'+
-            '</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>';
+        '</div>';
     }
     if(v.isSetup){
       return ''+

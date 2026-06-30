@@ -46,6 +46,14 @@
     padding: 64px 60px;
     background: oklch(0.972 0.016 230);
   }
+  .active-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 32px 36px;
+  }
 
   .btn-start{background:#005B96;}
   .btn-start:hover{background:#004a7a;}
@@ -76,9 +84,26 @@
     .left-container {
       position: relative;
       inset: auto;
-      padding: 36px 20px;
+      padding: 48px 24px;
       gap: 30px;
-      min-height: 400px;
+      min-height: 440px;
+      align-items: center;
+      text-align: center;
+    }
+    .left-container > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    .active-inner {
+      position: relative;
+      inset: auto;
+      padding: 32px 20px;
+      gap: 32px;
+      min-height: 480px;
+      width: 100%;
+      align-items: stretch;
     }
   }
 </style>
@@ -425,7 +450,7 @@
       return ''+
       '<div class="left-container" style="background:oklch(0.965 0.016 230);overflow:hidden;">'+
         '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;"></div>'+
-        '<div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:24px 28px;">'+
+        '<div class="active-inner">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
             '<div style="display:flex;align-items:center;gap:14px;">'+
               '<span style="width:14px;height:14px;border-radius:50%;background:'+v.phaseInk+';"></span>'+

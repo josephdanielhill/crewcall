@@ -215,7 +215,7 @@
   };
 
   var app = document.getElementById('app');
-  app.addEventListener('click', function(e){
+  app.addEventListener('pointerdown', function(e){
     var el = e.target.closest('[data-act]');
     if(!el) return;
     var fn = ACTIONS[el.getAttribute('data-act')];

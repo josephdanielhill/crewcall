@@ -1285,7 +1285,9 @@
     }
 
     if (leftEl) leftEl.innerHTML = renderLeft(v);
-    if (rightEl) rightEl.innerHTML = renderRight(v);
+    if (state.mode !== 'advance' && rightEl) {
+      rightEl.innerHTML = renderRight(v);
+    }
   }
 
   render();

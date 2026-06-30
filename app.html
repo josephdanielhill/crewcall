@@ -139,10 +139,32 @@
       align-items: stretch;
     }
   }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: oklch(0.26 0.022 255);
+    color: oklch(0.97 0.006 85);
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px oklch(0.3 0.022 255 / 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
 </style>
 </head>
 <body>
 <div id="app"></div>
+<input type="file" id="config-upload-input" accept=".json" style="display:none">
 
 <script>
 (function(){
@@ -401,8 +423,135 @@
   function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } render(); }
   function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; render(); }
 
+  function showToast(message) {
+    var toast = document.getElementById('toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toast';
+      toast.className = 'toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.remove('show');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    if (state.toastTimeout) clearTimeout(state.toastTimeout);
+    state.toastTimeout = setTimeout(function(){
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  function downloadConfig(){
+    var configData = {
+      targetMin: state.targetMin,
+      config: {
+        high:   { count: state.config.high.count,   rate: state.config.high.rate },
+        medium: { count: state.config.medium.count, rate: state.config.medium.rate },
+        med:    { count: state.config.med.count,    rate: state.config.med.rate },
+        low:    { count: state.config.low.count,    rate: state.config.low.rate }
+      }
+    };
+    var json = JSON.stringify(configData, null, 2);
+    var blob = new Blob([json], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    
+    var totalIntervals = state.config.high.count + state.config.medium.count + state.config.med.count + state.config.low.count;
+    var filename = 'crewcall-' + state.targetMin + 'min-' + totalIntervals + 'intervals.json';
+    
+    link.download = filename;
+    link.href = url;
+    link.click();
+    
+    setTimeout(function(){
+      URL.revokeObjectURL(url);
+    }, 100);
+    
+    showToast('Configuration exported!');
+  }
+
+  function triggerUpload(){
+    var input = document.getElementById('config-upload-input');
+    if(input) {
+      input.value = '';
+      input.click();
+    }
+  }
+
+  function importConfig(data){
+    if (typeof data.targetMin !== 'number' || data.targetMin < 10 || data.targetMin > 90) {
+      alert('Invalid session length in configuration. Target time must be between 10 and 90 minutes.');
+      return;
+    }
+    if (!data.config || typeof data.config !== 'object') {
+      alert('Invalid configuration object.');
+      return;
+    }
+    
+    var keys = ['high', 'medium', 'med', 'low'];
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (!data.config[k] || typeof data.config[k] !== 'object') {
+        alert('Missing configuration for intensity: ' + k);
+        return;
+      }
+      var count = data.config[k].count;
+      var rate = data.config[k].rate;
+      if (typeof count !== 'number' || count < 0 || count > 12) {
+        alert('Invalid interval count for intensity: ' + k);
+        return;
+      }
+      if (typeof rate !== 'number' || rate < 10 || rate > 60) {
+        alert('Invalid stroke rate for intensity: ' + k);
+        return;
+      }
+    }
+    
+    var counts = {
+      high: data.config.high.count,
+      medium: data.config.medium.count,
+      med: data.config.med.count,
+      low: data.config.low.count
+    };
+    
+    var targetSec = data.targetMin * 60;
+    var L = computeLen(targetSec, counts);
+    if (minPresentLen(L, counts) < MINLEN) {
+      alert('This configuration is invalid: intervals would be shorter than ' + MINLEN + ' seconds. Try increasing target session time.');
+      return;
+    }
+    
+    state.targetMin = data.targetMin;
+    keys.forEach(function(k){
+      state.config[k].count = data.config[k].count;
+      state.config[k].rate = data.config[k].rate;
+    });
+    
+    render();
+    showToast('Configuration loaded successfully!');
+  }
+
   document.addEventListener('keydown', function(e){
     if(e.code==='Space' && (state.mode==='running'||state.mode==='paused')){ e.preventDefault(); state.mode==='running'?pause():resume(); }
+  });
+
+  document.getElementById('config-upload-input').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try {
+        var data = JSON.parse(evt.target.result);
+        if (data && typeof data === 'object') {
+          importConfig(data);
+        } else {
+          alert('Invalid file format. Please upload a valid CrewCall session configuration JSON.');
+        }
+      } catch(err) {
+        alert('Error parsing JSON file. Please ensure it is a valid configuration file.');
+      }
+    };
+    reader.readAsText(file);
   });
 
   var ACTIONS = {
@@ -413,6 +562,8 @@
     incMdc: function(){ change('med','count',1); }, decMdc: function(){ change('med','count',-1); },
     incLc: function(){ change('low','count',1); }, decLc: function(){ change('low','count',-1); },
     downloadCard: downloadShareCard,
+    downloadConfig: downloadConfig,
+    uploadConfigBtn: triggerUpload,
   };
 
   var app = document.getElementById('app');
@@ -644,6 +795,9 @@
           '<button data-act="downloadCard" class="btn-start" style="width:100%;cursor:pointer;border:none;color:oklch(0.97 0.006 85);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;">'+
             '<span>📥</span>Save workout PNG'+
           '</button>'+
+          '<button data-act="downloadConfig" class="btn-soft" style="width:100%;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;">'+
+            '<span>💾</span>Save configuration JSON'+
+          '</button>'+
           '<div style="display:flex;gap:12px;width:100%;">'+
             '<button data-act="restart" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Repeat</button>'+
             '<button data-act="stop" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Edit plan</button>'+
@@ -658,14 +812,22 @@
     if(v.isSetup){
       return ''+
       '<div style="display:flex;flex-direction:column;height:100%;padding:52px 48px;overflow-y:auto;">'+
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">'+
+        '<div style="display:flex;flex-direction:column;gap:16px;">'+
           '<div>'+
             '<div style="font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Build your session</div>'+
             '<div style="font-size:24px;font-weight:600;color:oklch(0.3 0.012 70);margin-top:8px;letter-spacing:-0.01em;">Set the time, stack the work.</div>'+
           '</div>'+
-          '<button data-act="surprise" class="btn-surprise" style="flex:0 0 auto;cursor:pointer;border:1px solid oklch(0.8 0.05 27);background:oklch(1 0 0);color:oklch(0.48 0.13 27);padding:11px 17px;border-radius:30px;font-size:14px;font-weight:600;letter-spacing:0.03em;display:flex;align-items:center;gap:9px;white-space:nowrap;">'+
-            '<span style="width:7px;height:7px;border-radius:50%;background:oklch(0.71 0.145 27);"></span>Surprise me'+
-          '</button>'+
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+            '<button data-act="surprise" class="btn-surprise" style="cursor:pointer;border:1px solid oklch(0.8 0.05 27);background:oklch(1 0 0);color:oklch(0.48 0.13 27);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;letter-spacing:0.03em;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
+              '<span style="width:7px;height:7px;border-radius:50%;background:oklch(0.71 0.145 27);"></span>Surprise me'+
+            '</button>'+
+            '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
+              '<span>📂</span>Import JSON'+
+            '</button>'+
+            '<button data-act="downloadConfig" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
+              '<span>💾</span>Export JSON'+
+            '</button>'+
+          '</div>'+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:14px;margin-top:34px;">'+
           '<div style="border:1px solid oklch(0.87 0.012 85);border-radius:18px;padding:20px 24px;background:oklch(0.965 0.012 85);display:flex;align-items:center;justify-content:space-between;gap:18px;">'+

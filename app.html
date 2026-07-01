@@ -31,6 +31,7 @@
     border-right: 1px solid oklch(0.9 0.016 230);
     transition: flex 0.75s cubic-bezier(0.76, 0, 0.24, 1), border-color 0.75s ease;
     z-index: 10;
+    overflow: hidden;
   }
   .app-right {
     flex: 1;
@@ -69,7 +70,7 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 64px 60px;
-    background: oklch(0.972 0.016 230);
+    background: transparent;
   }
   .active-inner {
     position: absolute;
@@ -262,7 +263,7 @@
       overflow: hidden;
     }
     
-    #mobile-warning .water-bg-container {
+    .water-bg-container {
       position: absolute;
       inset: 0;
       z-index: 1;
@@ -270,7 +271,7 @@
       pointer-events: none;
       background: oklch(0.98 0.01 230);
     }
-    #mobile-warning .water-blob {
+    .water-blob {
       position: absolute;
       border-radius: 50%;
       filter: blur(40px);
@@ -278,7 +279,7 @@
       mix-blend-mode: multiply;
       animation: drift 20s infinite ease-in-out alternate;
     }
-    #mobile-warning .blob-1 {
+    .blob-1 {
       width: 100vw;
       height: 100vw;
       background: radial-gradient(circle, oklch(0.85 0.12 230) 0%, rgba(255,255,255,0) 70%);
@@ -286,7 +287,7 @@
       left: -10vw;
       animation-duration: 25s;
     }
-    #mobile-warning .blob-2 {
+    .blob-2 {
       width: 90vw;
       height: 90vw;
       background: radial-gradient(circle, oklch(0.88 0.10 250) 0%, rgba(255,255,255,0) 70%);
@@ -295,7 +296,7 @@
       animation-duration: 30s;
       animation-delay: -5s;
     }
-    #mobile-warning .blob-3 {
+    .blob-3 {
       width: 80vw;
       height: 80vw;
       background: radial-gradient(circle, oklch(0.82 0.14 195) 0%, rgba(255,255,255,0) 70%);
@@ -304,11 +305,37 @@
       animation-duration: 22s;
       animation-delay: -10s;
     }
-    #mobile-warning .water-frosted-overlay {
+    .water-frosted-overlay {
       position: absolute;
       inset: 0;
       backdrop-filter: blur(60px) saturate(130%);
       background: oklch(0.975 0.016 230 / 0.45);
+    }
+
+    /* Video Backdrop classes (matching index.html) */
+    .header-video-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .header-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(10px) saturate(110%);
+      opacity: 0.55;
+      transform: scale(1.25);
+    }
+    .header-video-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 30%,
+        oklch(0.98 0.01 230 / 0.4) 100%
+      );
     }
 
     @keyframes drift {
@@ -478,7 +505,25 @@
   </div>
 </div>
 <div id="app">
-  <div class="app-left"></div>
+  <div class="app-left">
+    <!-- Frosted Moving Water Backdrop -->
+    <div class="water-bg-container">
+      <div class="water-blob blob-1"></div>
+      <div class="water-blob blob-2"></div>
+      <div class="water-blob blob-3"></div>
+      <div class="water-frosted-overlay"></div>
+    </div>
+
+    <!-- Header Video Backdrop -->
+    <div class="header-video-bg">
+      <video autoplay loop muted playsinline class="header-video">
+        <source src="hero-bg.mp4" type="video/mp4">
+      </video>
+      <div class="header-video-overlay"></div>
+    </div>
+
+    <div class="app-left-content" style="position: absolute; inset: 0; display: flex; flex-direction: column; z-index: 3;"></div>
+  </div>
   <div class="app-right"></div>
 </div>
 <input type="file" id="config-upload-input" accept=".json" style="display:none">
@@ -1385,8 +1430,8 @@
       }
 
       return ''+
-      '<div class="left-container" style="padding: 0 60px 40px; background: oklch(0.975 0.016 230); position: relative; display: flex; flex-direction: column; justify-content: flex-start; min-height: 100vh; height: auto; box-sizing: border-box;">'+
-        '<div style="position: sticky; top: 0; background: oklch(0.975 0.016 230); padding-top: 48px; padding-bottom: 20px; z-index: 100; margin-left: -60px; margin-right: -60px; padding-left: 60px; padding-right: 60px; flex-shrink: 0;">'+
+      '<div class="left-container" style="padding: 0 60px 40px; background: transparent; position: relative; display: flex; flex-direction: column; justify-content: flex-start; min-height: 100vh; height: auto; box-sizing: border-box;">'+
+        '<div style="position: sticky; top: 0; background: oklch(0.975 0.016 230 / 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding-top: 48px; padding-bottom: 20px; z-index: 100; margin-left: -60px; margin-right: -60px; padding-left: 60px; padding-right: 60px; flex-shrink: 0;">'+
           '<div style="margin-bottom: 20px;">'+
             '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:oklch(0.5 0.022 255);text-decoration:none;">CREWCALL</a>'+
             '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
@@ -1505,9 +1550,9 @@
     }
     if(v.isActive){
       return ''+
-      '<div class="left-container" style="background:oklch(0.965 0.016 230);overflow:hidden;">'+
-        '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;"></div>'+
-        '<div class="active-inner">'+
+      '<div class="left-container" style="background:transparent;overflow:hidden;">'+
+        '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;opacity:0.75;z-index:1;"></div>'+
+        '<div class="active-inner" style="z-index:2;">'+
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
             '<div style="display:flex;align-items:center;gap:14px;">'+
               '<span style="width:14px;height:14px;border-radius:50%;background:'+v.phaseInk+';"></span>'+
@@ -1559,7 +1604,7 @@
     }
     if(v.isDone){
       return ''+
-      '<div class="left-container" style="justify-content:center;align-items:center;text-align:center;background:oklch(0.972 0.016 230);padding:40px 30px;">'+
+      '<div class="left-container" style="justify-content:center;align-items:center;text-align:center;background:transparent;padding:40px 30px;">'+
         '<div style="font-size:44px;margin-bottom:12px;">🏆</div>'+
         '<div style="font-size:13px;letter-spacing:0.25em;text-transform:uppercase;color:oklch(0.46 0.09 160);font-weight:600;">Workout Cleared</div>'+
         '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:110px;line-height:0.95;letter-spacing:-0.02em;color:oklch(0.3 0.012 70);margin:12px 0 6px;">'+v.totalText+'</div>'+
@@ -1714,7 +1759,14 @@
       app.classList.remove('sidebar-hidden');
     }
 
-    if (leftEl) leftEl.innerHTML = renderLeft(v);
+    if (leftEl) {
+      var leftContentEl = leftEl.querySelector('.app-left-content');
+      if (leftContentEl) {
+        leftContentEl.innerHTML = renderLeft(v);
+      } else {
+        leftEl.innerHTML = renderLeft(v);
+      }
+    }
     if (state.mode !== 'advance' && rightEl) {
       rightEl.innerHTML = renderRight(v);
     }

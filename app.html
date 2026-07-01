@@ -206,6 +206,23 @@
     animation: highlight-glow 2s cubic-bezier(0.25, 1, 0.5, 1);
     z-index: 5;
   }
+  @keyframes control-panel-enter {
+    0% {
+      opacity: 0;
+      transform: translateX(80px);
+    }
+    30% {
+      opacity: 0;
+      transform: translateX(80px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  #app.mode-advance-entering .control-panel {
+    animation: control-panel-enter 0.8s cubic-bezier(0.76, 0, 0.24, 1) both;
+  }
   .timeline-card {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
@@ -806,6 +823,7 @@
 
   function goToAdvance() {
     state.mode = 'advance';
+    state.enteringAdvance = true;
     if (!state.advancedSequence || state.advancedSequence.length === 0 || !state.advancedEdited) {
       var preview = applyAutoBreaks(buildPreview());
       state.advancedSequence = preview.map(function(s){
@@ -818,10 +836,22 @@
       state.advancedEdited = false;
     }
     render();
+    setTimeout(function() {
+      state.enteringAdvance = false;
+      var appEl = document.getElementById('app');
+      if (appEl) {
+        appEl.classList.remove('mode-advance-entering');
+      }
+    }, 800);
   }
 
   function exitAdvance() {
     state.mode = 'setup';
+    state.enteringAdvance = false;
+    var appEl = document.getElementById('app');
+    if (appEl) {
+      appEl.classList.remove('mode-advance-entering');
+    }
     render();
   }
 
@@ -1386,7 +1416,7 @@
           '</div>'+
 
           '<!-- Right Column: Control Panel -->'+
-          '<div style="position: fixed; top: 220px; right: 60px; width: 340px; display:flex; flex-direction:column; background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:20px; padding:0 24px; max-height: calc(100vh - 260px); overflow-y: auto; z-index: 90;">'+
+          '<div class="control-panel" style="position: fixed; top: 220px; right: 60px; width: 340px; display:flex; flex-direction:column; background:oklch(1 0 0); border:1px solid oklch(0.9 0.016 230); border-radius:20px; padding:0 24px; max-height: calc(100vh - 260px); overflow-y: auto; z-index: 90;">'+
             '<!-- Section: Session Control -->'+
             '<div style="position: sticky; top: 0; background: oklch(1 0 0); padding-top: 28px; padding-bottom: 20px; z-index: 10; margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; flex-shrink: 0; border-bottom: 1px solid oklch(0.95 0.012 85);">'+
               '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:12px; font-weight:600;">Session Actions</div>'+
@@ -1669,8 +1699,12 @@
 
     if (state.mode === 'advance') {
       app.classList.add('mode-advance');
+      if (state.enteringAdvance) {
+        app.classList.add('mode-advance-entering');
+      }
     } else {
       app.classList.remove('mode-advance');
+      app.classList.remove('mode-advance-entering');
     }
     app.style.height = '';
     app.style.overflow = '';

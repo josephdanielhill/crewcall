@@ -268,7 +268,7 @@
     }
     
     .water-bg-container {
-      position: fixed;
+      position: absolute;
       inset: 0;
       z-index: 1;
       overflow: hidden;
@@ -318,7 +318,7 @@
 
     /* Video Backdrop classes (matching index.html) */
     .header-video-bg {
-      position: fixed;
+      position: absolute;
       inset: 0;
       overflow: hidden;
       z-index: 2;
@@ -485,22 +485,6 @@
 </style>
 </head>
 <body>
-<!-- Frosted Moving Water Backdrop -->
-<div class="water-bg-container">
-  <div class="water-blob blob-1"></div>
-  <div class="water-blob blob-2"></div>
-  <div class="water-blob blob-3"></div>
-  <div class="water-frosted-overlay"></div>
-</div>
-
-<!-- Header Video Backdrop -->
-<div class="header-video-bg">
-  <video autoplay loop muted playsinline class="header-video">
-    <source src="hero-bg.mp4" type="video/mp4">
-  </video>
-  <div class="header-video-overlay"></div>
-</div>
-
 <div id="mobile-warning">
   <div class="water-bg-container">
     <div class="water-blob blob-1"></div>
@@ -526,6 +510,27 @@
 </div>
 <div id="app">
   <div class="app-left">
+    <!-- Sticky Column Background (constrained to left panel) -->
+    <div style="position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1;">
+      <div style="position: sticky; top: 0; width: 100%; height: 100vh; overflow: hidden;">
+        <!-- Frosted Moving Water Backdrop -->
+        <div class="water-bg-container">
+          <div class="water-blob blob-1"></div>
+          <div class="water-blob blob-2"></div>
+          <div class="water-blob blob-3"></div>
+          <div class="water-frosted-overlay"></div>
+        </div>
+
+        <!-- Header Video Backdrop -->
+        <div class="header-video-bg">
+          <video autoplay loop muted playsinline class="header-video">
+            <source src="hero-bg.mp4" type="video/mp4">
+          </video>
+          <div class="header-video-overlay"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="app-left-content" style="position: absolute; inset: 0; display: flex; flex-direction: column; z-index: 3;"></div>
   </div>
   <div class="app-right"></div>

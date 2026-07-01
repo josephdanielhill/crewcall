@@ -552,6 +552,15 @@
       color: var(--text-secondary);
     }
 
+    .footer-link {
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
     /* Responsive Design */
     @media (max-width: 992px) {
       .hero-section {
@@ -888,7 +897,7 @@
       <span class="footer-logo-dot"></span>
       <span class="footer-logo-text">CREWCALL</span>
     </div>
-    <div class="footer-text-right">Interval rowing coach · CrewCall</div>
+    <div class="footer-text-right">Interval rowing coach · <a href="https://squarecircletriangle.co/#/triangle-crewcall" target="_blank" rel="noopener" class="footer-link">CrewCall</a></div>
   </footer>
 
   <script>

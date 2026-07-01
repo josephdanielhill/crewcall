@@ -191,9 +191,207 @@
     background: oklch(0.85 0.016 230);
     border-radius: 4px;
   }
+
+  #mobile-warning {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    #app {
+      display: none !important;
+    }
+    #mobile-warning {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: oklch(0.975 0.016 230);
+      z-index: 9999;
+      font-family: 'Hanken Grotesk', system-ui, sans-serif;
+      padding: 24px;
+      overflow: hidden;
+    }
+    
+    #mobile-warning .water-bg-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+      background: oklch(0.98 0.01 230);
+    }
+    #mobile-warning .water-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.75;
+      mix-blend-mode: multiply;
+      animation: drift 20s infinite ease-in-out alternate;
+    }
+    #mobile-warning .blob-1 {
+      width: 100vw;
+      height: 100vw;
+      background: radial-gradient(circle, oklch(0.85 0.12 230) 0%, rgba(255,255,255,0) 70%);
+      top: -20vh;
+      left: -10vw;
+      animation-duration: 25s;
+    }
+    #mobile-warning .blob-2 {
+      width: 90vw;
+      height: 90vw;
+      background: radial-gradient(circle, oklch(0.88 0.10 250) 0%, rgba(255,255,255,0) 70%);
+      bottom: -10vh;
+      right: -10vw;
+      animation-duration: 30s;
+      animation-delay: -5s;
+    }
+    #mobile-warning .blob-3 {
+      width: 80vw;
+      height: 80vw;
+      background: radial-gradient(circle, oklch(0.82 0.14 195) 0%, rgba(255,255,255,0) 70%);
+      top: 30vh;
+      left: 40vw;
+      animation-duration: 22s;
+      animation-delay: -10s;
+    }
+    #mobile-warning .water-frosted-overlay {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(60px) saturate(130%);
+      background: oklch(0.975 0.016 230 / 0.45);
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      50% {
+        transform: translate(10vw, 8vh) scale(1.15) rotate(180deg);
+      }
+      100% {
+        transform: translate(-10vw, -10vh) scale(0.9) rotate(360deg);
+      }
+    }
+
+    .mobile-warning-card {
+      position: relative;
+      z-index: 10;
+      background: oklch(1 0 0 / 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid oklch(0.9 0.016 230 / 0.8);
+      border-radius: 24px;
+      padding: 40px 28px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px oklch(0.3 0.022 255 / 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-warning-icon {
+      width: 80px;
+      height: 80px;
+      background: oklch(0.93 0.016 230);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #005B96;
+      animation: pulseIcon 3s infinite ease-in-out;
+    }
+
+    @keyframes pulseIcon {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .mobile-warning-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 1.15;
+      color: oklch(0.26 0.022 255);
+      margin: 0;
+    }
+
+    .mobile-warning-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: oklch(0.48 0.022 255);
+      margin: 0;
+      text-wrap: pretty;
+    }
+
+    .mobile-warning-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: #005B96;
+      color: oklch(0.97 0.006 85);
+      border: none;
+      border-radius: 14px;
+      padding: 16px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 8px 20px oklch(0.3 0.022 255 / 0.12);
+      transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .mobile-warning-btn:active {
+      transform: scale(0.97);
+      background: #004a7a;
+    }
+
+    .mobile-warning-btn .btn-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .mobile-warning-btn:hover .btn-arrow {
+      transform: translateX(-4px);
+    }
+  }
 </style>
 </head>
 <body>
+<div id="mobile-warning">
+  <div class="water-bg-container">
+    <div class="water-blob blob-1"></div>
+    <div class="water-blob blob-2"></div>
+    <div class="water-blob blob-3"></div>
+    <div class="water-frosted-overlay"></div>
+  </div>
+  <div class="mobile-warning-card">
+    <div class="mobile-warning-icon">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="14" height="10" rx="1.5" stroke="currentColor"></rect>
+        <path d="M6 13v3M12 13v3M4 16h10" stroke="currentColor"></path>
+        <rect x="13" y="8" width="9" height="11" rx="1.5" fill="oklch(0.975 0.016 230)" stroke="currentColor"></rect>
+        <circle cx="17.5" cy="16.5" r="0.5" fill="currentColor" stroke="none"></circle>
+      </svg>
+    </div>
+    <h1 class="mobile-warning-title">Optimized for Tablet & Web</h1>
+    <p class="mobile-warning-text">CrewCall is designed for larger displays. To get the best out of your interval coach, please open this page on a tablet or desktop browser.</p>
+    <a href="index.html" class="mobile-warning-btn">
+      <span class="btn-arrow">←</span> Go back
+    </a>
+  </div>
+</div>
 <div id="app">
   <div class="app-left"></div>
   <div class="app-right"></div>

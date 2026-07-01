@@ -453,6 +453,13 @@
     }
   }
 
+  .app-backdrop-wrapper {
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #app.session-active .app-backdrop-wrapper {
+    opacity: 0;
+  }
+
   .sidebar-toggle-btn {
     position: absolute;
     right: 0;
@@ -518,7 +525,7 @@
 <div id="app">
   <div class="app-left">
     <!-- Sticky Column Background (constrained to left panel) -->
-    <div style="position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1;">
+    <div class="app-backdrop-wrapper" style="position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1;">
       <div style="position: sticky; top: 0; width: 100%; height: 100vh; overflow: hidden;">
         <!-- Frosted Moving Water Backdrop -->
         <div class="water-bg-container">
@@ -1756,6 +1763,12 @@
     
     var leftEl = app.querySelector('.app-left');
     var rightEl = app.querySelector('.app-right');
+
+    if (state.mode === 'running' || state.mode === 'paused') {
+      app.classList.add('session-active');
+    } else {
+      app.classList.remove('session-active');
+    }
 
     if (state.mode === 'advance') {
       app.classList.add('mode-advance');

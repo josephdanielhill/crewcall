@@ -1,743 +1,976 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CrewCall - Intelligent Interval Rowing Coach</title>
-<meta name="description" content="Set the time, stack the work. CrewCall is a smart interval rowing coach that auto-scales your session, arrangement, and pace. Built-in audio cues keep your eyes on the rhythm.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg-dark: oklch(0.975 0.016 230);          /* Pastel light blue */
-    --bg-card: oklch(1 0 0);                    /* Pure white cards */
-    --border-subtle: oklch(0.91 0.016 230);     /* Light blue borders */
-    --text-primary: oklch(0.26 0.022 255);      /* Dark slate blue */
-    --text-secondary: oklch(0.52 0.022 255);    /* Medium slate blue */
-    
-    --color-high: oklch(0.71 0.145 27);         /* Coral */
-    --color-medium: oklch(0.83 0.12 82);        /* Gold */
-    --color-low: oklch(0.80 0.095 158);         /* Mint */
-  }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CrewCall - Intelligent Interval Rowing Coach</title>
+  <meta name="description"
+    content="Set the time, stack the work. CrewCall is a smart interval rowing coach that auto-scales your session, arrangement, and pace. Built-in audio cues keep your eyes on the rhythm.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: oklch(0.975 0.016 230);
+      /* Pastel light blue */
+      --bg-card: oklch(1 0 0);
+      /* Pure white cards */
+      --border-subtle: oklch(0.91 0.016 230);
+      /* Light blue borders */
+      --text-primary: oklch(0.26 0.022 255);
+      /* Dark slate blue */
+      --text-secondary: oklch(0.52 0.022 255);
+      /* Medium slate blue */
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  
-  html, body {
-    background-color: transparent;
-    color: var(--text-primary);
-    font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-  }
-  html {
-    height: 100%;
-  }
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  ::-webkit-scrollbar {
-    width: 9px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--bg-dark);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: oklch(0.85 0.016 230);
-    border-radius: 8px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.78 0.02 230);
-  }
-
-  a { text-decoration: none; color: inherit; }
-
-  /* Typography */
-  h1, h2, h3, .font-heading {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-  }
-
-  /* Nav */
-  nav {
-    width: 100%;
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 30px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 34px;
-    font-size: 15px;
-    color: var(--text-secondary);
-  }
-  .nav-link {
-    letter-spacing: 0.01em;
-    font-weight: 500;
-    transition: color 0.2s ease;
-  }
-  .nav-link:hover {
-    color: var(--text-primary);
-  }
-  .btn-nav-cta {
-    background: #005B96;
-    color: oklch(0.97 0.006 85);
-    padding: 11px 20px;
-    border-radius: 30px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transition: background-color 0.2s ease, transform 0.15s ease;
-  }
-  .btn-nav-cta:hover {
-    background: #004a7a;
-    transform: translateY(-1px);
-  }
-
-  /* Hero Section */
-  .hero-section {
-    width: 100%;
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 56px 40px 30px;
-    display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 64px;
-    align-items: center;
-    flex: 1;
-  }
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #005B96;
-    background: oklch(0.92 0.02 230);
-    padding: 7px 15px;
-    border-radius: 30px;
-    font-weight: 600;
-    width: fit-content;
-  }
-  .hero-badge-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--color-high);
-  }
-  .hero-title {
-    font-size: clamp(42px, 5.5vw, 62px);
-    color: var(--text-primary);
-    margin: 26px 0 0;
-  }
-  .hero-desc {
-    font-size: 19px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    max-width: 480px;
-    margin: 24px 0 0;
-    text-wrap: pretty;
-  }
-  
-  .hero-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 36px;
-  }
-  @keyframes breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-  }
-  .btn-hero-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 13px;
-    background: #005B96;
-    color: oklch(0.97 0.006 85);
-    padding: 18px 30px;
-    border-radius: 15px;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    animation: breathe 4.5s ease-in-out infinite;
-    transition: background-color 0.2s ease, transform 0.15s ease;
-  }
-  .btn-hero-primary:hover {
-    background: #004a7a;
-    transform: translateY(-2px);
-  }
-  .btn-hero-primary-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--color-low);
-  }
-  .btn-hero-outline {
-    display: inline-flex;
-    align-items: center;
-    padding: 18px 26px;
-    border-radius: 15px;
-    border: 1px solid oklch(0.84 0.016 230);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background-color 0.2s ease, transform 0.15s ease;
-  }
-  .btn-hero-outline:hover {
-    background: oklch(0.965 0.016 230);
-    transform: translateY(-2px);
-  }
-
-  .hero-stats {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: center;
-    gap: clamp(24px, 6vw, 80px);
-    margin-top: 48px;
-    border-top: 1px solid var(--border-subtle);
-    padding-top: 32px;
-  }
-  .stat-val {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 34px;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-  .stat-lbl {
-    margin-top: 5px;
-    font-size: 13px;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-
-  /* Simulated Coach Preview Widget Styling */
-  .sandbox-widget {
-    position: relative;
-    border-radius: 26px;
-    border: 1px solid var(--border-subtle);
-    background: oklch(0.985 0.015 230);
-    overflow: hidden;
-    box-shadow: 0 30px 60px -30px oklch(0.3 0.022 255 / 0.15);
-  }
-  .sandbox-display {
-    position: relative;
-    height: 360px;
-    overflow: hidden;
-    background: oklch(0.965 0.004 230);
-  }
-  .sandbox-active-bg {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 0%;
-    background: var(--color-medium);
-    transition: background 0.4s ease, height 0.12s linear;
-  }
-  .sandbox-display-content {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 28px 30px;
-  }
-  .sandbox-display-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    z-index: 5;
-  }
-  .sandbox-display-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .sandbox-display-dot {
-    width: 11px;
-    height: 11px;
-    border-radius: 50%;
-    background: oklch(0.52 0.12 70);
-    transition: background 0.4s ease;
-  }
-  .sandbox-display-tag {
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-primary);
-    font-weight: 600;
-  }
-  .sandbox-display-next {
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-  }
-  .sandbox-display-next-val {
-    font-weight: 600;
-    transition: color 0.4s ease;
-  }
-
-  .sandbox-display-center {
-    text-align: center;
-    position: relative;
-    z-index: 5;
-  }
-  .sandbox-display-label {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--text-primary);
-    transition: color 0.4s ease;
-  }
-  .sandbox-display-timer {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 108px;
-    line-height: 0.92;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-primary);
-    margin-top: 4px;
-    transition: color 0.4s ease;
-  }
-  .sandbox-display-sub {
-    margin-top: 4px;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-
-  .sandbox-timeline {
-    display: flex;
-    gap: 3px;
-    height: 9px;
-    position: relative;
-    z-index: 5;
-  }
-  .sandbox-timeline-seg {
-    height: 100%;
-    border-radius: 2px;
-    transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, opacity 0.3s ease;
-  }
-
-  .sandbox-footer {
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid var(--border-subtle);
-    background: var(--bg-card);
-  }
-  .sandbox-footer-lbl {
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    color: var(--text-secondary);
-  }
-  .sandbox-footer-badge {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 13px;
-    color: #005B96;
-    background: oklch(0.9 0.02 230 / 0.5);
-    padding: 4px 11px;
-    border-radius: 20px;
-    font-weight: 600;
-    transition: color 0.3s ease, background 0.3s ease;
-  }
-
-
-
-  /* Footer */
-  footer {
-    width: 100%;
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 30px 40px 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid var(--border-subtle);
-  }
-  .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .footer-logo-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--color-low);
-  }
-  .logo-text {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 17px;
-    letter-spacing: 0.16em;
-    color: #000000;
-  }
-  .footer-logo-text {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
-    letter-spacing: 0.16em;
-    color: #000000;
-  }
-  .footer-text-right {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-
-  /* Responsive Design */
-  @media (max-width: 992px) {
-    .hero-section {
-      grid-template-columns: 1fr;
-      gap: 56px;
-      text-align: center;
+      --color-high: oklch(0.71 0.145 27);
+      /* Coral */
+      --color-medium: oklch(0.83 0.12 82);
+      /* Gold */
+      --color-low: oklch(0.80 0.095 158);
+      /* Mint */
     }
-    .hero-content {
-      align-items: center;
-    }
-    .hero-desc {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-actions {
-      justify-content: center;
-    }
-    .hero-stats {
-      justify-content: center;
-    }
-  }
 
-  @media (max-width: 768px) {
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      background-color: transparent;
+      color: var(--text-primary);
+      font-family: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    ::-webkit-scrollbar {
+      width: 9px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: oklch(0.85 0.016 230);
+      border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: oklch(0.78 0.02 230);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+
+    /* Nav */
     nav {
-      padding: 20px;
-      flex-direction: column;
-      gap: 16px;
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 30px 40px;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
     }
+
     .nav-links {
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
+      display: flex;
       align-items: center;
+      gap: 34px;
+      font-size: 15px;
+      color: var(--text-secondary);
     }
+
+    .nav-link {
+      letter-spacing: 0.01em;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+    }
+
     .btn-nav-cta {
-      width: 100%;
-      max-width: 200px;
-      text-align: center;
-      justify-content: center;
-      display: inline-flex;
+      background: #005B96;
+      color: oklch(0.97 0.006 85);
+      padding: 11px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: background-color 0.2s ease, transform 0.15s ease;
     }
+
+    .btn-nav-cta:hover {
+      background: #004a7a;
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
     .hero-section {
-      padding: 40px 20px;
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 56px 40px 30px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 64px;
+      align-items: center;
+      flex: 1;
     }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #005B96;
+      background: oklch(0.92 0.02 230);
+      padding: 7px 15px;
+      border-radius: 30px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .hero-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-high);
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 5.5vw, 62px);
+      color: var(--text-primary);
+      margin: 26px 0 0;
+    }
+
+    .hero-desc {
+      font-size: 19px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 24px 0 0;
+      text-wrap: pretty;
+    }
+
     .hero-actions {
-      flex-direction: column;
-      width: 100%;
-      max-width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 36px;
     }
+
+    @keyframes breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.02);
+      }
+    }
+
     .btn-hero-primary {
-      width: 100%;
-      justify-content: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      background: #005B96;
+      color: oklch(0.97 0.006 85);
+      padding: 18px 30px;
+      border-radius: 15px;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      animation: breathe 4.5s ease-in-out infinite;
+      transition: background-color 0.2s ease, transform 0.15s ease;
     }
-    footer {
+
+    .btn-hero-primary:hover {
+      background: #004a7a;
+      transform: translateY(-2px);
+    }
+
+    .btn-hero-primary-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--color-low);
+    }
+
+    .btn-hero-outline {
+      display: inline-flex;
+      align-items: center;
+      padding: 18px 26px;
+      border-radius: 15px;
+      border: 1px solid oklch(0.84 0.016 230);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-hero-outline:hover {
+      background: oklch(0.965 0.016 230);
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: clamp(24px, 6vw, 80px);
+      margin-top: 48px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 32px;
+    }
+
+    .stat-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      font-size: 34px;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-lbl {
+      margin-top: 5px;
+      font-size: 13px;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    /* Simulated Coach Preview Widget Styling */
+    .sandbox-widget {
+      position: relative;
+      border-radius: 26px;
+      border: 1px solid var(--border-subtle);
+      background: oklch(0.985 0.015 230);
+      overflow: hidden;
+      box-shadow: 0 30px 60px -30px oklch(0.3 0.022 255 / 0.15);
+    }
+
+    .sandbox-display {
+      position: relative;
+      height: 360px;
+      overflow: hidden;
+      background: oklch(0.965 0.004 230);
+    }
+
+    .sandbox-active-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0%;
+      background: var(--color-medium);
+      transition: background 0.4s ease, height 0.12s linear;
+    }
+
+    .sandbox-display-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 30px;
+    }
+
+    .sandbox-display-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 5;
+    }
+
+    .sandbox-display-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sandbox-display-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: oklch(0.52 0.12 70);
+      transition: background 0.4s ease;
+    }
+
+    .sandbox-display-tag {
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .sandbox-display-next {
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .sandbox-display-next-val {
+      font-weight: 600;
+      transition: color 0.4s ease;
+    }
+
+    .sandbox-display-center {
+      text-align: center;
+      position: relative;
+      z-index: 5;
+    }
+
+    .sandbox-display-label {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      transition: color 0.4s ease;
+    }
+
+    .sandbox-display-timer {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      font-size: 108px;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+      margin-top: 4px;
+      transition: color 0.4s ease;
+    }
+
+    .sandbox-display-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .sandbox-timeline {
+      display: flex;
+      gap: 3px;
+      height: 9px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .sandbox-timeline-seg {
+      height: 100%;
+      border-radius: 2px;
+      transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, opacity 0.3s ease;
+    }
+
+    .sandbox-footer {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+
+    .sandbox-footer-lbl {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .sandbox-footer-badge {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      color: #005B96;
+      background: oklch(0.9 0.02 230 / 0.5);
+      padding: 4px 11px;
+      border-radius: 20px;
+      font-weight: 600;
+      transition: color 0.3s ease, background 0.3s ease;
+    }
+
+    /* Features Section */
+    .features-section {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 60px 40px 80px;
+      position: relative;
+      z-index: 5;
+    }
+    .features-header-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 500;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .features-header-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 540px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .feature-card {
+      background: oklch(1 0 0 / 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 36px;
+      display: flex;
       flex-direction: column;
       gap: 16px;
-      padding: 30px 20px;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
     }
-  }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: #005B96;
+      box-shadow: 0 20px 40px -20px oklch(0.3 0.022 255 / 0.12);
+    }
+    .feature-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: oklch(0.92 0.02 230);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #005B96;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .feature-card:hover .feature-icon-wrapper {
+      background: #005B96;
+      color: oklch(1 0 0);
+    }
+    .feature-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .feature-desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      text-wrap: pretty;
+    }
 
-  /* Frosted Moving Water Backdrop */
-  .water-bg-container {
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    overflow: hidden;
-    pointer-events: none;
-    background: oklch(0.98 0.01 230);
-  }
-  .water-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.75;
-    mix-blend-mode: multiply;
-    animation: drift 20s infinite ease-in-out alternate;
-  }
-  .blob-1 {
-    width: 80vw;
-    height: 80vw;
-    background: radial-gradient(circle, oklch(0.85 0.12 230) 0%, rgba(255,255,255,0) 70%);
-    top: -20vh;
-    left: -10vw;
-    animation-duration: 25s;
-  }
-  .blob-2 {
-    width: 70vw;
-    height: 70vw;
-    background: radial-gradient(circle, oklch(0.88 0.10 250) 0%, rgba(255,255,255,0) 70%);
-    bottom: -10vh;
-    right: -10vw;
-    animation-duration: 30s;
-    animation-delay: -5s;
-  }
-  .blob-3 {
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, oklch(0.82 0.14 195) 0%, rgba(255,255,255,0) 70%);
-    top: 30vh;
-    left: 40vw;
-    animation-duration: 22s;
-    animation-delay: -10s;
-  }
-  .water-frosted-overlay {
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(60px) saturate(130%);
-    background: oklch(0.975 0.016 230 / 0.45);
-  }
+    /* Footer */
+    footer {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 30px 40px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+    }
 
-  @keyframes drift {
-    0% {
-      transform: translate(0, 0) scale(1) rotate(0deg);
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    50% {
-      transform: translate(18vw, 12vh) scale(1.25) rotate(180deg);
-    }
-    100% {
-      transform: translate(-12vw, -15vh) scale(0.85) rotate(360deg);
-    }
-  }
 
-  /* Header Video Backdrop */
-  .header-video-bg {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    z-index: -1;
-    pointer-events: none;
-  }
-  .header-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(10px) saturate(110%);
-    opacity: 0.55;
-    transform: scale(1.25); /* Zoom in to crop aspect ratio/black bars and prevent blur bleed */
-  }
-  .header-video-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      transparent 30%,
-      oklch(0.98 0.01 230 / 0.4) 100%
-    );
-  }
-</style>
+    .footer-logo-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--color-low);
+    }
+
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: 0.16em;
+      color: #000000;
+    }
+
+    .footer-logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.16em;
+      color: #000000;
+    }
+
+    .footer-text-right {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        gap: 56px;
+        text-align: center;
+      }
+
+      .hero-content {
+        align-items: center;
+      }
+
+      .hero-desc {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-actions {
+        justify-content: center;
+      }
+
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 20px;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        align-items: center;
+      }
+
+      .btn-nav-cta {
+        width: 100%;
+        max-width: 200px;
+        text-align: center;
+        justify-content: center;
+        display: inline-flex;
+      }
+
+      .hero-section {
+        padding: 40px 20px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .btn-hero-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .features-section {
+        padding: 40px 20px 60px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .feature-card {
+        padding: 28px 24px;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 16px;
+        padding: 30px 20px;
+      }
+    }
+
+    /* Frosted Moving Water Backdrop */
+    .water-bg-container {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+      background: oklch(0.98 0.01 230);
+    }
+
+    .water-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.75;
+      mix-blend-mode: multiply;
+      animation: drift 20s infinite ease-in-out alternate;
+    }
+
+    .blob-1 {
+      width: 80vw;
+      height: 80vw;
+      background: radial-gradient(circle, oklch(0.85 0.12 230) 0%, rgba(255, 255, 255, 0) 70%);
+      top: -20vh;
+      left: -10vw;
+      animation-duration: 25s;
+    }
+
+    .blob-2 {
+      width: 70vw;
+      height: 70vw;
+      background: radial-gradient(circle, oklch(0.88 0.10 250) 0%, rgba(255, 255, 255, 0) 70%);
+      bottom: -10vh;
+      right: -10vw;
+      animation-duration: 30s;
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, oklch(0.82 0.14 195) 0%, rgba(255, 255, 255, 0) 70%);
+      top: 30vh;
+      left: 40vw;
+      animation-duration: 22s;
+      animation-delay: -10s;
+    }
+
+    .water-frosted-overlay {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(60px) saturate(130%);
+      background: oklch(0.975 0.016 230 / 0.45);
+    }
+
+    @keyframes drift {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+
+      50% {
+        transform: translate(18vw, 12vh) scale(1.25) rotate(180deg);
+      }
+
+      100% {
+        transform: translate(-12vw, -15vh) scale(0.85) rotate(360deg);
+      }
+    }
+
+    /* Header Video Backdrop */
+    .header-video-bg {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .header-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(10px) saturate(110%);
+      opacity: 0.55;
+      transform: scale(1.25);
+      /* Zoom in to crop aspect ratio/black bars and prevent blur bleed */
+    }
+
+    .header-video-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+          transparent 30%,
+          oklch(0.98 0.01 230 / 0.4) 100%);
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="water-bg-container">
-  <div class="water-blob blob-1"></div>
-  <div class="water-blob blob-2"></div>
-  <div class="water-blob blob-3"></div>
-  <div class="water-frosted-overlay"></div>
-</div>
-
-<!-- Header Video Backdrop -->
-<div class="header-video-bg">
-  <video autoplay loop muted playsinline class="header-video">
-    <source src="hero-bg.mp4" type="video/mp4">
-  </video>
-  <div class="header-video-overlay"></div>
-</div>
-
-<!-- Navigation -->
-<nav>
-  <a href="#" class="logo-group">
-    <span class="logo-text">CREWCALL</span>
-  </a>
-  <div class="nav-links">
-    <a href="app.html" class="btn-nav-cta">Open Coach</a>
-  </div>
-</nav>
-
-<!-- Hero Section -->
-<section class="hero-section">
-  <div class="hero-content">
-    <div class="hero-badge">
-      <span class="hero-badge-dot"></span>
-      Interval rowing coach
-    </div>
-    <h1 class="hero-title">Row in intervals.<br>Stay on cadence.</h1>
-    <p class="hero-desc">
-      Set a target time, stack the work, and CrewCall builds a balanced session, coaching you through every phase with stroke targets and audio cues.
-    </p>
-    <div class="hero-actions">
-      <a href="app.html" class="btn-hero-primary">
-        <span class="btn-hero-primary-dot"></span>Start a session
-      </a>
-    </div>
+  <div class="water-bg-container">
+    <div class="water-blob blob-1"></div>
+    <div class="water-blob blob-2"></div>
+    <div class="water-blob blob-3"></div>
+    <div class="water-frosted-overlay"></div>
   </div>
 
-  <!-- Simulated Coach Preview Widget Card -->
-  <div>
-    <div class="sandbox-widget">
-      <!-- Session Active Display -->
-      <div class="sandbox-display">
-        <div class="sandbox-active-bg" id="sandbox-bg"></div>
-        <div class="sandbox-display-content">
-          <div class="sandbox-display-header">
-            <div class="sandbox-display-indicator">
-              <span class="sandbox-display-dot" id="sandbox-dot"></span>
-              <span class="sandbox-display-tag" id="sandbox-tag">Interval 1 / 6</span>
+  <!-- Header Video Backdrop -->
+  <div class="header-video-bg">
+    <video autoplay loop muted playsinline class="header-video">
+      <source src="hero-bg.mp4" type="video/mp4">
+    </video>
+    <div class="header-video-overlay"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="logo-group">
+      <span class="logo-text">CREWCALL</span>
+    </a>
+    <div class="nav-links">
+      <a href="app.html" class="btn-nav-cta">Open Coach</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Interval rowing coach
+      </div>
+      <h1 class="hero-title">Row in intervals.<br>Stay on cadence.</h1>
+      <p class="hero-desc">
+        Set a target time, stack the work, and CrewCall builds a balanced session, coaching you through every phase with
+        stroke targets and audio cues.
+      </p>
+      <div class="hero-actions">
+        <a href="app.html" class="btn-hero-primary">
+          <span class="btn-hero-primary-dot"></span>Start a session
+        </a>
+      </div>
+    </div>
+
+    <!-- Simulated Coach Preview Widget Card -->
+    <div>
+      <div class="sandbox-widget">
+        <!-- Session Active Display -->
+        <div class="sandbox-display">
+          <div class="sandbox-active-bg" id="sandbox-bg"></div>
+          <div class="sandbox-display-content">
+            <div class="sandbox-display-header">
+              <div class="sandbox-display-indicator">
+                <span class="sandbox-display-dot" id="sandbox-dot"></span>
+                <span class="sandbox-display-tag" id="sandbox-tag">Interval 1 / 6</span>
+              </div>
+              <div class="sandbox-display-next">Next&nbsp;·&nbsp;<span class="sandbox-display-next-val"
+                  id="sandbox-next">Extreme</span></div>
             </div>
-            <div class="sandbox-display-next">Next&nbsp;·&nbsp;<span class="sandbox-display-next-val" id="sandbox-next">Extreme</span></div>
-          </div>
-          <div class="sandbox-display-center">
-            <div class="sandbox-display-label" id="sandbox-label">Low</div>
-            <div class="sandbox-display-timer" id="sandbox-timer">0:06</div>
-            <div class="sandbox-display-sub">remaining in phase</div>
-          </div>
-          <div class="sandbox-timeline" id="sandbox-timeline">
-            <!-- Rendered via JS -->
+            <div class="sandbox-display-center">
+              <div class="sandbox-display-label" id="sandbox-label">Low</div>
+              <div class="sandbox-display-timer" id="sandbox-timer">0:06</div>
+              <div class="sandbox-display-sub">remaining in phase</div>
+            </div>
+            <div class="sandbox-timeline" id="sandbox-timeline">
+              <!-- Rendered via JS -->
+            </div>
           </div>
         </div>
+        <!-- Footer Info -->
+        <div class="sandbox-footer">
+          <span class="sandbox-footer-lbl">Live session preview</span>
+          <span class="sandbox-footer-badge" id="sandbox-strokes">24 strokes</span>
+        </div>
       </div>
-      <!-- Footer Info -->
-      <div class="sandbox-footer">
-        <span class="sandbox-footer-lbl">Live session preview</span>
-        <span class="sandbox-footer-badge" id="sandbox-strokes">24 strokes</span>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2 class="features-header-title">Streamlined training features</h2>
+    <p class="features-header-desc">Everything you need to focus on your rowing rhythm and execute perfect interval sessions.</p>
+    <div class="features-grid">
+      <!-- Card 1: Intelligent Intervals -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </div>
+        <h3 class="feature-title">Intelligent Intervals</h3>
+        <p class="feature-desc">Auto-scales session layout, pacing, and target stroke rates dynamically based on your time constraints.</p>
+      </div>
+      
+      <!-- Card 2: Audio Cues -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Audio Cues</h3>
+        <p class="feature-desc">Built-in audio guidance and transition alerts keep your eyes focused on your stroke rhythm instead of the screen.</p>
+      </div>
+      
+      <!-- Card 3: Advanced Editor -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+        </div>
+        <h3 class="feature-title">Workout Builder</h3>
+        <p class="feature-desc">Fully customize and drag-and-drop workout blocks to fine-tune phases, intensities, and durations.</p>
+      </div>
+      
+      <!-- Card 4: Import & Export Plans -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3L21 7L17 11"></path>
+            <path d="M3 7H21"></path>
+            <path d="M7 21L3 17L7 13"></path>
+            <path d="M21 17H3"></path>
+          </svg>
+        </div>
+        <h3 class="feature-title">Import & Export</h3>
+        <p class="feature-desc">Export custom workout configurations to JSON files, and import them later to restore or share your plan instantly.</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="hero-stats">
-    <div>
-      <div class="stat-val">4</div>
-      <div class="stat-lbl">Intensities</div>
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">
+      <span class="footer-logo-dot"></span>
+      <span class="footer-logo-text">CREWCALL</span>
     </div>
-    <div>
-      <div class="stat-val">10 to 90</div>
-      <div class="stat-lbl">Minute sessions</div>
-    </div>
-    <div>
-      <div class="stat-val">∞</div>
-      <div class="stat-lbl">Combinations</div>
-    </div>
-  </div>
-</section>
+    <div class="footer-text-right">Interval rowing coach · CrewCall</div>
+  </footer>
 
-<!-- Footer -->
-<footer>
-  <div class="footer-logo">
-    <span class="footer-logo-dot"></span>
-    <span class="footer-logo-text">CREWCALL</span>
-  </div>
-  <div class="footer-text-right">Interval rowing coach · CrewCall</div>
-</footer>
+  <script>
+    // --- SIMULATED COACH CLOCK LOGIC ---
+    const COLORS = {
+      high: { name: 'EXTREME', fill: 'oklch(0.71 0.145 27)', ink: 'oklch(0.45 0.15 27)', tint: 'oklch(0.93 0.05 27)', rate: 30 },
+      medium: { name: 'HARD', fill: 'oklch(0.83 0.12 82)', ink: 'oklch(0.52 0.12 70)', tint: 'oklch(0.93 0.06 82)', rate: 28 },
+      med: { name: 'MEDIUM', fill: 'oklch(0.78 0.09 190)', ink: 'oklch(0.48 0.09 190)', tint: 'oklch(0.93 0.05 190)', rate: 26 },
+      low: { name: 'LOW', fill: 'oklch(0.80 0.095 158)', ink: 'oklch(0.46 0.09 160)', tint: 'oklch(0.93 0.05 158)', rate: 24 },
+    };
 
-<script>
-  // --- SIMULATED COACH CLOCK LOGIC ---
-  const COLORS = {
-    high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  ink:'oklch(0.45 0.15 27)',  tint:'oklch(0.93 0.05 27)',  rate:30 },
-    medium: { name:'HARD',    fill:'oklch(0.83 0.12 82)',   ink:'oklch(0.52 0.12 70)',  tint:'oklch(0.93 0.06 82)',  rate:28 },
-    med:    { name:'MEDIUM',  fill:'oklch(0.78 0.09 190)',  ink:'oklch(0.48 0.09 190)', tint:'oklch(0.93 0.05 190)', rate:26 },
-    low:    { name:'LOW',     fill:'oklch(0.80 0.095 158)', ink:'oklch(0.46 0.09 160)', tint:'oklch(0.93 0.05 158)', rate:24 },
-  };
-  
-  const seq = [
-    {k:'low',len:6},{k:'high',len:3},{k:'medium',len:4},
-    {k:'med',len:5},{k:'medium',len:4},{k:'high',len:3},
-    {k:'med',len:5},{k:'low',len:6},
-  ];
+    const seq = [
+      { k: 'low', len: 6 }, { k: 'high', len: 3 }, { k: 'medium', len: 4 },
+      { k: 'med', len: 5 }, { k: 'medium', len: 4 }, { k: 'high', len: 3 },
+      { k: 'med', len: 5 }, { k: 'low', len: 6 },
+    ];
 
-  let activeIdx = 0;
-  let startTime = performance.now();
+    let activeIdx = 0;
+    let startTime = performance.now();
 
-  function fmtTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = Math.round(seconds % 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
-  }
-
-  function tick() {
-    const now = performance.now();
-    const currentItem = seq[activeIdx];
-    const duration = currentItem.len;
-    let elapsed = (now - startTime) / 1000;
-    
-    if (elapsed >= duration) {
-      activeIdx = (activeIdx + 1) % seq.length;
-      startTime = now;
-      elapsed = 0;
+    function fmtTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = Math.round(seconds % 60);
+      return `${m}:${String(s).padStart(2, '0')}`;
     }
-    
-    const cur = seq[activeIdx];
-    const remain = Math.max(0, Math.ceil(cur.len - elapsed));
-    const frac = Math.max(0, Math.min(1, (cur.len - elapsed) / cur.len));
-    
-    // Update DOM elements
-    const co = COLORS[cur.k];
-    const nextItem = seq[(activeIdx + 1) % seq.length];
-    const nextCo = COLORS[nextItem.k];
-    
-    document.getElementById('sandbox-bg').style.height = `${frac * 100}%`;
-    document.getElementById('sandbox-bg').style.background = co.fill;
-    
-    document.getElementById('sandbox-dot').style.background = co.ink;
-    document.getElementById('sandbox-tag').innerText = `Interval ${activeIdx + 1} / ${seq.length}`;
-    document.getElementById('sandbox-tag').style.color = co.ink;
-    
-    document.getElementById('sandbox-next').innerText = nextCo.name;
-    document.getElementById('sandbox-next').style.color = nextCo.ink;
-    
-    document.getElementById('sandbox-label').innerText = co.name;
-    document.getElementById('sandbox-label').style.color = co.ink;
-    
-    document.getElementById('sandbox-timer').innerText = fmtTime(remain);
-    document.getElementById('sandbox-timer').style.color = co.ink;
-    
-    // Update strokes badge
-    const strokeBadge = document.getElementById('sandbox-strokes');
-    strokeBadge.innerText = `${co.rate} strokes`;
-    strokeBadge.style.color = co.ink;
-    strokeBadge.style.background = co.tint;
-    
-    // Render timeline segments
-    const timeline = document.getElementById('sandbox-timeline');
-    timeline.innerHTML = seq.map((item, idx) => {
-      const isCurrent = idx === activeIdx;
-      return `<div class="sandbox-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill}; opacity: ${isCurrent ? 1 : 0.4};"></div>`;
-    }).join('');
-  }
 
-  // Run tick every 70ms
-  setInterval(tick, 70);
-  tick(); // initial call
-</script>
+    function tick() {
+      const now = performance.now();
+      const currentItem = seq[activeIdx];
+      const duration = currentItem.len;
+      let elapsed = (now - startTime) / 1000;
+
+      if (elapsed >= duration) {
+        activeIdx = (activeIdx + 1) % seq.length;
+        startTime = now;
+        elapsed = 0;
+      }
+
+      const cur = seq[activeIdx];
+      const remain = Math.max(0, Math.ceil(cur.len - elapsed));
+      const frac = Math.max(0, Math.min(1, (cur.len - elapsed) / cur.len));
+
+      // Update DOM elements
+      const co = COLORS[cur.k];
+      const nextItem = seq[(activeIdx + 1) % seq.length];
+      const nextCo = COLORS[nextItem.k];
+
+      document.getElementById('sandbox-bg').style.height = `${frac * 100}%`;
+      document.getElementById('sandbox-bg').style.background = co.fill;
+
+      document.getElementById('sandbox-dot').style.background = co.ink;
+      document.getElementById('sandbox-tag').innerText = `Interval ${activeIdx + 1} / ${seq.length}`;
+      document.getElementById('sandbox-tag').style.color = co.ink;
+
+      document.getElementById('sandbox-next').innerText = nextCo.name;
+      document.getElementById('sandbox-next').style.color = nextCo.ink;
+
+      document.getElementById('sandbox-label').innerText = co.name;
+      document.getElementById('sandbox-label').style.color = co.ink;
+
+      document.getElementById('sandbox-timer').innerText = fmtTime(remain);
+      document.getElementById('sandbox-timer').style.color = co.ink;
+
+      // Update strokes badge
+      const strokeBadge = document.getElementById('sandbox-strokes');
+      strokeBadge.innerText = `${co.rate} strokes`;
+      strokeBadge.style.color = co.ink;
+      strokeBadge.style.background = co.tint;
+
+      // Render timeline segments
+      const timeline = document.getElementById('sandbox-timeline');
+      timeline.innerHTML = seq.map((item, idx) => {
+        const isCurrent = idx === activeIdx;
+        return `<div class="sandbox-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill}; opacity: ${isCurrent ? 1 : 0.4};"></div>`;
+      }).join('');
+    }
+
+    // Run tick every 70ms
+    setInterval(tick, 70);
+    tick(); // initial call
+  </script>
 
 </body>
+
 </html>

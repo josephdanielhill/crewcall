@@ -1764,7 +1764,7 @@
     var leftEl = app.querySelector('.app-left');
     var rightEl = app.querySelector('.app-right');
 
-    if (state.mode === 'running' || state.mode === 'paused') {
+    if (state.mode !== 'setup') {
       app.classList.add('session-active');
     } else {
       app.classList.remove('session-active');

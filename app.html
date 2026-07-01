@@ -449,6 +449,7 @@
     medium: { name:'HARD',    fill:'oklch(0.83 0.12 82)',   tint:'oklch(0.93 0.06 82)',  ink:'oklch(0.52 0.12 70)' },
     med:    { name:'MEDIUM',  fill:'oklch(0.78 0.09 190)',  tint:'oklch(0.93 0.05 190)', ink:'oklch(0.48 0.09 190)' },
     low:    { name:'LOW',     fill:'oklch(0.80 0.095 158)', tint:'oklch(0.93 0.05 158)', ink:'oklch(0.46 0.09 160)' },
+    break:  { name:'BREAK',   fill:'oklch(0.86 0.015 240)', tint:'oklch(0.95 0.005 240)', ink:'oklch(0.40 0.01 240)' }
   };
   var RATIOS = { high:2, medium:3, med:3.5, low:4 };
   var MINLEN = 15;
@@ -471,6 +472,7 @@
     advancedEdited: false,
     isAdvancedWorkout: false,
     sidebarHidden: false,
+    breaksEnabled: true,
   };
 
   function fmt(s){ s=Math.max(0,Math.round(s)); var m=Math.floor(s/60), ss=s%60; return m+':'+String(ss).padStart(2,'0'); }
@@ -534,6 +536,51 @@
   function canAdd(k){ if(state.config[k].count>=12) return false; var counts=curCounts(); counts[k]++; var L=computeLen(state.targetMin*60,counts); return minPresentLen(L,counts)>=MINLEN; }
   function canSetTarget(targetSec){ var counts=curCounts(); var L=computeLen(targetSec,counts); return minPresentLen(L,counts)>=MINLEN; }
   function buildPreview(){ var counts=curCounts(); var L=computeLen(state.targetMin*60,counts); return arrange(counts.high,counts.medium,counts.med,counts.low).map(function(k){ return {intensity:k,len:L[k]}; }); }
+
+  function applyAutoBreaks(sequence) {
+    if (!state.breaksEnabled || state.targetMin < 20) {
+      return sequence;
+    }
+    var result = [];
+    var activeElapsed = 0;
+    var nextBreakMark = 600;
+    for (var i = 0; i < sequence.length; i++) {
+      var seg = sequence[i];
+      var remainingLen = seg.len;
+      var intensity = seg.intensity;
+      var rate = seg.rate;
+      
+      while (remainingLen > 0) {
+        var timeToNextBreak = nextBreakMark - activeElapsed;
+        if (timeToNextBreak > 0 && remainingLen >= timeToNextBreak) {
+          result.push({
+            intensity: intensity,
+            len: timeToNextBreak,
+            rate: rate
+          });
+          activeElapsed += timeToNextBreak;
+          remainingLen -= timeToNextBreak;
+          if (activeElapsed < state.targetMin * 60) {
+            result.push({
+              intensity: 'break',
+              len: 30,
+              rate: 0
+            });
+          }
+          nextBreakMark += 600;
+        } else {
+          result.push({
+            intensity: intensity,
+            len: remainingLen,
+            rate: rate
+          });
+          activeElapsed += remainingLen;
+          remainingLen = 0;
+        }
+      }
+    }
+    return result;
+  }
 
   function surprise(){
     var tgt=state.targetMin*60; var kinds=['high','medium','med','low'];
@@ -648,7 +695,7 @@
         };
       });
     } else {
-      state.sequence = buildPreview();
+      state.sequence = applyAutoBreaks(buildPreview());
     }
     var t=0;
     state.ends=state.sequence.map(function(s){ t+=s.len; return t; });
@@ -668,7 +715,7 @@
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.start(t); o.stop(t+dur+0.03);
   }
-  function transitionBeep(k){ var f = k==='high'?740 : k==='medium'?640 : k==='med'?540 : 440; beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
+  function transitionBeep(k){ var f = k==='high'?740 : k==='medium'?640 : k==='med'?540 : k==='break'?380 : 440; beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
   function countBeep(){ if(!COUNTDOWN_BEEPS) return; beep(430,0.06,0.05); }
   function completeBeep(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ beep(f,0.18,0.07); }, i*150); }); }
 
@@ -732,12 +779,12 @@
   function goToAdvance() {
     state.mode = 'advance';
     if (!state.advancedSequence || state.advancedSequence.length === 0 || !state.advancedEdited) {
-      var preview = buildPreview();
+      var preview = applyAutoBreaks(buildPreview());
       state.advancedSequence = preview.map(function(s){
         return {
           intensity: s.intensity,
           len: s.len,
-          rate: state.config[s.intensity].rate
+          rate: state.config[s.intensity] ? state.config[s.intensity].rate : (s.rate || 0)
         };
       });
       state.advancedEdited = false;
@@ -752,12 +799,12 @@
 
   function resetAdvance() {
     if (confirm('Are you sure you want to reset the timeline to the current setup configuration?')) {
-      var preview = buildPreview();
+      var preview = applyAutoBreaks(buildPreview());
       state.advancedSequence = preview.map(function(s){
         return {
           intensity: s.intensity,
           len: s.len,
-          rate: state.config[s.intensity].rate
+          rate: state.config[s.intensity] ? state.config[s.intensity].rate : (s.rate || 0)
         };
       });
       state.advancedEdited = false;
@@ -766,9 +813,9 @@
   }
 
   function addAdvancedBlock(intensity) {
-    var defaultLens = { high: 45, medium: 90, med: 105, low: 120 };
+    var defaultLens = { high: 45, medium: 90, med: 105, low: 120, break: 30 };
     var len = defaultLens[intensity] || 60;
-    var rate = state.config[intensity] ? state.config[intensity].rate : 24;
+    var rate = state.config[intensity] ? state.config[intensity].rate : 0;
     state.advancedSequence.push({
       intensity: intensity,
       len: len,
@@ -786,7 +833,7 @@
 
   function changeAdvancedRate(idx, delta) {
     var block = state.advancedSequence[idx];
-    if (!block) return;
+    if (!block || block.intensity === 'break') return;
     block.rate = Math.max(10, Math.min(60, block.rate + delta));
     state.advancedEdited = true;
     render();
@@ -937,12 +984,12 @@
 
     state.advancedEdited = false;
     if (state.mode === 'advance') {
-      var preview = buildPreview();
+      var preview = applyAutoBreaks(buildPreview());
       state.advancedSequence = preview.map(function(s){
         return {
           intensity: s.intensity,
           len: s.len,
-          rate: state.config[s.intensity].rate
+          rate: state.config[s.intensity] ? state.config[s.intensity].rate : (s.rate || 0)
         };
       });
     }
@@ -984,6 +1031,7 @@
     downloadCard: downloadShareCard,
     downloadConfig: downloadConfig,
     uploadConfigBtn: triggerUpload,
+    toggleBreaks: function(){ state.breaksEnabled = !state.breaksEnabled; render(); },
   };
 
   app.addEventListener('pointerdown', function(e){
@@ -1081,7 +1129,7 @@
     var isActive=state.mode==='running'||state.mode==='paused';
     var isAdvance=state.mode==='advance';
 
-    var prev=isAdvance ? state.advancedSequence : buildPreview();
+    var prev=isAdvance ? state.advancedSequence : applyAutoBreaks(buildPreview());
     var pt=0; var previewSegs=prev.map(function(s){ pt+=s.len; return {flex:s.len, color:CO[s.intensity].fill}; });
     var tgt=state.targetMin*60; var counts=curCounts(); var L=computeLen(tgt,counts);
     var lenT=function(k){ return counts[k]? fmt(L[k]) : '-'; };
@@ -1118,7 +1166,11 @@
       phaseLabel=co.name; phaseFill=co.fill; phaseInk=co.ink;
       phaseRemain=fmt(Math.ceil(remain)); phaseHeight=(frac*100)+'%';
       phaseIdx=(curIdx+1)+' / '+state.sequence.length;
-      phaseStrokes=String(s.rate !== undefined ? s.rate : c[s.intensity].rate);
+      if (s.intensity === 'break') {
+        phaseStrokes = 'BREAK';
+      } else {
+        phaseStrokes = String(s.rate !== undefined ? s.rate : (c[s.intensity] ? c[s.intensity].rate : 24));
+      }
       nextLabel = nx?CO[nx.intensity].name:'FINISH'; nextInk = nx?CO[nx.intensity].ink:CO.low.ink;
     }
 
@@ -1199,7 +1251,7 @@
             '<span style="width:12px; height:12px; border-radius:50%; background:'+co.fill+'; flex-shrink:0;"></span>'+
             '<div style="flex:1; display:flex; align-items:center; gap:8px;">'+
               '<span style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:'+co.ink+';">'+co.name+'</span>'+
-              '<span style="font-family:\'Space Grotesk\'; font-size:12px; color:'+co.ink+'; background:'+co.tint+'; padding:2px 8px; border-radius:10px; font-weight:500; white-space:nowrap;">'+s.rate+' strokes</span>'+
+              (s.intensity !== 'break' ? '<span style="font-family:\'Space Grotesk\'; font-size:12px; color:'+co.ink+'; background:'+co.tint+'; padding:2px 8px; border-radius:10px; font-weight:500; white-space:nowrap;">'+s.rate+' strokes</span>' : '')+
             '</div>'+
 
             '<div style="display:flex; align-items:center; gap:6px; background:oklch(0.975 0.012 85); padding:4px 8px; border-radius:10px; border:1px solid oklch(0.91 0.012 85);">'+
@@ -1229,10 +1281,13 @@
 
       var showWarning = false;
       if (state.advancedSequence.length > 0) {
-        var first = state.advancedSequence[0];
-        var last = state.advancedSequence[state.advancedSequence.length - 1];
-        if (first.intensity !== 'low' || last.intensity !== 'low') {
-          showWarning = true;
+        var nonBreakBlocks = state.advancedSequence.filter(function(s){ return s.intensity !== 'break'; });
+        if (nonBreakBlocks.length > 0) {
+          var first = nonBreakBlocks[0];
+          var last = nonBreakBlocks[nonBreakBlocks.length - 1];
+          if (first.intensity !== 'low' || last.intensity !== 'low') {
+            showWarning = true;
+          }
         }
       }
 
@@ -1312,6 +1367,9 @@
                   '<button data-act="addBlock" data-intensity="low" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.80 0.095 158 / 0.3); background:oklch(0.93 0.05 158); color:oklch(0.46 0.09 160); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
                     '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.80 0.095 158);"></span>+ Low'+
                   '</button>'+
+                  '<button data-act="addBlock" data-intensity="break" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.85 0.01 240 / 0.3); background:oklch(0.95 0.01 240); color:oklch(0.40 0.01 240); padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:flex-start; width:100%;">'+
+                    '<span style="width:8px; height:8px; border-radius:50%; background:oklch(0.65 0.02 240);"></span>+ Break (Rest)'+
+                  '</button>'+
                 '</div>'+
               '</div>'+
 
@@ -1380,10 +1438,16 @@
             '<div style="font-size:34px;font-weight:600;letter-spacing:0.34em;text-transform:uppercase;color:'+v.phaseInk+';">'+v.phaseLabel+'</div>'+
             '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:200px;line-height:0.92;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:'+v.phaseInk+';margin-top:6px;">'+v.phaseRemain+'</div>'+
             '<div style="margin-top:4px;font-size:15px;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.5 0.012 70);">remaining in phase</div>'+
-            '<div style="margin-top:18px;display:inline-flex;align-items:center;gap:10px;padding:9px 20px;border-radius:30px;background:oklch(1 0 0 / 0.5);border:1px solid '+v.phaseInk+';">'+
-              '<span style="font-family:\'Space Grotesk\';font-size:26px;font-weight:600;color:'+v.phaseInk+';">'+v.phaseStrokes+'</span>'+
-              '<span style="font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:'+v.phaseInk+';">strokes&nbsp;·&nbsp;target</span>'+
-            '</div>'+
+            (v.phaseStrokes === 'BREAK' ?
+              '<div style="margin-top:18px;display:inline-flex;align-items:center;gap:10px;padding:9px 20px;border-radius:30px;background:oklch(1 0 0 / 0.5);border:1px solid '+v.phaseInk+';">'+
+                '<span style="font-size:20px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:'+v.phaseInk+';">Active Break</span>'+
+              '</div>'
+            :
+              '<div style="margin-top:18px;display:inline-flex;align-items:center;gap:10px;padding:9px 20px;border-radius:30px;background:oklch(1 0 0 / 0.5);border:1px solid '+v.phaseInk+';">'+
+                '<span style="font-family:\'Space Grotesk\';font-size:26px;font-weight:600;color:'+v.phaseInk+';">'+v.phaseStrokes+'</span>'+
+                '<span style="font-size:14px;letter-spacing:0.14em;text-transform:uppercase;color:'+v.phaseInk+';">strokes&nbsp;·&nbsp;target</span>'+
+              '</div>'
+            )+
           '</div>'+
           '<div style="display:flex;flex-direction:column;gap:20px;background:oklch(1 0 0 / 0.95);backdrop-filter:blur(10px);border:1px solid oklch(0.9 0.016 230);border-radius:20px;padding:22px 24px;box-shadow:0 10px 30px oklch(0.3 0.022 255 / 0.06);z-index:2;position:relative;">'+
             '<div>'+
@@ -1500,6 +1564,17 @@
               stepperBtn('incTarget', v.incTargetDisabled, false, '+')+
             '</div>'+
           '</div>'+
+          (state.targetMin >= 20 ?
+            '<div style="border:1px solid oklch(0.87 0.012 85);border-radius:18px;padding:20px 24px;background:oklch(1 0 0);display:flex;align-items:center;justify-content:space-between;gap:18px;animation:fadeIn 0.3s ease;">'+
+              '<div>'+
+                '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.4 0.012 70);">Auto breaks</div>'+
+                '<div style="font-size:13px;color:oklch(0.6 0.012 70);margin-top:4px;">30s break after every 10 mins</div>'+
+              '</div>'+
+              '<button data-act="toggleBreaks" style="cursor:pointer;border:none;background:'+(state.breaksEnabled ? 'oklch(0.80 0.095 158)' : 'oklch(0.9 0.012 85)')+';padding:8px 16px;border-radius:12px;font-size:13px;font-weight:700;color:'+(state.breaksEnabled ? 'oklch(0.98 0.01 158)' : 'oklch(0.4 0.012 70)')+';transition:background 0.2s, color 0.2s;text-transform:uppercase;letter-spacing:0.05em;">'+
+                (state.breaksEnabled ? 'On' : 'Off')+
+              '</button>'+
+            '</div>'
+          : '')+
           intensityCard('Extreme','oklch(0.71 0.145 27)','oklch(0.45 0.15 27)','oklch(0.93 0.05 27)',v.hrate,v.hc,v.hsub,'decHc','incHc',v.addHDisabled,v.hlenText)+
           intensityCard('Hard','oklch(0.83 0.12 82)','oklch(0.52 0.12 70)','oklch(0.93 0.06 82)',v.mrate,v.mc,v.msub,'decMc','incMc',v.addMDisabled,v.mlenText)+
           intensityCard('Medium','oklch(0.78 0.09 190)','oklch(0.48 0.09 190)','oklch(0.93 0.05 190)',v.mdrate,v.mdc,v.mdsub,'decMdc','incMdc',v.addMdDisabled,v.mdlenText)+

@@ -31,6 +31,14 @@
     overflow-x: hidden;
     scroll-behavior: smooth;
   }
+  html {
+    height: 100%;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
   ::-webkit-scrollbar {
     width: 9px;
@@ -58,6 +66,7 @@
 
   /* Nav */
   nav {
+    width: 100%;
     max-width: 1120px;
     margin: 0 auto;
     padding: 30px 40px;
@@ -96,6 +105,7 @@
 
   /* Hero Section */
   .hero-section {
+    width: 100%;
     max-width: 1120px;
     margin: 0 auto;
     padding: 56px 40px 30px;
@@ -103,6 +113,7 @@
     grid-template-columns: 1.05fr 0.95fr;
     gap: 64px;
     align-items: center;
+    flex: 1;
   }
   .hero-badge {
     display: inline-flex;
@@ -353,303 +364,11 @@
     transition: color 0.3s ease, background 0.3s ease;
   }
 
-  /* Intensities Section */
-  .intensities-section {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 84px 40px 30px;
-  }
-  .intensities-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .section-lbl {
-    font-size: 13px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-  }
-  .section-title-large {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 38px;
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
-    margin: 10px 0 0;
-  }
-  .section-desc-right {
-    font-size: 15px;
-    color: var(--text-secondary);
-    max-width: 320px;
-    text-wrap: pretty;
-  }
 
-  .intensities-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-top: 38px;
-  }
-  .intensity-card {
-    border: 1px solid var(--border-subtle);
-    border-radius: 20px;
-    padding: 28px 26px;
-    background: var(--bg-card);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .intensity-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px oklch(0.3 0.022 255 / 0.05);
-  }
-  .intensity-card-header {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-  }
-  .intensity-card-dot {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-  }
-  .intensity-card-title {
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-  .intensity-card-rate {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 500;
-    font-size: 46px;
-    color: var(--text-primary);
-    margin-top: 22px;
-    font-variant-numeric: tabular-nums;
-  }
-  .intensity-card-rate span {
-    font-size: 18px;
-    color: var(--text-secondary);
-    font-weight: 400;
-  }
-  .intensity-card-desc {
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--text-secondary);
-    margin: 14px 0 0;
-  }
-
-  /* How It Works Section */
-  .how-section {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 84px 40px 30px;
-  }
-  .how-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 38px;
-  }
-  .how-card {
-    border-radius: 20px;
-    padding: 30px 28px;
-    background: oklch(0.965 0.012 230);
-    border: 1px solid oklch(0.9 0.016 230);
-    transition: transform 0.2s ease;
-  }
-  .how-card:hover {
-    transform: translateY(-2px);
-  }
-  .how-card-num {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    color: var(--text-secondary);
-  }
-  .how-card-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-top: 14px;
-    letter-spacing: -0.01em;
-  }
-  .how-card-desc {
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--text-secondary);
-    margin: 10px 0 0;
-  }
-
-  /* App Screenshots Gallery Section */
-  .showcase-section {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 84px 40px 30px;
-  }
-  .gallery-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-    background: oklch(0.95 0.016 230);
-    padding: 6px;
-    border-radius: 16px;
-    border: 1px solid var(--border-subtle);
-    max-width: 680px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .gallery-tab {
-    padding: 12px 20px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  .gallery-tab:hover {
-    color: var(--text-primary);
-  }
-  .gallery-tab.active {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 4px 15px oklch(0.3 0.022 255 / 0.05);
-  }
-  .gallery-content {
-    position: relative;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-card);
-    box-shadow: 0 25px 60px oklch(0.3 0.022 255 / 0.1);
-    aspect-ratio: 1280 / 850;
-    width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-  .gallery-image-panel {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.98);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .gallery-image-panel.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
-  }
-  .gallery-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .gallery-caption {
-    position: absolute;
-    bottom: 24px;
-    left: 24px;
-    right: 24px;
-    padding: 20px 28px;
-    background: oklch(1 0 0 / 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.9 0.016 230 / 0.8);
-    border-radius: 16px;
-    max-width: 500px;
-  }
-  .gallery-caption h4 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--text-primary);
-  }
-  .gallery-caption p {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.4;
-  }
-
-  /* Final CTA Section */
-  .final-cta-section {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 70px 40px 40px;
-  }
-  .final-cta-card {
-    border-radius: 26px;
-    background: oklch(0.3 0.022 255);
-    color: oklch(0.97 0.006 85);
-    padding: 64px 56px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 40px oklch(0.3 0.022 255 / 0.15);
-  }
-  .final-cta-timeline {
-    display: flex;
-    gap: 3px;
-    height: 10px;
-    width: 280px;
-    max-width: 70%;
-    margin: 0 auto 30px;
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .final-cta-timeline-seg {
-    height: 100%;
-    border-radius: 2px;
-  }
-  .final-cta-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(26px, 4.5vw, 40px);
-    letter-spacing: -0.01em;
-    margin: 0;
-    color: oklch(1 0 0);
-  }
-  .final-cta-desc {
-    font-size: 17px;
-    color: oklch(0.85 0.016 230);
-    margin: 16px auto 0;
-    max-width: 440px;
-  }
-  .btn-final-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 13px;
-    background: oklch(0.97 0.006 85);
-    color: oklch(0.28 0.022 255);
-    padding: 18px 34px;
-    border-radius: 15px;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-top: 34px;
-    transition: background-color 0.2s ease, transform 0.15s ease;
-  }
-  .btn-final-cta:hover {
-    background: oklch(1 0 0);
-    transform: translateY(-2px);
-  }
-  .btn-final-cta-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--color-low);
-  }
 
   /* Footer */
   footer {
+    width: 100%;
     max-width: 1120px;
     margin: 0 auto;
     padding: 30px 40px 56px;
@@ -708,12 +427,6 @@
     .hero-stats {
       justify-content: center;
     }
-    .intensities-grid {
-      grid-template-columns: 1fr;
-    }
-    .how-grid {
-      grid-template-columns: 1fr;
-    }
   }
 
   @media (max-width: 768px) {
@@ -744,30 +457,9 @@
       width: 100%;
       max-width: 280px;
     }
-    .btn-hero-primary, .btn-hero-outline {
+    .btn-hero-primary {
       width: 100%;
       justify-content: center;
-    }
-    .gallery-caption {
-      position: static;
-      margin: 16px;
-      max-width: none;
-    }
-    .gallery-content {
-      aspect-ratio: auto;
-      height: auto;
-    }
-    .gallery-image-panel {
-      position: relative;
-      display: none;
-      transform: none;
-      aspect-ratio: 1280 / 850;
-    }
-    .gallery-image-panel.active {
-      display: block;
-    }
-    .final-cta-card {
-      padding: 40px 24px;
     }
     footer {
       flex-direction: column;
@@ -840,12 +532,8 @@
 
   /* Header Video Backdrop */
   .header-video-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 90vh;
-    max-height: 900px;
+    position: fixed;
+    inset: 0;
     overflow: hidden;
     z-index: -1;
     pointer-events: none;
@@ -863,9 +551,8 @@
     inset: 0;
     background: linear-gradient(
       to bottom,
-      transparent 50%,
-      oklch(0.98 0.01 230 / 0.5) 80%,
-      oklch(0.98 0.01 230) 100%
+      transparent 30%,
+      oklch(0.98 0.01 230 / 0.4) 100%
     );
   }
 </style>
@@ -887,16 +574,12 @@
   <div class="header-video-overlay"></div>
 </div>
 
-<div class="grid-overlay"></div>
-
 <!-- Navigation -->
 <nav>
   <a href="#" class="logo-group">
     <span class="logo-text">CREWCALL</span>
   </a>
   <div class="nav-links">
-    <a href="#intensities" class="nav-link">Intensities</a>
-    <a href="#how" class="nav-link">How it works</a>
     <a href="app.html" class="btn-nav-cta">Open Coach</a>
   </div>
 </nav>
@@ -916,7 +599,6 @@
       <a href="app.html" class="btn-hero-primary">
         <span class="btn-hero-primary-dot"></span>Start a session
       </a>
-      <a href="#how" class="btn-hero-outline">How it works</a>
     </div>
   </div>
 
@@ -968,149 +650,6 @@
   </div>
 </section>
 
-<!-- Intensities Section -->
-<section id="intensities" class="intensities-section">
-  <div class="intensities-header">
-    <div>
-      <div class="section-lbl">Four gears</div>
-      <h2 class="section-title-large">Every session is built from four intensities.</h2>
-    </div>
-    <p class="section-desc-right">Each phase carries its own stroke-rate target, so you always know how hard to pull.</p>
-  </div>
-
-  <div class="intensities-grid">
-    <!-- EXTREME -->
-    <div class="intensity-card">
-      <div class="intensity-card-header">
-        <span class="intensity-card-dot" style="background: var(--color-high);"></span>
-        <span class="intensity-card-title" style="color: oklch(0.45 0.15 27);">Extreme</span>
-      </div>
-      <div class="intensity-card-rate">30<span> spm</span></div>
-      <p class="intensity-card-desc">Short, sharp bursts. Empty the tank, then recover. Designed for maximum cardio push.</p>
-    </div>
-    <!-- HARD -->
-    <div class="intensity-card">
-      <div class="intensity-card-header">
-        <span class="intensity-card-dot" style="background: var(--color-medium);"></span>
-        <span class="intensity-card-title" style="color: oklch(0.52 0.12 70);">Hard</span>
-      </div>
-      <div class="intensity-card-rate">28<span> spm</span></div>
-      <p class="intensity-card-desc">Sustainable working pace. The backbone of your endurance work and core session blocks.</p>
-    </div>
-    <!-- MEDIUM -->
-    <div class="intensity-card">
-      <div class="intensity-card-header">
-        <span class="intensity-card-dot" style="background: oklch(0.78 0.09 190);"></span>
-        <span class="intensity-card-title" style="color: oklch(0.48 0.09 190);">Medium</span>
-      </div>
-      <div class="intensity-card-rate">26<span> spm</span></div>
-      <p class="intensity-card-desc">Moderate pace. Ideal for building aerobic capacity and steady state aerobic base.</p>
-    </div>
-    <!-- LOW -->
-    <div class="intensity-card">
-      <div class="intensity-card-header">
-        <span class="intensity-card-dot" style="background: var(--color-low);"></span>
-        <span class="intensity-card-title" style="color: oklch(0.46 0.09 160);">Low</span>
-      </div>
-      <div class="intensity-card-rate">24<span> spm</span></div>
-      <p class="intensity-card-desc">Easy recovery strokes to catch your breath, reset posture, and roll into the next hard set.</p>
-    </div>
-  </div>
-</section>
-
-<!-- How It Works Section -->
-<section id="how" class="how-section">
-  <div class="section-lbl">How it works</div>
-  <h2 class="section-title-large" style="max-width:560px;">Set the time, stack the work, press start.</h2>
-
-  <div class="how-grid">
-    <div class="how-card">
-      <div class="how-card-num">01</div>
-      <div class="how-card-title">Set the length</div>
-      <p class="how-card-desc">Pick your total target workout time in five-minute steps, from a quick ten to a full ninety.</p>
-    </div>
-    <div class="how-card">
-      <div class="how-card-num">02</div>
-      <div class="how-card-title">Stack the intervals</div>
-      <p class="how-card-desc">Add high, medium, and low intensity pieces. Every segment length auto-adjusts to perfectly fill your time.</p>
-    </div>
-    <div class="how-card">
-      <div class="how-card-num">03</div>
-      <div class="how-card-title">Press start</div>
-      <p class="how-card-desc">A highly glanceable timer dashboard and custom audio beeps guide you through every gear change.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Interactive Showcase Gallery -->
-<section class="showcase-section">
-  <div class="container">
-    <div class="section-lbl" style="text-align: center; margin-bottom: 12px;">Glanceable Dashboard</div>
-    <h2 class="section-title-large" style="text-align: center; margin-bottom: 40px;">Inside the App</h2>
-
-    <!-- Tabs -->
-    <div class="gallery-tabs">
-      <button class="gallery-tab active" onclick="switchTab(0)">1. Custom Setup</button>
-      <button class="gallery-tab" onclick="switchTab(1)">2. Surprise Layout</button>
-      <button class="gallery-tab" onclick="switchTab(2)">3. Running Session</button>
-      <button class="gallery-tab" onclick="switchTab(3)">4. Session Complete</button>
-    </div>
-
-    <!-- Gallery Panel -->
-    <div class="gallery-content">
-      <!-- Slide 1 -->
-      <div class="gallery-image-panel active">
-        <img src="setup_screenshot.png" alt="Setup Screen" class="gallery-img">
-        <div class="gallery-caption">
-          <h4>Custom Session Planner</h4>
-          <p>Define your target length and use intuitive counters to customize the high, medium, and low intensity stack. Your session timeline automatically stretches to fill the target time.</p>
-        </div>
-      </div>
-
-      <!-- Slide 2 -->
-      <div class="gallery-image-panel">
-        <img src="surprise_screenshot.png" alt="Surprise Screen" class="gallery-img">
-        <div class="gallery-caption">
-          <h4>Dynamic Balanced Randomizer</h4>
-          <p>With "Surprise Me", CrewCall instantly mixes, groups, and spaces out interval ratios. You get a balanced build-up, peak-work, and cooldown flow ready to start immediately.</p>
-        </div>
-      </div>
-
-      <!-- Slide 3 -->
-      <div class="gallery-image-panel">
-        <img src="running_screenshot.png" alt="Running Screen" class="gallery-img">
-        <div class="gallery-caption">
-          <h4>High-Contrast Active Coach</h4>
-          <p>Large, readable text shows your current zone, remaining interval time, target stroke rate, and session progress bar. Designed to be visible from your rowing machine seat.</p>
-        </div>
-      </div>
-
-      <!-- Slide 4 -->
-      <div class="gallery-image-panel">
-        <img src="complete_screenshot.png" alt="Complete Screen" class="gallery-img">
-        <div class="gallery-caption">
-          <h4>Session Accomplished</h4>
-          <p>Congratulations, session complete! A celebratory beep sequence plays when you finish, displaying your workout metrics. Ready for your next piece?</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Final CTA Section -->
-<section id="start" class="final-cta-section">
-  <div class="final-cta-card">
-    <div class="final-cta-timeline" id="final-cta-timeline">
-      <!-- Rendered via JS -->
-    </div>
-    <h2 class="final-cta-title">Your next session is two minutes from starting.</h2>
-    <p class="final-cta-desc">No accounts, no setup screens. Define your targets, and start pulling.</p>
-    <a href="app.html" class="btn-final-cta">
-      <span class="btn-final-cta-dot"></span>Build my session
-    </a>
-  </div>
-</section>
-
 <!-- Footer -->
 <footer>
   <div class="footer-logo">
@@ -1121,28 +660,6 @@
 </footer>
 
 <script>
-  // Tab switching logic for gallery
-  function switchTab(index) {
-    const tabs = document.querySelectorAll('.gallery-tab');
-    const panels = document.querySelectorAll('.gallery-image-panel');
-    
-    tabs.forEach((tab, i) => {
-      if (i === index) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
-
-    panels.forEach((panel, i) => {
-      if (i === index) {
-        panel.classList.add('active');
-      } else {
-        panel.classList.remove('active');
-      }
-    });
-  }
-
   // --- SIMULATED COACH CLOCK LOGIC ---
   const COLORS = {
     high:   { name:'EXTREME', fill:'oklch(0.71 0.145 27)',  ink:'oklch(0.45 0.15 27)',  tint:'oklch(0.93 0.05 27)',  rate:30 },
@@ -1214,14 +731,6 @@
     timeline.innerHTML = seq.map((item, idx) => {
       const isCurrent = idx === activeIdx;
       return `<div class="sandbox-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill}; opacity: ${isCurrent ? 1 : 0.4};"></div>`;
-    }).join('');
-  }
-
-  // Render final CTA static timeline
-  const finalTimeline = document.getElementById('final-cta-timeline');
-  if (finalTimeline) {
-    finalTimeline.innerHTML = seq.map(item => {
-      return `<div class="final-cta-timeline-seg" style="flex: ${item.len}; background: ${COLORS[item.k].fill};"></div>`;
     }).join('');
   }
 

@@ -714,13 +714,13 @@
 
   function surprise(){
     var tgt=state.targetMin*60; var kinds=['high','medium','med','low'];
-    var counts={high:0,medium:0,med:0,low:2}; var guard=0;
+    var counts={high:0,medium:0,med:0,low:2,freeform:0}; var guard=0;
     var want=6+Math.floor(Math.random()*6);
     while((counts.high+counts.medium+counts.med+counts.low)<want && guard<300){
       guard++;
       var k=kinds[Math.floor(Math.random()*4)];
       if(counts[k]>=12) continue;
-      var test={high:counts.high,medium:counts.medium,med:counts.med,low:counts.low}; test[k]++;
+      var test={high:counts.high,medium:counts.medium,med:counts.med,low:counts.low,freeform:counts.freeform}; test[k]++;
       var L=computeLen(tgt,test);
       if(minPresentLen(L,test)>=MINLEN){ counts=test; } else break;
     }

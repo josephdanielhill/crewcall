@@ -569,6 +569,10 @@
   var MINLEN = 15;
   var SOUND_ENABLED = true;
   var COUNTDOWN_BEEPS = true;
+  var COUNTDOWN_WINDOW = 5;
+  var PREP_DURATION = 10;
+  var INTENSITY_FREQ = { high:740, medium:640, med:540, break:380 };
+  function freqFor(k){ return INTENSITY_FREQ[k] || 440; }
 
   var state = {
     mode: 'setup',
@@ -582,6 +586,7 @@
     elapsed: 0, baseElapsed: 0, runStart: 0,
     sequence: [], ends: [], totalDuration: 0,
     lastSegIndex: -1, lastCountTick: null, raf: null, actx: null,
+    prepStart: 0, prepElapsed: 0, prepLastTick: null,
     advancedSequence: [],
     advancedEdited: false,
     isAdvancedWorkout: false,
@@ -1093,8 +1098,8 @@
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.start(t); o.stop(t+dur+0.03);
   }
-  function transitionBeep(k){ var f = k==='high'?740 : k==='medium'?640 : k==='med'?540 : k==='break'?380 : 440; beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
-  function countBeep(){ if(!COUNTDOWN_BEEPS) return; beep(430,0.06,0.05); }
+  function transitionBeep(k){ var f = freqFor(k); beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
+  function countBeep(freq){ if(!COUNTDOWN_BEEPS) return; beep(freq||430,0.06,0.05); }
   function completeBeep(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ beep(f,0.18,0.07); }, i*150); }); }
 
   function segIndexAt(e){ for(var i=0;i<state.ends.length;i++){ if(e<state.ends[i]) return i; } return state.ends.length-1; }
@@ -1110,11 +1115,30 @@
   }
   function start(){
     state.isAdvancedWorkout = false;
-    runWorkout();
+    beginPrep();
   }
   function startAdvanced(){
     state.isAdvancedWorkout = true;
-    runWorkout();
+    beginPrep();
+  }
+  function beginPrep(){
+    build(); if(state.sequence.length===0) return;
+    ensureAudio();
+    state.mode='prep'; state.prepStart=performance.now(); state.prepElapsed=0; state.prepLastTick=null;
+    state.sidebarHidden = false;
+    prepLoop(); render();
+  }
+  function prepLoop(){ if(state.raf) cancelAnimationFrame(state.raf); state.raf=requestAnimationFrame(prepTick); }
+  function prepTick(){
+    if(state.mode!=='prep') return;
+    var now=performance.now();
+    state.prepElapsed=(now-state.prepStart)/1000;
+    var remain=PREP_DURATION-state.prepElapsed;
+    if(remain<=0){ runWorkout(); return; }
+    var rc=Math.ceil(remain);
+    if(rc!==state.prepLastTick){ state.prepLastTick=rc; countBeep(freqFor(state.sequence[0].intensity)); }
+    render();
+    state.raf=requestAnimationFrame(prepTick);
   }
   function loop(){ if(state.raf) cancelAnimationFrame(state.raf); state.raf=requestAnimationFrame(tick); }
   function tick(){
@@ -1125,7 +1149,11 @@
     var idx=segIndexAt(state.elapsed);
     if(idx!==state.lastSegIndex){ state.lastSegIndex=idx; transitionBeep(state.sequence[idx].intensity); state.lastCountTick=null; }
     var remain=state.ends[idx]-state.elapsed; var rc=Math.ceil(remain);
-    if(rc<=3 && rc>=1 && rc!==state.lastCountTick){ state.lastCountTick=rc; countBeep(); }
+    if(rc<=COUNTDOWN_WINDOW && rc>=1 && rc!==state.lastCountTick){
+      state.lastCountTick=rc;
+      var nx=state.sequence[idx+1];
+      countBeep(freqFor(nx ? nx.intensity : state.sequence[idx].intensity));
+    }
     render();
     state.raf=requestAnimationFrame(tick);
   }
@@ -1150,7 +1178,7 @@
     render();
   }
   function finish(){ state.mode='done'; state.elapsed=state.totalDuration; if(state.raf) cancelAnimationFrame(state.raf); completeBeep(); render(); }
-  function restart(){ runWorkout(); }
+  function restart(){ beginPrep(); }
   function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } state.advancedEdited = false; render(); }
   function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; state.advancedEdited = false; render(); }
 
@@ -1591,6 +1619,7 @@
     var isSetup=state.mode==='setup', isDone=state.mode==='done';
     var isActive=state.mode==='running'||state.mode==='paused';
     var isAdvance=state.mode==='advance';
+    var isPrep=state.mode==='prep';
 
     var prev=isAdvance ? state.advancedSequence : applyAutoBreaks(buildPreview());
     var pt=0; var previewSegs=prev.map(function(s){ pt+=s.len; return {flex:s.len, color:CO[s.intensity].fill}; });
@@ -1642,8 +1671,20 @@
     var total = (isSetup || isAdvance)?pt:state.totalDuration;
     var overallPct = (isActive||isDone)&&total? Math.max(0,Math.min(100,(state.elapsed/total)*100)) : 0;
 
+    var prepRemainText='', prepFirstLabel='', prepFirstInk='', prepFirstFill='';
+    if(isPrep){
+      var prepRemain = Math.max(0, PREP_DURATION - state.prepElapsed);
+      prepRemainText = String(Math.ceil(prepRemain));
+      var firstSeg = state.sequence[0];
+      if(firstSeg){
+        var firstCo = CO[firstSeg.intensity];
+        prepFirstLabel = firstCo.name; prepFirstInk = firstCo.ink; prepFirstFill = firstCo.fill;
+      }
+    }
+
     return {
-      isSetup:isSetup, isActive:isActive, isDone:isDone, showList:isActive||isDone, isAdvance:isAdvance,
+      isSetup:isSetup, isActive:isActive, isDone:isDone, showList:isActive||isDone||isPrep, isAdvance:isAdvance,
+      isPrep:isPrep, prepRemainText:prepRemainText, prepFirstLabel:prepFirstLabel, prepFirstInk:prepFirstInk, prepFirstFill:prepFirstFill,
       canStart: prev.length>0, cannotStart: prev.length===0,
       previewSegs:previewSegs, segViews:segViews,
       setupTotalText:fmt(pt), setupCount:useSeq.length,
@@ -1903,6 +1944,18 @@
             '</button>'
           : '<div style="font-size:16px;color:oklch(0.6 0.012 70);">Add at least one interval to begin →</div>')+
         '</div>'+
+      '</div>';
+    }
+    if(v.isPrep){
+      return ''+
+      '<div class="left-container" style="justify-content:center;align-items:center;text-align:center;background:transparent;padding:40px 30px;">'+
+        '<div style="font-size:15px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.5 0.012 70);margin-bottom:8px;">Get ready</div>'+
+        '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:200px;line-height:0.92;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.prepRemainText+'</div>'+
+        '<div style="margin-top:18px;display:inline-flex;align-items:center;gap:10px;padding:9px 20px;border-radius:30px;background:oklch(1 0 0 / 0.5);border:1px solid '+v.prepFirstInk+';">'+
+          '<span style="width:9px;height:9px;border-radius:50%;background:'+v.prepFirstFill+';"></span>'+
+          '<span style="font-size:16px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:'+v.prepFirstInk+';">First up &middot; '+v.prepFirstLabel+'</span>'+
+        '</div>'+
+        '<button data-act="stop" class="btn-soft" style="margin-top:30px;cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:14px 28px;border-radius:13px;font-size:14px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">Cancel</button>'+
       '</div>';
     }
     if(v.isActive){

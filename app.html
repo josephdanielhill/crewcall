@@ -33,8 +33,8 @@
     flex-direction: column;
     border-right: 1px solid oklch(0.9 0.016 230);
     transition: flex 0.75s cubic-bezier(0.76, 0, 0.24, 1), border-color 0.75s ease;
-    z-index: 10;
-    overflow: hidden;
+    z-index: 20;
+    overflow: visible;
   }
   .app-right {
     flex: 1;
@@ -44,7 +44,7 @@
     min-width: 0;
     transition: transform 0.75s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.75s ease, flex 0.75s cubic-bezier(0.76, 0, 0.24, 1);
     position: relative;
-    z-index: 20;
+    z-index: 10;
   }
   #app.mode-advance {
     height: 100vh;

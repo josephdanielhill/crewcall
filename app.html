@@ -558,6 +558,8 @@
 (function(){
   "use strict";
 
+  function trackEvent(name){ if(window.fathom) window.fathom.trackEvent(name); }
+
   var app = document.getElementById('app');
 
   var COLORS = {
@@ -716,6 +718,7 @@
   }
 
   function surprise(){
+    trackEvent('Surprise Me Used');
     var tgt=state.targetMin*60; var kinds=['high','medium','med','low'];
     var counts={high:0,medium:0,med:0,low:2,freeform:0}; var guard=0;
     var want=6+Math.floor(Math.random()*6);
@@ -734,6 +737,7 @@
   }
 
   function openBuilder() {
+    trackEvent('Guided Builder Opened');
     state.builderActive = true;
     state.builderStep = 0;
     state.builderAnswers = {
@@ -989,6 +993,7 @@
   }
 
   function downloadShareCard(){
+    trackEvent('Share Card Downloaded');
     var canvas = document.createElement('canvas');
     canvas.width = 1200;
     canvas.height = 630;
@@ -1128,6 +1133,7 @@
   }
   function beginPrep(){
     build(); if(state.sequence.length===0) return;
+    trackEvent('Workout Started');
     ensureAudio();
     state.mode='prep'; state.prepStart=performance.now(); state.prepElapsed=0; state.prepLastTick=null;
     state.sidebarHidden = false;
@@ -1182,12 +1188,13 @@
     if (app) app.classList.remove('sidebar-hidden');
     render();
   }
-  function finish(){ state.mode='done'; state.elapsed=state.totalDuration; if(state.raf) cancelAnimationFrame(state.raf); completeBeep(); render(); }
+  function finish(){ state.mode='done'; state.elapsed=state.totalDuration; if(state.raf) cancelAnimationFrame(state.raf); completeBeep(); render(); trackEvent('Workout Completed'); }
   function restart(){ beginPrep(); }
   function change(k,field,delta){ var c=state.config[k]; if(field==='count'){ if(delta>0 && !canAdd(k)) return; c.count=Math.max(0,Math.min(12,c.count+delta)); } state.advancedEdited = false; render(); }
   function changeTarget(delta){ var nv=state.targetMin+delta*5; if(nv<10||nv>90) return; if(delta<0 && !canSetTarget(nv*60)) return; state.targetMin=nv; state.advancedEdited = false; render(); }
 
   function goToAdvance() {
+    trackEvent('Advanced Builder Opened');
     state.mode = 'advance';
     state.enteringAdvance = true;
     if (!state.advancedSequence || state.advancedSequence.length === 0 || !state.advancedEdited) {
@@ -1327,6 +1334,7 @@
   }
 
   function downloadConfig(){
+    trackEvent('Config Downloaded');
     var configData = {
       targetMin: state.targetMin,
       config: {
@@ -1385,6 +1393,7 @@
       state.advancedEdited = true;
       state.mode = 'advance';
       render();
+      trackEvent('Config Imported');
       showToast('Custom timeline loaded successfully!');
       return;
     }
@@ -1447,6 +1456,7 @@
     }
     
     render();
+    trackEvent('Config Imported');
     showToast('Configuration loaded successfully!');
   }
 

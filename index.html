@@ -771,7 +771,7 @@
       <span class="logo-text">CREWCALL</span>
     </a>
     <div class="nav-links">
-      <a href="app.html" class="btn-nav-cta">Open Coach</a>
+      <a href="app.html" class="btn-nav-cta" onclick="trackEvent('Landing CTA - Nav Click')">Open Coach</a>
     </div>
   </nav>
 
@@ -788,7 +788,7 @@
         stroke targets and audio cues.
       </p>
       <div class="hero-actions">
-        <a href="app.html" class="btn-hero-primary">
+        <a href="app.html" class="btn-hero-primary" onclick="trackEvent('Landing CTA - Hero Click')">
           <span class="btn-hero-primary-dot"></span>Start a session
         </a>
       </div>
@@ -904,6 +904,8 @@
   </footer>
 
   <script>
+    function trackEvent(name){ if(window.fathom) window.fathom.trackEvent(name); }
+
     // --- SIMULATED COACH CLOCK LOGIC ---
     const COLORS = {
       high: { name: 'EXTREME', fill: 'oklch(0.71 0.145 27)', ink: 'oklch(0.45 0.15 27)', tint: 'oklch(0.93 0.05 27)', rate: 30 },

@@ -118,17 +118,48 @@
   .btn-stepper-soft:hover{background:oklch(0.95 0.016 230);}
   .btn-disabled{opacity:0.3;pointer-events:none;}
 
-  @media (max-width: 768px) {
+  /* ---------------------------------------------------------------- */
+  /* Mobile (phone) layout — one primary panel per mode, the other      */
+  /* becomes a compact bar or an on-demand sheet instead of stacking.  */
+  /* ---------------------------------------------------------------- */
+  #mobile-topbar { display: none; }
+  .mobile-sheet-scrim { display: none; }
+
+  @media (max-width: 767px) {
+    #mobile-topbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px;
+      flex: 0 0 auto;
+      background: oklch(0.985 0.015 230 / 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid oklch(0.9 0.016 230);
+      position: relative;
+      z-index: 30;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      color: #000000;
+    }
+
+    body { display: flex; flex-direction: column; height: 100dvh; margin: 0; overflow: hidden; }
+
     #app {
       flex-direction: column;
       height: auto;
-      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
     }
     .app-left {
-      flex: 0 0 auto;
+      flex: 1 1 auto;
       width: 100%;
       border-right: none;
-      border-bottom: 1px solid oklch(0.9 0.016 230);
+      min-height: 0;
+      overflow-y: auto;
     }
     .app-right {
       flex: 0 0 auto;
@@ -141,9 +172,9 @@
     .left-container {
       position: relative;
       inset: auto;
-      padding: 48px 16px;
-      gap: 30px;
-      min-height: 440px;
+      padding: 24px 18px !important;
+      gap: 22px;
+      min-height: 100%;
       align-items: center;
       text-align: center;
     }
@@ -168,11 +199,238 @@
     .active-inner {
       position: relative;
       inset: auto;
-      padding: 32px 16px;
-      gap: 32px;
-      min-height: 480px;
+      padding: 20px 16px;
+      gap: 24px;
+      min-height: 100%;
       width: 100%;
       align-items: stretch;
+    }
+
+    /* SETUP: the builder (right panel) is the primary scrollable view;   */
+    /* the summary/start button collapse into a fixed bottom action bar. */
+    #app[data-mode="setup"] .app-left {
+      order: 2;
+      flex: 0 0 auto;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 500;
+      border-top: 1px solid oklch(0.9 0.016 230);
+      background: oklch(1 0 0 / 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    #app[data-mode="setup"] .app-left-content {
+      position: relative !important;
+      inset: auto !important;
+    }
+    #app[data-mode="setup"] .app-backdrop-wrapper {
+      display: none;
+    }
+    #app[data-mode="setup"] .app-right {
+      order: 1;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding-bottom: 180px;
+    }
+    #app[data-mode="setup"] .left-container {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      text-align: left;
+      min-height: 0;
+    }
+    #app[data-mode="setup"] .left-container > div {
+      display: block;
+      width: auto;
+    }
+    #app[data-mode="setup"] .setup-brand {
+      display: none !important;
+    }
+    #app[data-mode="setup"] .setup-summary {
+      flex: 1 1 auto;
+      background: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      gap: 4px !important;
+    }
+    #app[data-mode="setup"] .setup-metrics-row {
+      justify-content: flex-start;
+      align-items: baseline;
+      gap: 14px;
+    }
+    #app[data-mode="setup"] .setup-time-val {
+      font-size: 22px;
+    }
+    #app[data-mode="setup"] .setup-count-val {
+      font-size: 16px;
+    }
+    #app[data-mode="setup"] .setup-preview-bar,
+    #app[data-mode="setup"] .setup-time-label,
+    #app[data-mode="setup"] .setup-count-label {
+      display: none !important;
+    }
+    #app[data-mode="setup"] .setup-metrics-row > div:last-child {
+      padding-bottom: 0 !important;
+    }
+    #app[data-mode="setup"] .setup-cta {
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 0;
+    }
+    #app[data-mode="setup"] .setup-cta button {
+      padding: 12px 16px !important;
+      font-size: 13px !important;
+      gap: 8px !important;
+      white-space: nowrap;
+    }
+
+    /* ADVANCE: cards list is primary; the control panel becomes a       */
+    /* sticky bottom action bar instead of a 340px side column.          */
+    #app.mode-advance .app-left {
+      flex: 1 1 auto;
+      height: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-top: 0;
+    }
+    #app.mode-advance .advance-brand {
+      display: none;
+    }
+    #app.mode-advance .advance-body {
+      flex-direction: column;
+      overflow: visible !important;
+      gap: 16px !important;
+    }
+    #app.mode-advance #timeline-cards-column {
+      overflow-y: visible !important;
+    }
+    #app.mode-advance .control-panel {
+      width: 100% !important;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 500;
+      max-height: none !important;
+      border-radius: 20px 20px 0 0 !important;
+      padding: 0 16px !important;
+      box-shadow: 0 -12px 30px oklch(0.3 0.022 255 / 0.18);
+    }
+    #app.mode-advance .control-panel .advance-actions-grid {
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 6px !important;
+    }
+    #app.mode-advance .control-panel .advance-actions-grid button span {
+      display: none;
+    }
+    #app.mode-advance #timeline-cards-column,
+    #app.mode-advance .left-container {
+      padding-bottom: 150px !important;
+    }
+    .timeline-move-btn {
+      display: none !important;
+    }
+    .timeline-card {
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+    .timeline-dur-btn {
+      width: 32px !important;
+      height: 32px !important;
+    }
+    .timeline-delete-btn {
+      padding: 8px !important;
+    }
+
+    /* PREP: brief transitional countdown - list stays in normal flow    */
+    /* below it (no sheet), so shrink the huge desktop countdown so it   */
+    /* doesn't push the list off-screen.                                 */
+    #app[data-mode="prep"] .prep-countdown-val {
+      font-size: 96px !important;
+    }
+    #app[data-mode="prep"] .app-left {
+      flex: 0 0 auto;
+    }
+    #app[data-mode="prep"] .app-left-content {
+      position: relative !important;
+      inset: auto !important;
+    }
+    #app[data-mode="prep"] .app-backdrop-wrapper {
+      display: none;
+    }
+
+    /* RUNNING / PAUSED / PREP / DONE: timer/controls stay primary and   */
+    /* full-height; the interval list becomes an on-demand bottom sheet. */
+    /* Reserve room so the floating toggle pill never covers content     */
+    /* that scrolls to the bottom (e.g. the Done screen's action row).   */
+    #app.has-sheet .left-container {
+      padding-bottom: 90px !important;
+    }
+    #app[data-mode="done"] .left-container {
+      justify-content: flex-start !important;
+      flex-shrink: 0;
+      padding-top: 32px !important;
+      padding-bottom: 150px !important;
+    }
+    #app.has-sheet .app-right {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 900;
+      max-height: 65vh;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -12px 30px oklch(0.3 0.022 255 / 0.18);
+      overflow-y: auto;
+      transform: translateY(0);
+      transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+    #app.has-sheet.sidebar-hidden .app-right {
+      transform: translateY(100%);
+      pointer-events: none;
+    }
+    #app.has-sheet .mobile-sheet-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: oklch(0.2 0.02 255 / 0.35);
+      z-index: 850;
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.35s ease;
+    }
+    #app.has-sheet.sidebar-hidden .mobile-sheet-scrim {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #app.has-sheet .sidebar-toggle-btn {
+      position: fixed;
+      left: 50%;
+      right: auto;
+      top: auto;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: auto;
+      height: auto;
+      border-radius: 30px;
+      padding: 10px 20px;
+      gap: 8px;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      z-index: 950;
+    }
+    #app.has-sheet .sidebar-toggle-btn:hover,
+    #app.has-sheet .sidebar-toggle-btn:active,
+    #app.has-sheet.sidebar-hidden .sidebar-toggle-btn:hover,
+    #app.has-sheet.sidebar-hidden .sidebar-toggle-btn:active {
+      transform: translateX(-50%);
     }
   }
   .toast {
@@ -246,120 +504,6 @@
   .timeline-cards-container::-webkit-scrollbar-thumb {
     background: oklch(0.85 0.016 230);
     border-radius: 4px;
-  }
-
-  #mobile-warning {
-    display: none;
-  }
-
-  @media (max-width: 767px) {
-    #app {
-      display: none !important;
-    }
-    #mobile-warning {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: oklch(0.975 0.016 230);
-      z-index: 9999;
-      font-family: 'Hanken Grotesk', system-ui, sans-serif;
-      padding: 24px;
-      overflow: hidden;
-    }
-
-    .mobile-warning-card {
-      position: relative;
-      z-index: 10;
-      background: oklch(1 0 0 / 0.82);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid oklch(0.9 0.016 230 / 0.8);
-      border-radius: 24px;
-      padding: 40px 28px;
-      max-width: 360px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 20px 40px oklch(0.3 0.022 255 / 0.06);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .mobile-warning-icon {
-      width: 80px;
-      height: 80px;
-      background: oklch(0.93 0.016 230);
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #005B96;
-      animation: pulseIcon 3s infinite ease-in-out;
-    }
-
-    @keyframes pulseIcon {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-    }
-
-    .mobile-warning-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      font-size: 24px;
-      line-height: 1.15;
-      color: oklch(0.26 0.022 255);
-      margin: 0;
-    }
-
-    .mobile-warning-text {
-      font-size: 15px;
-      line-height: 1.6;
-      color: oklch(0.48 0.022 255);
-      margin: 0;
-      text-wrap: pretty;
-    }
-
-    .mobile-warning-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background: #005B96;
-      color: oklch(0.97 0.006 85);
-      border: none;
-      border-radius: 14px;
-      padding: 16px 28px;
-      font-size: 16px;
-      font-weight: 600;
-      text-decoration: none;
-      width: 100%;
-      cursor: pointer;
-      box-shadow: 0 8px 20px oklch(0.3 0.022 255 / 0.12);
-      transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-    }
-
-    .mobile-warning-btn:active {
-      transform: scale(0.97);
-      background: #004a7a;
-    }
-
-    .mobile-warning-btn .btn-arrow {
-      transition: transform 0.2s ease;
-    }
-
-    .mobile-warning-btn:hover .btn-arrow {
-      transform: translateX(-4px);
-    }
   }
 
   /* Global Water Background Backdrop */
@@ -463,9 +607,15 @@
     opacity: 0;
   }
 
+  .sidebar-toggle-mount {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 950;
+  }
   .sidebar-toggle-btn {
     position: absolute;
-    right: 0;
+    right: 43%;
     top: 50%;
     transform: translate(50%, -50%);
     width: 44px;
@@ -475,6 +625,7 @@
     border: 1px solid oklch(0.9 0.016 230);
     box-shadow: 0 4px 12px oklch(0.3 0.022 255 / 0.12);
     cursor: pointer;
+    pointer-events: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -489,42 +640,21 @@
   .sidebar-toggle-btn:active {
     transform: translate(50%, -50%) scale(0.95);
   }
-  
+
   #app.sidebar-hidden .sidebar-toggle-btn {
-    transform: translate(10px, -50%);
+    right: 0;
+    transform: translate(-10px, -50%);
   }
   #app.sidebar-hidden .sidebar-toggle-btn:hover {
-    transform: translate(10px, -50%) scale(1.08);
+    transform: translate(-10px, -50%) scale(1.08);
   }
   #app.sidebar-hidden .sidebar-toggle-btn:active {
-    transform: translate(10px, -50%) scale(0.95);
+    transform: translate(-10px, -50%) scale(0.95);
   }
 </style>
 </head>
 <body>
-<div id="mobile-warning">
-  <div class="water-bg-container">
-    <div class="water-blob blob-1"></div>
-    <div class="water-blob blob-2"></div>
-    <div class="water-blob blob-3"></div>
-    <div class="water-frosted-overlay"></div>
-  </div>
-  <div class="mobile-warning-card">
-    <div class="mobile-warning-icon">
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="14" height="10" rx="1.5" stroke="currentColor"></rect>
-        <path d="M6 13v3M12 13v3M4 16h10" stroke="currentColor"></path>
-        <rect x="13" y="8" width="9" height="11" rx="1.5" fill="oklch(0.975 0.016 230)" stroke="currentColor"></rect>
-        <circle cx="17.5" cy="16.5" r="0.5" fill="currentColor" stroke="none"></circle>
-      </svg>
-    </div>
-    <h1 class="mobile-warning-title">Optimized for Tablet & Web</h1>
-    <p class="mobile-warning-text">CrewCall is designed for larger displays. To get the best out of your interval coach, please open this page on a tablet or desktop browser.</p>
-    <a href="index.html" class="mobile-warning-btn">
-      <span class="btn-arrow">←</span> Go back
-    </a>
-  </div>
-</div>
+<div id="mobile-topbar">CREWCALL</div>
 <div id="app">
   <div class="app-left">
     <!-- Sticky Column Background (constrained to left panel) -->
@@ -551,6 +681,8 @@
     <div class="app-left-content" style="position: absolute; inset: 0; display: flex; flex-direction: column; z-index: 3;"></div>
   </div>
   <div class="app-right"></div>
+  <div class="mobile-sheet-scrim" data-act="toggleSidebar"></div>
+  <div class="sidebar-toggle-mount"></div>
 </div>
 <input type="file" id="config-upload-input" accept=".json" style="display:none">
 
@@ -559,6 +691,7 @@
   "use strict";
 
   function trackEvent(name){ if(window.fathom) window.fathom.trackEvent(name); }
+  function isMobile(){ return window.matchMedia('(max-width: 767px)').matches; }
 
   var app = document.getElementById('app');
 
@@ -1120,7 +1253,7 @@
     ensureAudio();
     state.mode='running'; state.elapsed=0; state.baseElapsed=0; state.runStart=performance.now();
     state.lastSegIndex=-1; state.lastCountTick=null;
-    state.sidebarHidden = false;
+    state.sidebarHidden = isMobile();
     loop(); render();
   }
   function start(){
@@ -1721,6 +1854,19 @@
     };
   }
 
+  function sidebarToggleBtn(){
+    var mobile = isMobile();
+    var hidden = state.sidebarHidden;
+    var icon = mobile
+      ? (hidden ? '<polyline points="18 9 12 15 6 9"></polyline>' : '<polyline points="18 15 12 9 6 15"></polyline>')
+      : (hidden ? '<polyline points="15 18 9 12 15 6"></polyline>' : '<polyline points="9 18 15 12 9 6"></polyline>');
+    return ''+
+    '<button data-act="toggleSidebar" class="sidebar-toggle-btn" aria-label="Toggle session plan">'+
+      (mobile ? '<span>'+(hidden ? 'View plan' : 'Hide plan')+'</span>' : '')+
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+icon+'</svg>'+
+    '</button>';
+  }
+
   function stepperBtn(act, disabled, soft, label){
     var cls = soft ? 'btn-stepper-soft' : 'btn-stepper';
     var bg = soft ? 'oklch(0.985 0.005 85)' : 'oklch(1 0 0)';
@@ -1821,17 +1967,17 @@
 
               '<div style="display:flex; align-items:center; gap:6px; background:oklch(1 0 0 / 0.6); padding:4px 8px; border-radius:10px; border:1px solid '+co.fill.replace(')', ' / 0.1)')+';">'+
                 '<span style="font-size:12px; color:oklch(0.5 0.012 70); font-weight:600;">Dur:</span>'+
-                '<button data-act="decDur" data-idx="'+i+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">−</button>'+
+                '<button data-act="decDur" data-idx="'+i+'" class="timeline-dur-btn" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">−</button>'+
                 '<span style="font-family:\'Space Grotesk\'; font-size:14px; font-weight:600; min-width:44px; text-align:center; color:oklch(0.3 0.012 70);">'+fmt(s.len)+'</span>'+
-                '<button data-act="incDur" data-idx="'+i+'" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">+</button>'+
+                '<button data-act="incDur" data-idx="'+i+'" class="timeline-dur-btn" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">+</button>'+
               '</div>'+
 
-              '<div style="display:flex; gap:4px;">'+
+              '<div class="timeline-move-btn" style="display:flex; gap:4px;">'+
                 '<button data-act="moveUp" data-idx="'+i+'" style="border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▲</button>'+
                 '<button data-act="moveDown" data-idx="'+i+'" style="border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▼</button>'+
               '</div>'+
 
-              '<button data-act="deleteBlock" data-idx="'+i+'" style="border:none; background:transparent; cursor:pointer; font-size:16px; color:oklch(0.6 0.1 27); padding:4px; display:flex; align-items:center; justify-content:center; margin-left:8px;" title="Delete Block">🗑️</button>'+
+              '<button data-act="deleteBlock" data-idx="'+i+'" class="timeline-delete-btn" style="border:none; background:transparent; cursor:pointer; font-size:16px; color:oklch(0.6 0.1 27); padding:4px; display:flex; align-items:center; justify-content:center; margin-left:8px;" title="Delete Block">🗑️</button>'+
             '</div>';
           }
         }
@@ -1870,7 +2016,7 @@
       return ''+
       '<div class="left-container" style="justify-content: flex-start; overflow: hidden; height: 100%; box-sizing: border-box; padding: 64px 60px 40px;">'+
         '<div style="flex-shrink: 0; padding-bottom: 20px; width: 100%;">'+
-          '<div style="margin-bottom: 20px;">'+
+          '<div class="advance-brand" style="margin-bottom: 20px;">'+
             '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>'+
             '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
           '</div>'+
@@ -1888,7 +2034,7 @@
           '</div>'+
         '</div>'+
 
-        '<div style="display:flex; flex:1; overflow:hidden; gap:36px; min-height:0; width:100%;">'+
+        '<div class="advance-body" style="display:flex; flex:1; overflow:hidden; gap:36px; min-height:0; width:100%;">'+
           '<!-- Left Column: Cards List -->'+
           '<div id="timeline-cards-column" style="flex:1; overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:8px; padding-bottom:24px; min-height:0;">'+
             warningHtml+
@@ -1902,7 +2048,7 @@
             '<!-- Section: Session Control -->'+
             '<div style="position: sticky; top:0; background:oklch(1 0 0); padding-top:24px; padding-bottom:16px; z-index:10; border-bottom:1px solid oklch(0.95 0.012 85);">'+
               '<div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.6 0.012 70); margin-bottom:12px; font-weight:600;">Session Actions</div>'+
-              '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">'+
+              '<div class="advance-actions-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">'+
                 '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer; border:1px solid oklch(0.87 0.012 85); background:oklch(1 0 0); color:oklch(0.35 0.012 70); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px;">'+
                   '<span>📂</span>Import'+
                 '</button>'+
@@ -1932,29 +2078,29 @@
     if(v.isSetup){
       return ''+
       '<div class="left-container">'+
-        '<div>'+
+        '<div class="setup-brand">'+
           '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>'+
           '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
         '</div>'+
-        '<div style="display:flex;flex-direction:column;gap:24px;width:100%;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.5);border-radius:20px;padding:24px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.05);box-sizing:border-box;">'+
+        '<div class="setup-summary" style="display:flex;flex-direction:column;gap:24px;width:100%;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.5);border-radius:20px;padding:24px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.05);box-sizing:border-box;">'+
           '<div class="setup-metrics-row">'+
             '<div>'+
               '<div class="setup-time-val">'+v.setupTotalText+'</div>'+
-              '<div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">'+
+              '<div class="setup-time-label" style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">'+
                 '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.3 0.012 70);white-space:nowrap;">Total session</span>'+
                 '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.35 0.022 255);background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);padding:3px 11px;border-radius:20px;white-space:nowrap;">Goal '+v.targetText+'</span>'+
               '</div>'+
             '</div>'+
             '<div style="padding-bottom:14px;text-align:center;">'+
               '<div class="setup-count-val">'+v.setupCount+'</div>'+
-              '<div style="margin-top:8px;font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.3 0.012 70);">Intervals</div>'+
+              '<div class="setup-count-label" style="margin-top:8px;font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.3 0.012 70);">Intervals</div>'+
             '</div>'+
           '</div>'+
-          '<div style="display:flex;gap:3px;height:14px;border-radius:8px;overflow:hidden;width:100%;">'+
+          '<div class="setup-preview-bar" style="display:flex;gap:3px;height:14px;border-radius:8px;overflow:hidden;width:100%;">'+
             v.previewSegs.map(function(seg){ return '<div style="flex:'+seg.flex+';background:'+seg.color+';border-radius:3px;"></div>'; }).join('')+
           '</div>'+
         '</div>'+
-        '<div>'+
+        '<div class="setup-cta">'+
           (v.canStart ?
             '<button data-act="start" class="btn-start" style="display:flex;align-items:center;gap:16px;border:none;cursor:pointer;color:oklch(0.97 0.006 85);padding:22px 38px;border-radius:16px;font-size:19px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;animation:breathe 4.5s ease-in-out infinite;">'+
               '<span style="width:9px;height:9px;border-radius:50%;background:oklch(0.8 0.095 158);"></span>'+
@@ -1968,7 +2114,7 @@
       return ''+
       '<div class="left-container" style="justify-content:center;align-items:center;text-align:center;background:transparent;padding:40px 30px;">'+
         '<div style="font-size:15px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.5 0.012 70);margin-bottom:8px;">Get ready</div>'+
-        '<div style="font-family:\'Space Grotesk\';font-weight:500;font-size:200px;line-height:0.92;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.prepRemainText+'</div>'+
+        '<div class="prep-countdown-val" style="font-family:\'Space Grotesk\';font-weight:500;font-size:200px;line-height:0.92;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.prepRemainText+'</div>'+
         '<div style="margin-top:18px;display:inline-flex;align-items:center;gap:10px;padding:9px 20px;border-radius:30px;background:oklch(1 0 0 / 0.5);border:1px solid '+v.prepFirstInk+';">'+
           '<span style="width:9px;height:9px;border-radius:50%;background:'+v.prepFirstFill+';"></span>'+
           '<span style="font-size:16px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:'+v.prepFirstInk+';">First up &middot; '+v.prepFirstLabel+'</span>'+
@@ -2027,12 +2173,7 @@
             '</div>'+
           '</div>'+
         '</div>'+
-      '</div>'+
-      '<button data-act="toggleSidebar" class="sidebar-toggle-btn" aria-label="Toggle Side Panel">'+
-        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+
-          (state.sidebarHidden ? '<polyline points="15 18 9 12 15 6"></polyline>' : '<polyline points="9 18 15 12 9 6"></polyline>')+
-        '</svg>'+
-      '</button>';
+      '</div>';
     }
     if(v.isDone){
       return ''+
@@ -2078,12 +2219,7 @@
             '<button data-act="stop" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Edit plan</button>'+
           '</div>'+
         '</div>'+
-      '</div>'+
-      '<button data-act="toggleSidebar" class="sidebar-toggle-btn" aria-label="Toggle Side Panel">'+
-        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+
-          (state.sidebarHidden ? '<polyline points="15 18 9 12 15 6"></polyline>' : '<polyline points="9 18 15 12 9 6"></polyline>')+
-        '</svg>'+
-      '</button>';
+      '</div>';
     }
     return '';
   }
@@ -2344,6 +2480,8 @@
     var cardsCol = app.querySelector('#timeline-cards-column');
     var scrollTop = cardsCol ? cardsCol.scrollTop : 0;
 
+    app.setAttribute('data-mode', state.mode);
+
     if (state.mode !== 'setup') {
       app.classList.add('session-active');
     } else {
@@ -2362,7 +2500,10 @@
     app.style.height = '';
     app.style.overflow = '';
 
-    if (state.sidebarHidden && (state.mode === 'running' || state.mode === 'paused' || state.mode === 'done')) {
+    var sheetMode = state.mode === 'running' || state.mode === 'paused' || state.mode === 'done';
+    app.classList.toggle('has-sheet', sheetMode);
+
+    if (state.sidebarHidden && sheetMode) {
       app.classList.add('sidebar-hidden');
     } else {
       app.classList.remove('sidebar-hidden');
@@ -2378,6 +2519,11 @@
     }
     if (state.mode !== 'advance' && rightEl) {
       rightEl.innerHTML = renderRight(v);
+    }
+
+    var toggleMountEl = app.querySelector('.sidebar-toggle-mount');
+    if (toggleMountEl) {
+      toggleMountEl.innerHTML = sheetMode ? sidebarToggleBtn() : '';
     }
 
     if (cardsCol) {

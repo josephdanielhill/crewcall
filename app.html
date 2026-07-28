@@ -1517,14 +1517,38 @@
     }
 
     if (data.advancedSequence && Array.isArray(data.advancedSequence)) {
+      var validIntensities = ['high', 'medium', 'med', 'low', 'break', 'freeform'];
+      var seq = [];
+      for (var j = 0; j < data.advancedSequence.length; j++) {
+        var block = data.advancedSequence[j];
+        if (!block || typeof block !== 'object') {
+          alert('Invalid custom timeline: block ' + (j + 1) + ' is malformed.');
+          return;
+        }
+        if (validIntensities.indexOf(block.intensity) === -1) {
+          alert('Invalid custom timeline: unrecognized intensity in block ' + (j + 1) + '.');
+          return;
+        }
+        if (typeof block.len !== 'number' || !isFinite(block.len) || block.len < MINLEN || block.len > 900) {
+          alert('Invalid custom timeline: block ' + (j + 1) + ' has an invalid duration.');
+          return;
+        }
+        var rate;
+        if (block.intensity === 'break') {
+          rate = 0;
+        } else if (block.intensity === 'freeform') {
+          rate = null;
+        } else if (typeof block.rate !== 'number' || !isFinite(block.rate) || block.rate < 10 || block.rate > 60) {
+          alert('Invalid custom timeline: block ' + (j + 1) + ' has an invalid stroke rate.');
+          return;
+        } else {
+          rate = block.rate;
+        }
+        seq.push({ intensity: block.intensity, len: block.len, rate: rate });
+      }
+
       state.targetMin = data.targetMin;
-      state.advancedSequence = data.advancedSequence.map(function(s){
-        return {
-          intensity: s.intensity,
-          len: s.len,
-          rate: s.rate
-        };
-      });
+      state.advancedSequence = seq;
       state.advancedEdited = true;
       state.mode = 'advance';
       render();

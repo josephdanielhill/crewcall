@@ -1,0 +1,24 @@
+{
+  "name": "crewcall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx vitest run",
+    "test:watch": "npx vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephdanielhill/crewcall.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josephdanielhill/crewcall/issues"
+  },
+  "homepage": "https://github.com/josephdanielhill/crewcall#readme",
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  }
+}

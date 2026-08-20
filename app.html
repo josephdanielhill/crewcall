@@ -1405,6 +1405,13 @@
   function pause(){ if(state.mode!=='running') return; state.baseElapsed=state.elapsed; state.mode='paused'; if(state.raf) cancelAnimationFrame(state.raf); render(); }
   function resume(){ if(state.mode!=='paused') return; state.runStart=performance.now(); state.mode='running'; ensureAudio(); loop(); render(); }
   function togglePause(){ state.mode==='running'?pause():resume(); }
+
+  // Ensure accurate display when tab comes back to foreground (rAF is throttled in background)
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && (state.mode==='running'||state.mode==='prep')) {
+      render(); // force re-render with correct elapsed time
+    }
+  });
   function skip(){
     if(state.mode!=='running'&&state.mode!=='paused') return;
     var idx=segIndexAt(state.elapsed); var ns=state.ends[idx];

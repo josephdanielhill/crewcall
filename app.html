@@ -571,6 +571,13 @@
     overflow: hidden;
     z-index: 2;
     pointer-events: none;
+    /* Water-inspired gradient fallback (no video load needed on mobile data) */
+    background: radial-gradient(ellipse 80% 60% at 30% 20%, oklch(0.85 0.10 230 / 0.5) 0%, transparent 80%),
+                radial-gradient(ellipse 70% 50% at 80% 80%, oklch(0.82 0.14 195 / 0.4) 0%, transparent 70%),
+                linear-gradient(135deg, oklch(0.92 0.05 220), oklch(0.96 0.02 240));
+  }
+  .header-video-bg.has-video {
+    background: none;
   }
   .header-video {
     width: 100%;
@@ -670,11 +677,8 @@
           <div class="water-frosted-overlay"></div>
         </div>
 
-        <!-- Header Video Backdrop -->
-        <div class="header-video-bg">
-          <video autoplay loop muted playsinline class="header-video">
-            <source src="hero-bg.mp4" type="video/mp4">
-          </video>
+        <!-- Header Video Backdrop — gradient shown by default; video loaded on fast connections -->
+        <div class="header-video-bg" id="headerVideoBgApp">
           <div class="header-video-overlay"></div>
         </div>
       </div>
@@ -689,6 +693,25 @@
 <input type="file" id="config-upload-input" accept=".json" style="display:none">
 
 <script>
+  // Lazy-load hero video on fast connections only
+  (function(){
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var isFast = !conn || conn.type === 'wifi' || conn.type === 'ethernet' ||
+      (conn.effectiveType && (conn.effectiveType === '4g' || conn.effectiveType === '5g'));
+    var reducedData = conn && conn.saveData === true;
+    if (isFast && !reducedData) {
+      var container = document.getElementById('headerVideoBgApp');
+      var video = document.createElement('video');
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.className = 'header-video';
+      video.innerHTML = '<source src="hero-bg.mp4" type="video/mp4">';
+      container.prepend(video);
+      container.classList.add('has-video');
+    }
+  })();
 (function(){
   "use strict";
 

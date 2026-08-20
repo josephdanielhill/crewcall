@@ -719,13 +719,21 @@
       }
     }
 
-    /* Header Video Backdrop */
+    /* Header Video Backdrop — gradient fallback by default; video loaded on fast connections */
     .header-video-bg {
       position: fixed;
       inset: 0;
       overflow: hidden;
       z-index: -1;
       pointer-events: none;
+      /* Water-inspired gradient fallback (no video load needed) */
+      background: radial-gradient(ellipse 80% 60% at 30% 20%, oklch(0.85 0.10 230 / 0.5) 0%, transparent 80%),
+                  radial-gradient(ellipse 70% 50% at 80% 80%, oklch(0.82 0.14 195 / 0.4) 0%, transparent 70%),
+                  linear-gradient(135deg, oklch(0.92 0.05 220), oklch(0.96 0.02 240));
+    }
+
+    .header-video-bg.has-video {
+      background: none;
     }
 
     .header-video {
@@ -757,13 +765,32 @@
     <div class="water-frosted-overlay"></div>
   </div>
 
-  <!-- Header Video Backdrop -->
-  <div class="header-video-bg">
-    <video autoplay loop muted playsinline class="header-video">
-      <source src="hero-bg.mp4" type="video/mp4">
-    </video>
+  <!-- Header Video Backdrop — gradient shown by default; video loaded on fast connections -->
+  <div class="header-video-bg" id="headerVideoBg">
     <div class="header-video-overlay"></div>
   </div>
+
+  <script>
+    // Lazy-load hero video only on fast connections (WiFi or >=4G)
+    (function() {
+      var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      var isFast = !conn || conn.type === 'wifi' || conn.type === 'ethernet' ||
+        (conn.effectiveType && (conn.effectiveType === '4g' || conn.effectiveType === '5g'));
+      var reducedData = conn && conn.saveData === true;
+      if (isFast && !reducedData) {
+        var container = document.getElementById('headerVideoBg');
+        var video = document.createElement('video');
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.className = 'header-video';
+        video.innerHTML = '<source src="hero-bg.mp4" type="video/mp4">';
+        container.prepend(video);
+        container.classList.add('has-video');
+      }
+    })();
+  </script>
 
   <!-- Navigation -->
   <nav>

@@ -1287,8 +1287,35 @@
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.start(t); o.stop(t+dur+0.03);
   }
+  // Schedule a beep at an absolute AudioContext time offset
+  function beepAt(freq,dur,gain,offset){
+    dur = dur===undefined?0.12:dur; gain = gain===undefined?0.06:gain;
+    if(!SOUND_ENABLED || !state.actx) return;
+    var ctx=state.actx, t=ctx.currentTime+offset;
+    var o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }
   function transitionBeep(k){ var f = freqFor(k); beep(f,0.14,0.07); setTimeout(function(){ beep(f*1.5,0.16,0.06); },130); }
+  // Schedule a transition beep at an absolute offset using AudioContext timing
+  function scheduleTransition(offset,k){
+    var f = freqFor(k);
+    beepAt(f,0.14,0.07,offset);
+    beepAt(f*1.5,0.16,0.06,offset+0.13);
+  }
   function countBeep(freq){ if(!COUNTDOWN_BEEPS) return; beep(freq||430,0.06,0.05); }
+  // Schedule countdown beeps at each second offset
+  function scheduleCountdown(offset,freq){
+    freq = freq||430; if(!COUNTDOWN_BEEPS) return;
+    var ctx=state.actx; if(!ctx) return;
+    for(var s=0;s<offset;s++){
+      var t=ctx.currentTime+offset-s-1;
+      (function(f){ beepAt(f,0.06,0.05,s?0:offset); })(freq);
+    }
+  }
   function completeBeep(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ beep(f,0.18,0.07); }, i*150); }); }
 
   function segIndexAt(e){ for(var i=0;i<state.ends.length;i++){ if(e<state.ends[i]) return i; } return state.ends.length-1; }
@@ -1298,8 +1325,32 @@
     build(); if(state.sequence.length===0) return;
     ensureAudio();
     state.mode='running'; state.elapsed=0; state.baseElapsed=0; state.runStart=performance.now();
-    state.lastSegIndex=-1; state.lastCountTick=null;
+    state.lastSegIndex=-1; state.lastCountTick=null; state.nextCueIdx=0;
     state.sidebarHidden = isMobile();
+
+    // Build audio cue timeline — pre-compute absolute cue times
+    state.cueTimeline = [];
+    if (SOUND_ENABLED && state.actx) {
+      var seq = state.sequence;
+      for (var ii = 0; ii < seq.length; ii++) {
+        var segStart = state.ends[ii] - seq[ii].len;
+        // Transition cue at segment start
+        state.cueTimeline.push({ at: segStart, intensity: seq[ii].intensity, type: 'transition' });
+        // Countdown cues in last COUNTDOWN_WINDOW seconds (before segment end)
+        if (COUNTDOWN_BEEPS) {
+          var cfreq = freqFor(ii+1 < seq.length ? seq[ii+1].intensity : seq[ii].intensity);
+          for (var c=COUNTDOWN_WINDOW; c>=1; c--) {
+            var cueAt = state.ends[ii] - c;
+            if (cueAt > segStart) { // only if countdown fits within segment
+              state.cueTimeline.push({ at: cueAt, freq: cfreq, type: 'countdown' });
+            }
+          }
+        }
+      }
+      // Sort timeline by cue time
+      state.cueTimeline.sort(function(a,b){ return a.at - b.at; });
+    }
+
     loop(); render();
   }
   function start(){
@@ -1336,13 +1387,17 @@
     var now=performance.now();
     state.elapsed=state.baseElapsed+(now-state.runStart)/1000;
     if(state.elapsed>=state.totalDuration){ state.elapsed=state.totalDuration; finish(); return; }
-    var idx=segIndexAt(state.elapsed);
-    if(idx!==state.lastSegIndex){ state.lastSegIndex=idx; transitionBeep(state.sequence[idx].intensity); state.lastCountTick=null; }
-    var remain=state.ends[idx]-state.elapsed; var rc=Math.ceil(remain);
-    if(rc<=COUNTDOWN_WINDOW && rc>=1 && rc!==state.lastCountTick){
-      state.lastCountTick=rc;
-      var nx=state.sequence[idx+1];
-      countBeep(freqFor(nx ? nx.intensity : state.sequence[idx].intensity));
+
+    // Fire cues from pre-computed timeline using AudioContext scheduling
+    while (state.cueTimeline && state.nextCueIdx < state.cueTimeline.length) {
+      var cue = state.cueTimeline[state.nextCueIdx];
+      if (cue.at > state.elapsed) break; // not yet
+      if (cue.type === 'transition') {
+        scheduleTransition(0, cue.intensity);
+      } else if (cue.type === 'countdown') {
+        beepAt(cue.freq, 0.06, 0.05, 0); // fire immediately via AudioContext currentTime
+      }
+      state.nextCueIdx++;
     }
     render();
     state.raf=requestAnimationFrame(tick);

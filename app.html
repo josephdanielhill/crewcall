@@ -350,6 +350,18 @@
     .timeline-delete-btn {
       padding: 8px !important;
     }
+    /* Touch-friendly: increase target sizes on mobile */
+    .timeline-card [data-act],
+    .timeline-card button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .timeline-card .timeline-dur-btn {
+      min-height: 44px;
+      min-width: 44px;
+      width: 44px !important;
+      height: 44px !important;
+    }
 
     /* PREP: brief transitional countdown - list stays in normal flow    */
     /* below it (no sheet), so shrink the huge desktop countdown so it   */
@@ -503,6 +515,11 @@
     border: 2px dashed oklch(0.7 0.02 230) !important;
     background: oklch(0.97 0.01 230) !important;
     transform: scale(0.98);
+    transition: none;
+  }
+  .timeline-card.drag-over {
+    border-color: oklch(0.5 0.1 230) !important;
+    border-style: dashed !important;
   }
   .timeline-cards-container::-webkit-scrollbar {
     width: 6px;
@@ -1747,34 +1764,77 @@
     }
   });
 
-  app.addEventListener('dragstart', function(e){
-    var card = e.target.closest('.timeline-card');
-    if (!card) return;
-    e.dataTransfer.setData('text/plain', card.getAttribute('data-index'));
+  // ── Timeline drag: pointer-event-based (works on touch + mouse) ──────────
+  var dragState = null; // { card, startIdx, startY, offsetY, mode:'hold'/'drag' }
+
+  app.addEventListener('pointerdown', function(pe){
+    if (pe.button !== 0) return; // primary button only
+    // Only initiate from drag handle or long-press via touch
+    // Check: is this a drag handle?
+    if (!pe.target.closest || !pe.target.closest('.drag-handle')) return;
+    if (!pe.target.closest('.timeline-card')) return;
+
+    var card = pe.target.closest('.timeline-card');
+    card.setPointerCapture(pe.pointerId);
+    dragState = {
+      card: card,
+      startIdx: parseInt(card.getAttribute('data-index'), 10),
+      startY: pe.clientY,
+      lastClientY: pe.clientY,
+      moved: false,
+      mode: 'detecting' // will switch to 'drag' after threshold
+    };
     card.classList.add('dragging');
   });
 
-  app.addEventListener('dragover', function(e){
-    var card = e.target.closest('.timeline-card');
-    var dragging = app.querySelector('.dragging');
-    if (!card || !dragging || card === dragging) return;
+  app.addEventListener('pointermove', function(pe){
+    if (!dragState) return;
+    var dy = pe.clientY - dragState.startY;
 
-    e.preventDefault();
+    // Threshold of 8px to distinguish tap from drag
+    if (!dragState.moved && Math.abs(dy) < 8) return;
 
-    var rect = card.getBoundingClientRect();
-    var next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-    var parent = card.parentNode;
-    parent.insertBefore(dragging, next ? card.nextSibling : card);
+    dragState.moved = true;
+    dragState.lastClientY = pe.clientY;
+
+    // Reorder: find the card below pointer
+    var cards = app.querySelectorAll('.timeline-card:not(.dragging)');
+    var parent = dragState.card.parentNode;
+    var replaced = false;
+
+    cards.forEach(function(c){
+      if (replaced) return;
+      var r = c.getBoundingClientRect();
+      var mid = r.top + r.height / 2;
+      if (pe.clientY <= mid && r.top >= 0) {
+        parent.insertBefore(dragState.card, c);
+        replaced = true;
+      }
+    });
+
+    if (!replaced) {
+      // Append to end if pointer below last card
+      var lastCard = cards[cards.length - 1];
+      if (lastCard) {
+        var lastRect = lastCard.getBoundingClientRect();
+        if (pe.clientY > lastRect.bottom) {
+          parent.appendChild(dragState.card);
+        }
+      }
+    }
+
+    // Highlight the drop zone
+    app.querySelectorAll('.timeline-card.drag-over').forEach(function(c){ c.classList.remove('drag-over'); });
+    var target = pe.target.closest('.timeline-card');
+    if (target && target !== dragState.card) target.classList.add('drag-over');
   });
 
-  app.addEventListener('drop', function(e){
-    e.preventDefault();
-  });
+  app.addEventListener('pointerup', function(pe){
+    if (!dragState) return;
 
-  app.addEventListener('dragend', function(e){
-    var dragging = app.querySelector('.dragging');
-    var cards = app.querySelectorAll('.timeline-card');
-    if (cards.length > 0) {
+    // If it was a true drag (moved beyond threshold), commit the reorder
+    if (dragState.moved) {
+      var cards = app.querySelectorAll('.timeline-card');
       var newSeq = [];
       cards.forEach(function(c){
         var idx = parseInt(c.getAttribute('data-index'), 10);
@@ -1784,12 +1844,68 @@
       });
       state.advancedSequence = newSeq;
       state.advancedEdited = true;
+      render();
     }
-    if (dragging) {
-      dragging.classList.remove('dragging');
-    }
-    render();
+
+    // Clean up
+    dragState.card.classList.remove('dragging');
+    app.querySelectorAll('.timeline-card.drag-over').forEach(function(c){ c.classList.remove('drag-over'); });
+    dragState = null;
   });
+
+  // ── Swipe-to-delete on touch ──────────────────────────────────────────────
+  var swipeState = null;
+
+  app.addEventListener('touchstart', function(te){
+    var card = te.target.closest('.timeline-card');
+    if (!card) return;
+    // Don't intercept if the touch is on a button or the drag handle
+    if (te.target.closest('button') || te.target.closest('.drag-handle')) return;
+    var touch = te.changedTouches[0];
+    swipeState = {
+      card: card,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startTime: Date.now()
+    };
+  }, { passive: true });
+
+  app.addEventListener('touchmove', function(te){
+    if (!swipeState) return;
+    var touch = te.changedTouches[0];
+    var dx = touch.clientX - swipeState.startX;
+    var dy = touch.clientY - swipeState.startY;
+    // Only horizontal swipe, not vertical scroll
+    if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 60) {
+      var idx = parseInt(swipeState.card.getAttribute('data-index'), 10);
+      if (!isNaN(idx)) {
+        // Visual feedback
+        swipeState.card.style.transform = 'translateX(' + dx + 'px)';
+        swipeState.card.style.opacity = Math.max(0, 1 - Math.abs(dx) / 200);
+        if (dx < -80) {
+          swipeState.card.style.borderColor = 'oklch(0.6 0.1 27 / 0.4)';
+        }
+        swipeState.dx = dx;
+      }
+    }
+  }, { passive: true });
+
+  app.addEventListener('touchend', function(te){
+    if (!swipeState) return;
+    var dx = swipeState.dx || 0;
+    var card = swipeState.card;
+    var idx = parseInt(card.getAttribute('data-index'), 10);
+
+    // Remove transform when done
+    card.style.transform = '';
+    card.style.opacity = '';
+
+    // Commit delete if swiped left > 80px
+    if (dx < -80 && !isNaN(idx)) {
+      deleteAdvancedBlock(idx);
+    }
+    swipeState = null;
+  }, { passive: true });
 
   function jumpToAdvancedBlock(idx) {
     var card = app.querySelector('.timeline-card[data-index="' + idx + '"]');
@@ -2010,8 +2126,8 @@
             var s = state.advancedSequence[i];
             var co = COLORS[s.intensity];
             listHtml += ''+
-            '<div class="timeline-card" data-index="'+i+'" draggable="true" style="display:flex; align-items:center; gap:16px; border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; border-radius:14px; padding:12px 18px; background:'+co.tint+'; margin-bottom:8px; cursor:grab; transition:transform 0.15s ease, box-shadow 0.15s ease;">'+
-              '<div style="cursor:grab; color:oklch(0.6 0.012 70); font-size:18px; user-select:none;">⋮⋮</div>'+
+            '<div class="timeline-card" data-index="'+i+'" style="display:flex; align-items:center; gap:16px; border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; border-radius:14px; padding:12px 18px; background:'+co.tint+'; margin-bottom:8px; transition:transform 0.15s ease, box-shadow 0.15s ease;">'+
+              '<div style="cursor:grab; color:oklch(0.6 0.012 70); font-size:18px; user-select:none; touch-action:none; padding:10px 8px; margin:-10px 0;" class="drag-handle">⋮⋮</div>'+
               '<span style="width:12px; height:12px; border-radius:50%; background:'+co.fill+'; flex-shrink:0;"></span>'+
               '<div style="flex:1; display:flex; align-items:center; gap:8px;">'+
                 '<span style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:'+co.ink+';">'+co.name+'</span>'+

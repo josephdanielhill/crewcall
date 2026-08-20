@@ -632,6 +632,18 @@
         justify-content: center;
       }
 
+      .sandbox-display-timer {
+        font-size: clamp(56px, 20vw, 108px);
+      }
+
+      .sandbox-display {
+        height: 320px;
+      }
+
+      .sandbox-display-content {
+        padding: 22px 20px;
+      }
+
       .features-section {
         padding: 40px 20px 60px;
       }
@@ -752,6 +764,28 @@
       background: linear-gradient(to bottom,
           transparent 30%,
           oklch(0.98 0.01 230 / 0.4) 100%);
+    }
+
+    /* Narrow mobile safety — zero horizontal scroll at 375px/390px/414px */
+    @media (max-width: 420px) {
+      .hero-section {
+        padding: 32px 14px;
+      }
+      .sandbox-display-timer {
+        font-size: clamp(48px, 18vw, 72px);
+      }
+      .sandbox-display {
+        height: 280px;
+      }
+      .sandbox-display-content {
+        padding: 18px 14px;
+      }
+      .features-grid {
+        gap: 12px;
+      }
+      .feature-card {
+        padding: 24px 18px;
+      }
     }
   </style>
 </head>

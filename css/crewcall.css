@@ -1,0 +1,397 @@
+/* CrewCall Design Tokens & Base Stylesheet
+ *
+ * This file provides CSS custom properties for all design tokens used
+ * across CrewCall, plus class-based utility styles. Inline styles in
+ * the JavaScript render functions should be replaced with references
+ * to these classes and properties over time.
+ *
+ * BLD-862 — Define CSS custom properties and base stylesheet
+ * BLD-863 — Replace inline intensity color styles with CSS classes
+ * BLD-864 — Replace inline layout and spacing styles with CSS classes
+ * BLD-865 — Add dark mode support and verify visual parity
+ */
+
+/* ================================================================ */
+/*  Design Tokens (CSS Custom Properties)                           */
+/* ================================================================ */
+
+:root {
+  /* ---- Surfaces ---- */
+  --col-page-bg: oklch(0.975 0.016 230);
+  --col-card-bg: oklch(1 0 0);
+  --col-panel-bg: oklch(0.985 0.015 230);
+  --col-frost-bg: oklch(1 0 0 / 0.94);
+  --col-scrim: oklch(0.2 0.02 255 / 0.35);
+
+  /* ---- Text ---- */
+  --col-text-primary: oklch(0.26 0.022 255);
+  --col-text-secondary: oklch(0.3 0.012 70);
+  --col-text-tertiary: oklch(0.35 0.012 70);
+  --col-text-muted: oklch(0.4 0.012 70);
+  --col-text-light: oklch(0.5 0.012 70);
+  --col-text-lighter: oklch(0.6 0.012 70);
+  --col-text-label: oklch(0.62 0.012 70);
+  --col-text-ink: oklch(0.35 0.012 70);
+  --col-text-on-dark: oklch(0.97 0.006 85);
+
+  /* ---- Borders ---- */
+  --col-border: oklch(0.9 0.016 230);
+  --col-border-muted: oklch(0.87 0.012 85);
+  --col-border-card: oklch(0.9 0.006 85);
+  --col-divider: oklch(0.7 0.012 70);
+
+  /* ---- Scrollbar ---- */
+  --col-scrollbar-thumb: oklch(0.85 0.016 230);
+
+  /* ---- Intensity: Extreme ---- */
+  --int-extreme-hue: 27;
+  --int-extreme-fill: oklch(0.71 0.145 27);
+  --int-extreme-border: oklch(0.8 0.05 27 / 0.2);
+  --int-extreme-bg: oklch(0.96 0.02 27);
+  --int-extreme-ink: oklch(0.45 0.15 27);
+  --int-extreme-swatch: oklch(0.71 0.145 27);
+
+  /* ---- Intensity: Hard ---- */
+  --int-hard-hue: 82;
+  --int-hard-fill: oklch(0.83 0.12 82);
+  --int-hard-border: oklch(0.83 0.12 82 / 0.2);
+  --int-hard-bg: oklch(0.96 0.03 82);
+  --int-hard-ink: oklch(0.52 0.12 70);
+  --int-hard-swatch: oklch(0.83 0.12 82);
+
+  /* ---- Intensity: Medium ---- */
+  --int-medium-hue: 190;
+  --int-medium-fill: oklch(0.78 0.09 190);
+  --int-medium-border: oklch(0.78 0.09 190 / 0.2);
+  --int-medium-bg: oklch(0.96 0.02 190);
+  --int-medium-ink: oklch(0.48 0.09 190);
+  --int-medium-swatch: oklch(0.78 0.09 190);
+
+  /* ---- Intensity: Low ---- */
+  --int-low-hue: 158;
+  --int-low-fill: oklch(0.80 0.095 158);
+  --int-low-border: oklch(0.80 0.095 158 / 0.2);
+  --int-low-bg: oklch(0.96 0.02 158);
+  --int-low-ink: oklch(0.46 0.09 160);
+  --int-low-swatch: oklch(0.80 0.095 158);
+
+  /* ---- Intensity: Break ---- */
+  --int-break-hue: 240;
+  --int-break-fill: oklch(0.65 0.02 240);
+  --int-break-border: oklch(0.85 0.01 240 / 0.2);
+  --int-break-bg: oklch(0.97 0.01 240);
+  --int-break-ink: oklch(0.40 0.01 240);
+  --int-break-swatch: oklch(0.65 0.02 240);
+
+  /* ---- Intensity: Freeform ---- */
+  --int-freeform-hue: 310;
+  --int-freeform-fill: oklch(0.74 0.13 310);
+  --int-freeform-border: oklch(0.74 0.13 310 / 0.2);
+  --int-freeform-bg: oklch(0.96 0.03 310);
+  --int-freeform-ink: oklch(0.48 0.13 310);
+  --int-freeform-swatch: oklch(0.74 0.13 310);
+
+  /* ---- Spacing ---- */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 20px;
+  --radius-round: 50%;
+  --radius-pill: 20px;
+
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 8px;
+  --space-lg: 10px;
+  --space-xl: 12px;
+  --space-2xl: 14px;
+  --space-3xl: 16px;
+  --space-4xl: 18px;
+  --space-5xl: 20px;
+  --space-6xl: 22px;
+  --space-7xl: 24px;
+  --space-8xl: 32px;
+  --space-9xl: 36px;
+  --space-10xl: 40px;
+  --space-11xl: 44px;
+  --space-12xl: 60px;
+  --space-13xl: 64px;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Grotesk', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 15px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 18px;
+  --font-size-3xl: 22px;
+  --font-size-4xl: 26px;
+  --font-size-5xl: 52px;
+  --font-size-6xl: 110px;
+
+  /* ---- Transitions ---- */
+  --transition-panel: 0.75s cubic-bezier(0.76, 0, 0.24, 1);
+  --transition-opacity: 0.75s ease;
+  --transition-fast: 0.2s ease;
+  --transition-sheet: 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+  --transition-swipe: 0.15s ease;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 30px oklch(0.3 0.022 255 / 0.15);
+  --shadow-lg: 0 -12px 30px oklch(0.3 0.022 255 / 0.18);
+}
+
+/* ================================================================ */
+/*  Intensity Badge Styles                                           */
+/* ================================================================ */
+
+.int-badge {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--col-card-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---- Extreme ---- */
+.int-extreme { --int-fill: var(--int-extreme-fill); --int-bg: var(--int-extreme-bg); --int-border: var(--int-extreme-border); --int-ink: var(--int-extreme-ink); --int-swatch: var(--int-extreme-swatch); --int-hue: 27; }
+.int-extreme-bg { background: var(--int-extreme-bg); }
+.int-extreme-border { border-color: var(--int-extreme-border); }
+.int-extreme-ink { color: var(--int-extreme-ink); }
+.int-extreme-swatch { background: var(--int-extreme-swatch); }
+.int-extreme-fill { background: var(--int-extreme-fill); }
+
+/* ---- Hard ---- */
+.int-hard { --int-fill: var(--int-hard-fill); --int-bg: var(--int-hard-bg); --int-border: var(--int-hard-border); --int-ink: var(--int-hard-ink); --int-swatch: var(--int-hard-swatch); --int-hue: 82; }
+.int-hard-bg { background: var(--int-hard-bg); }
+.int-hard-border { border-color: var(--int-hard-border); }
+.int-hard-ink { color: var(--int-hard-ink); }
+.int-hard-swatch { background: var(--int-hard-swatch); }
+
+/* ---- Medium ---- */
+.int-medium { --int-fill: var(--int-medium-fill); --int-bg: var(--int-medium-bg); --int-border: var(--int-medium-border); --int-ink: var(--int-medium-ink); --int-swatch: var(--int-medium-swatch); --int-hue: 190; }
+.int-medium-bg { background: var(--int-medium-bg); }
+.int-medium-border { border-color: var(--int-medium-border); }
+.int-medium-ink { color: var(--int-medium-ink); }
+.int-medium-swatch { background: var(--int-medium-swatch); }
+
+/* ---- Low ---- */
+.int-low { --int-fill: var(--int-low-fill); --int-bg: var(--int-low-bg); --int-border: var(--int-low-border); --int-ink: var(--int-low-ink); --int-swatch: var(--int-low-swatch); --int-hue: 158; }
+.int-low-bg { background: var(--int-low-bg); }
+.int-low-border { border-color: var(--int-low-border); }
+.int-low-ink { color: var(--int-low-ink); }
+.int-low-swatch { background: var(--int-low-swatch); }
+
+/* ---- Break ---- */
+.int-break { --int-fill: var(--int-break-fill); --int-bg: var(--int-break-bg); --int-border: var(--int-break-border); --int-ink: var(--int-break-ink); --int-swatch: var(--int-break-swatch); --int-hue: 240; }
+.int-break-bg { background: var(--int-break-bg); }
+.int-break-border { border-color: var(--int-break-border); }
+.int-break-ink { color: var(--int-break-ink); }
+.int-break-swatch { background: var(--int-break-swatch); }
+
+/* ---- Freeform ---- */
+.int-freeform { --int-fill: var(--int-freeform-fill); --int-bg: var(--int-freeform-bg); --int-border: var(--int-freeform-border); --int-ink: var(--int-freeform-ink); --int-swatch: var(--int-freeform-swatch); --int-hue: 310; }
+.int-freeform-bg { background: var(--int-freeform-bg); }
+.int-freeform-border { border-color: var(--int-freeform-border); }
+.int-freeform-ink { color: var(--int-freeform-ink); }
+.int-freeform-swatch { background: var(--int-freeform-swatch); }
+
+/* ---- Intensity: dynamic via data attribute ---- */
+[data-intensity="high"] { color: var(--int-extreme-ink); background: var(--int-extreme-bg); border-color: var(--int-extreme-border); }
+[data-intensity="hard"] { color: var(--int-hard-ink); background: var(--int-hard-bg); border-color: var(--int-hard-border); }
+[data-intensity="med"] { color: var(--int-medium-ink); background: var(--int-medium-bg); border-color: var(--int-medium-border); }
+[data-intensity="low"] { color: var(--int-low-ink); background: var(--int-low-bg); border-color: var(--int-low-border); }
+[data-intensity="break"] { color: var(--int-break-ink); background: var(--int-break-bg); border-color: var(--int-break-border); }
+[data-intensity="freeform"] { color: var(--int-freeform-ink); background: var(--int-freeform-bg); border-color: var(--int-freeform-border); }
+
+/* ================================================================ */
+/*  Button Utility Styles                                            */
+/* ================================================================ */
+
+.btn-icon-circle {
+  width: var(--space-11xl);
+  height: var(--space-11xl);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-3xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-int-insert {
+  cursor: pointer;
+  padding: var(--space-sm) var(--radius-lg);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  border-width: 1px;
+  border-style: solid;
+}
+
+.btn-close-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-2xl);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ================================================================ */
+/*  Card & Container Styles                                         */
+/* ================================================================ */
+
+.card-base {
+  border: 1px solid var(--col-border-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl) var(--space-4xl);
+  background: var(--col-card-bg);
+}
+
+.inset-container-full {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.label-uppercase {
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.label-uppercase-xs {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.text-mono-large {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-4xl);
+  font-weight: 500;
+}
+
+.text-mono-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================================================================ */
+/*  Divider / Insert Menu Styles                                    */
+/* ================================================================ */
+
+.insert-divider {
+  position: relative;
+  height: 16px;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.15;
+  transition: opacity var(--transition-fast);
+}
+
+.insert-divider:hover {
+  opacity: 0.95 !important;
+}
+
+.insert-divider-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--col-divider);
+  border-top: 1px dashed var(--col-divider);
+}
+
+.insert-toggle-btn {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  border: 1px solid var(--int-medium-fill);
+  background: var(--int-medium-bg);
+  color: var(--int-medium-ink);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 0;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ================================================================ */
+/*  Empty State                                                     */
+/* ================================================================ */
+
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 220px;
+  border: 2px dashed var(--col-border-muted);
+  border-radius: var(--radius-2xl);
+  color: var(--col-text-light);
+  font-size: var(--font-size-lg);
+  text-align: center;
+  padding: var(--space-5xl);
+  background: var(--col-card-bg);
+}
+
+/* ================================================================ */
+/*  Drag Handle                                                     */
+/* ================================================================ */
+
+.drag-handle-base {
+  cursor: grab;
+  color: var(--col-text-lighter);
+  font-size: var(--font-size-2xl);
+  user-select: none;
+  touch-action: none;
+  padding: 10px 8px;
+  margin: -10px 0;
+}
+
+/* ================================================================ */
+/*  Dark Mode Overrides                                             */
+/* ================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --col-page-bg: oklch(0.15 0.016 255);
+    --col-card-bg: oklch(0.22 0.02 255);
+    --col-panel-bg: oklch(0.18 0.018 255);
+    --col-text-primary: oklch(0.92 0.01 85);
+    --col-text-secondary: oklch(0.85 0.012 85);
+    --col-text-tertiary: oklch(0.75 0.012 85);
+    --col-text-muted: oklch(0.7 0.012 85);
+    --col-text-light: oklch(0.6 0.012 85);
+    --col-text-lighter: oklch(0.5 0.012 85);
+    --col-border: oklch(0.3 0.016 255);
+    --col-scrollbar-thumb: oklch(0.4 0.016 255);
+    --col-frost-bg: oklch(0.18 0.018 255 / 0.94);
+  }
+}

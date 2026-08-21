@@ -282,7 +282,7 @@ export function renderLeft(v) {
       '<div class="advance-body" style="display:flex; flex:1; overflow:hidden; gap:36px; min-height:0; width:100%;">' +
       '<div id="timeline-cards-column" style="flex:1; overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:8px; padding-bottom:24px; min-height:0;">' +
       warningHtml +
-      '<div class="timeline-cards-container" class="flex-col gap-md">' +
+      '<div class="timeline-cards-container flex-col gap-md">' +
       cardsHtml +
       '</div>' +
       '</div>' +
@@ -313,11 +313,11 @@ export function renderLeft(v) {
       '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>' +
       '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>' +
       '</div>' +
-      '<div class="setup-summary" class="flex-col gap-7xl w-full glass-card">' +
+      '<div class="setup-summary flex-col gap-7xl w-full glass-card">' +
       '<div class="setup-metrics-row">' +
       '<div>' +
       '<div class="setup-time-val">' + v.setupTotalText + '</div>' +
-      '<div class="setup-time-label" class="mt-lg flex-center gap-xl flex-wrap">' +
+      '<div class="setup-time-label mt-lg flex-center gap-xl flex-wrap">' +
       '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.3 0.012 70);white-space:nowrap;">Total session</span>' +
       '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.35 0.022 255);background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);padding:3px 11px;border-radius:20px;white-space:nowrap;">Goal ' + v.targetText + '</span>' +
       '</div>' +
@@ -541,7 +541,7 @@ export function renderRight(v) {
 
   if (v.isSetup) {
     return '' +
-      '<div class="setup-builder-scroll" class="flex-col h-full p-7xl overflow-y-auto">' +
+      '<div class="setup-builder-scroll flex-col h-full p-7xl overflow-y-auto">' +
       '<div class="flex-col gap-3xl">' +
       '<div>' +
       '<div style="font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Build your session</div>' +

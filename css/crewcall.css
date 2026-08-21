@@ -294,6 +294,92 @@
 }
 
 /* ================================================================ */
+/*  Utility Layout Classes  (BLD-864)                               */
+/* ================================================================ */
+
+.flex          { display: flex; }
+.flex-col      { display: flex; flex-direction: column; }
+.flex-wrap     { display: flex; flex-wrap: wrap; }
+.flex-1        { flex: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+.flex-center   { display: flex; align-items: center; justify-content: center; }
+.flex-align    { display: flex; align-items: center; }
+
+.flex-between  { display: flex; justify-content: space-between; }
+.flex-between-align { display: flex; justify-content: space-between; align-items: center; }
+.flex-start    { display: flex; justify-content: flex-start; }
+.flex-col-center { display: flex; flex-direction: column; align-items: center; }
+.flex-col-center-gap { display: flex; flex-direction: column; align-items: center; gap: var(--space-xl); }
+
+.inline-flex-center { display: inline-flex; align-items: center; justify-content: center; }
+.align-items-center { align-items: center; }
+.text-center   { text-align: center; }
+.relative      { position: relative; }
+.absolute-cover { position: absolute; inset: 0; }
+.overflow-hidden { overflow: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+.w-full        { width: 100%; }
+.h-full        { height: 100%; }
+.min-h-0       { min-height: 0; }
+.box-border    { box-sizing: border-box; }
+
+/* Gap-based spacing */
+.gap-sm  { gap: var(--space-sm); }
+.gap-xs  { gap: var(--space-xs); }
+.gap-md  { gap: var(--space-md); }
+.gap-lg  { gap: var(--space-lg); }
+.gap-xl  { gap: var(--space-xl); }
+.gap-2xl { gap: var(--space-2xl); }
+.gap-3xl { gap: var(--space-3xl); }
+.gap-4xl { gap: var(--space-4xl); }
+.gap-5xl { gap: var(--space-5xl); }
+.gap-6xl { gap: var(--space-6xl); }
+.gap-7xl { gap: var(--space-7xl); }
+.gap-8xl { gap: var(--space-8xl); }
+.gap-9xl { gap: var(--space-9xl); }
+
+/* Padding shortcuts */
+.p-3xl  { padding: var(--space-3xl); }
+.p-4xl  { padding: var(--space-4xl); }
+.p-5xl  { padding: var(--space-5xl); }
+.p-7xl  { padding: var(--space-7xl); }
+.p-10xl { padding: var(--space-10xl); }
+
+/* Margin shortcuts */
+.mt-sm  { margin-top: var(--space-sm); }
+.mt-md  { margin-top: var(--space-md); }
+.mt-xl  { margin-top: var(--space-xl); }
+.mt-3xl { margin-top: var(--space-3xl); }
+.mb-md  { margin-bottom: var(--space-md); }
+.mb-lg  { margin-bottom: var(--space-lg); }
+.mb-xl  { margin-bottom: var(--space-xl); }
+.mb-2xl { margin-bottom: var(--space-2xl); }
+.mb-3xl { margin-bottom: var(--space-3xl); }
+.mb-5xl { margin-bottom: var(--space-5xl); }
+.mr-xs  { margin-right: var(--space-xs); }
+.ml-xs  { margin-left: var(--space-xs); }
+
+.mt-8xl { margin-top: var(--space-8xl); }
+.mb-8xl { margin-bottom: var(--space-8xl); }
+
+/* Sticky */
+.sticky-top  { position: sticky; top: 0; }
+.sticky-bottom { position: sticky; bottom: 0; }
+
+/* Flex children */
+.self-stretch { align-self: stretch; }
+
+/* Glass surface (frosted) */
+.glass-card {
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: var(--radius-3xl);
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.05);
+}
+
+/* ================================================================ */
 /*  Divider / Insert Menu Styles                                    */
 /* ================================================================ */
 

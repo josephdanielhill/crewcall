@@ -5,7 +5,7 @@ import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, INTENSITY_FREQ, fmt, arra
 import { ensureAudio, createBeepUrl, beep, transitionBeep, scheduleTransition, countBeep, scheduleCountdown, completeBeep } from './audio.js';
 import { render } from './render.js';
 import { goToAdvance, exitAdvance, resetAdvance, addAdvancedBlock, toggleInsertMenu, closeInsertMenu, insertAdvancedBlock, deleteAdvancedBlock, changeAdvancedRate, changeAdvancedDur, moveAdvancedBlock, jumpToAdvancedBlock } from './editor.js';
-import { build, runWorkout, start, startAdvanced, beginPrep, prepLoop, prepTick, pause, resume, togglePause, skip, stop, finish, restart, change, changeTarget, showToast, downloadShareCard, downloadConfig, triggerUpload, importConfig, surprise } from './session.js';
+import { build, runWorkout, start, startAdvanced, beginPrep, prepLoop, pause, resume, togglePause, skip, stop, finish, restart, change, changeTarget, showToast, downloadShareCard, downloadConfig, triggerUpload, importConfig, surprise } from './session.js';
 import { openBuilder, closeBuilder, setBuilderAnswer, nextBuilderStep, prevBuilderStep, generateSmartPlan } from './smart-builder.js';
 import { isMobile, trackEvent } from './track.js';
 
@@ -156,7 +156,7 @@ document.addEventListener('keydown', function(e) {
   if (isEnter && state.mode === 'setup') {
     // Space key is more intuitive
   }
-  if (key === 'escape') esc();
+  if (key === 'escape') onEsc();
   if (key === 'arrowup' && state.mode === 'setup') changeTarget(5);
   if (key === 'arrowdown' && state.mode === 'setup') changeTarget(-5);
 });
@@ -196,7 +196,7 @@ document.addEventListener('pointerup', function(e) {
 });
 
 // Esc handler
-function esc() {
+function onEsc() {
   if (state.mode === 'advance') {
     if (state.insertIndex !== null) { closeInsertMenu(); return; }
     exitAdvance();

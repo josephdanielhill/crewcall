@@ -182,4 +182,8 @@ export function segStart(i) {
   return i === 0 ? 0 : state.ends[i - 1];
 }
 
+export function toggleBreaks() {
+  state.breaksEnabled = !state.breaksEnabled;
+}
+
 export function esc(s) { return String(s); }

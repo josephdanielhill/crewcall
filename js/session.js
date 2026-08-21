@@ -131,7 +131,7 @@ export function startAdvanced() {
 
 var prepRaf = null;
 
-function beginPrep() {
+export function beginPrep() {
   state.mode = 'prep';
   state.prepStart = performance.now();
   state.prepElapsed = 0;
@@ -139,7 +139,7 @@ function beginPrep() {
   prepLoop();
 }
 
-function prepLoop() {
+export function prepLoop() {
   if (state.mode !== 'prep') return;
   var now = performance.now();
   if (state.prepLastTick) {

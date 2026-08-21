@@ -449,6 +449,87 @@ function generateSmartPlanFullSequence(answers) {
   return generateSmartPlan(answers);
 }
 
+/**
+ * Valid intensity keys for advanced sequences.
+ */
+var VALID_INTENSITIES = ['high', 'medium', 'med', 'low', 'break', 'freeform'];
+
+/**
+ * Validate a CrewCall config JSON object against the expected schema.
+ * Mirrors the validation logic in app.html's importConfig().
+ * @param {Object} data - Parsed JSON config object
+ * @returns {{ valid: boolean, error: string|null }}
+ */
+function validateConfigSchema(data) {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid configuration: not an object.' };
+  }
+  if (typeof data.targetMin !== 'number' || data.targetMin < 10 || data.targetMin > 90) {
+    return { valid: false, error: 'Invalid session length. Target time must be between 10 and 90 minutes.' };
+  }
+
+  // Advanced sequence (optional)
+  if (data.advancedSequence !== undefined) {
+    if (!Array.isArray(data.advancedSequence)) {
+      return { valid: false, error: 'Invalid custom timeline: must be an array.' };
+    }
+    for (var j = 0; j < data.advancedSequence.length; j++) {
+      var block = data.advancedSequence[j];
+      if (!block || typeof block !== 'object') {
+        return { valid: false, error: 'Invalid custom timeline: block ' + (j + 1) + ' is malformed.' };
+      }
+      if (VALID_INTENSITIES.indexOf(block.intensity) === -1) {
+        return { valid: false, error: 'Invalid custom timeline: unrecognized intensity in block ' + (j + 1) + '.' };
+      }
+      if (typeof block.len !== 'number' || !isFinite(block.len) || block.len < MINLEN || block.len > 900) {
+        return { valid: false, error: 'Invalid custom timeline: block ' + (j + 1) + ' has an invalid duration.' };
+      }
+      if (block.intensity !== 'break' && block.intensity !== 'freeform') {
+        if (typeof block.rate !== 'number' || !isFinite(block.rate) || block.rate < 10 || block.rate > 60) {
+          return { valid: false, error: 'Invalid custom timeline: block ' + (j + 1) + ' has an invalid stroke rate.' };
+        }
+      }
+    }
+    return { valid: true, error: null }; // advanced sequence is valid
+  }
+
+  // Standard config
+  if (!data.config || typeof data.config !== 'object') {
+    return { valid: false, error: 'Invalid configuration object.' };
+  }
+
+  var keys = ['high', 'medium', 'med', 'low', 'freeform'];
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    if (!data.config[k] || typeof data.config[k] !== 'object') {
+      return { valid: false, error: 'Missing configuration for intensity: ' + k };
+    }
+    var count = data.config[k].count;
+    var rate = data.config[k].rate;
+    if (typeof count !== 'number' || count < 0 || count > 12) {
+      return { valid: false, error: 'Invalid interval count for intensity: ' + k };
+    }
+    if (k !== 'freeform' && (typeof rate !== 'number' || rate < 10 || rate > 60)) {
+      return { valid: false, error: 'Invalid stroke rate for intensity: ' + k };
+    }
+  }
+
+  // Check minPresentLen constraint
+  var counts = {
+    high: data.config.high.count,
+    medium: data.config.medium.count,
+    med: data.config.med.count,
+    low: data.config.low.count,
+    freeform: data.config.freeform.count
+  };
+  var L = computeLen(data.targetMin * 60, counts);
+  if (minPresentLen(L, counts) < MINLEN) {
+    return { valid: false, error: 'Configuration invalid: intervals would be shorter than ' + MINLEN + ' seconds. Try increasing target session time.' };
+  }
+
+  return { valid: true, error: null };
+}
+
 module.exports = {
   RATIOS: RATIOS,
   MINLEN: MINLEN,
@@ -465,5 +546,7 @@ module.exports = {
   generateSmartPlan: generateSmartPlan,
   generateSmartPlanFullSequence: generateSmartPlanFullSequence,
   surpriseDeterministic: surpriseDeterministic,
-  mulberry32: mulberry32
+  mulberry32: mulberry32,
+  validateConfigSchema: validateConfigSchema,
+  VALID_INTENSITIES: VALID_INTENSITIES
 };

@@ -8,7 +8,8 @@ const {
   freqFor, arrange, computeLen, minPresentLen,
   canAdd, curCounts, canSetTarget, buildPreview,
   applyAutoBreaks, generateSmartPlan,
-  surpriseDeterministic, mulberry32
+  surpriseDeterministic, mulberry32,
+  validateConfigSchema, VALID_INTENSITIES
 } = require('./crewcall-logic.js');
 
 // ─── Test helpers ────────────────────────────────────────────────────────────
@@ -649,5 +650,189 @@ describe('sequence stability', function () {
     var seq1 = generateSmartPlan({ energy: 'high', tired: 'no', goal: 'sweat', duration: 30 });
     var seq2 = generateSmartPlan({ energy: 'high', tired: 'no', goal: 'sweat', duration: 30 });
     expect(totalDuration(seq1)).toBe(totalDuration(seq2));
+  });
+});
+
+// ─── validateConfigSchema — import/export validation ─────────────────────────
+
+describe('validateConfigSchema', function () {
+  var validConfig = {
+    targetMin: 20,
+    config: {
+      high:     { count: 2, rate: 30 },
+      medium:   { count: 2, rate: 28 },
+      med:      { count: 2, rate: 26 },
+      low:      { count: 4, rate: 24 },
+      freeform: { count: 0, rate: null }
+    }
+  };
+
+  it('validates a standard config', function () {
+    var result = validateConfigSchema(validConfig);
+    expect(result.valid).toBe(true);
+    expect(result.error).toBeNull();
+  });
+
+  it('rejects null/undefined input', function () {
+    expect(validateConfigSchema(null).valid).toBe(false);
+    expect(validateConfigSchema(undefined).valid).toBe(false);
+  });
+
+  it('rejects non-object data', function () {
+    expect(validateConfigSchema('string').valid).toBe(false);
+    expect(validateConfigSchema(42).valid).toBe(false);
+  });
+
+  it('rejects missing targetMin', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    delete data.targetMin;
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('session length');
+  });
+
+  it('rejects targetMin below 10', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.targetMin = 5;
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects targetMin above 90', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.targetMin = 100;
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+  });
+
+  it('rejects missing config object', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    delete data.config;
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('configuration object');
+  });
+
+  it('rejects missing intensity config', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    delete data.config.high;
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('high');
+  });
+
+  it('rejects invalid count (negative)', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.config.high.count = -1;
+    expect(validateConfigSchema(data).valid).toBe(false);
+  });
+
+  it('rejects invalid count (over 12)', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.config.high.count = 15;
+    expect(validateConfigSchema(data).valid).toBe(false);
+  });
+
+  it('rejects invalid rate (below 10)', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.config.high.rate = 5;
+    expect(validateConfigSchema(data).valid).toBe(false);
+  });
+
+  it('accepts null rate for freeform', function () {
+    var data = JSON.parse(JSON.stringify(validConfig));
+    data.config.freeform.rate = null;
+    expect(validateConfigSchema(data).valid).toBe(true);
+  });
+
+  it('rejects config that makes intervals too short', function () {
+    var data = {
+      targetMin: 10,
+      config: {
+        high:     { count: 10, rate: 30 },
+        medium:   { count: 10, rate: 28 },
+        med:      { count: 10, rate: 26 },
+        low:      { count: 10, rate: 24 },
+        freeform: { count: 0, rate: null }
+      }
+    };
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('shorter than');
+  });
+
+  // Advanced sequence tests
+  it('validates a valid advanced sequence', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: [
+        { intensity: 'low', len: 120, rate: 24 },
+        { intensity: 'high', len: 60, rate: 30 },
+        { intensity: 'break', len: 30, rate: 0 },
+        { intensity: 'med', len: 90, rate: 26 },
+        { intensity: 'low', len: 120, rate: 24 }
+      ]
+    };
+    expect(validateConfigSchema(data).valid).toBe(true);
+  });
+
+  it('rejects advanced sequence with bad block structure', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: ['string', 'not', 'blocks']
+    };
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('malformed');
+  });
+
+  it('rejects advanced sequence with invalid intensity', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: [
+        { intensity: 'extreme', len: 60, rate: 30 }
+      ]
+    };
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('unrecognized intensity');
+  });
+
+  it('rejects advanced sequence with too-short block', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: [
+        { intensity: 'low', len: 5, rate: 24 }
+      ]
+    };
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('invalid duration');
+  });
+
+  it('rejects advanced sequence with invalid stroke rate', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: [
+        { intensity: 'high', len: 60, rate: 200 }
+      ]
+    };
+    var result = validateConfigSchema(data);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('invalid stroke rate');
+  });
+
+  it('accepts break blocks without rate', function () {
+    var data = {
+      targetMin: 30,
+      advancedSequence: [
+        { intensity: 'break', len: 30 }
+      ]
+    };
+    expect(validateConfigSchema(data).valid).toBe(true);
+  });
+
+  it('VALID_INTENSITIES includes all expected values', function () {
+    expect(VALID_INTENSITIES).toEqual(['high', 'medium', 'med', 'low', 'break', 'freeform']);
   });
 });

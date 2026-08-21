@@ -2190,15 +2190,15 @@
   function intensityCard(label, dotColor, inkColor, badgeBg, badgeText, count, sub, decAct, incAct, addDisabled, lenText){
     return ''+
     '<div style="border:1px solid oklch(0.9 0.006 85);border-radius:14px;padding:14px 18px;background:oklch(1 0 0);">'+
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'+
+      '<div class="flex-align gap-xl mb-xl">'+
         '<span style="width:13px;height:13px;border-radius:50%;background:'+dotColor+';"></span>'+
         '<span style="font-size:16px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:'+inkColor+';">'+label+'</span>'+
         '<span style="font-family:\'Space Grotesk\';font-size:13px;color:'+inkColor+';background:'+badgeBg+';padding:4px 11px;border-radius:20px;">'+badgeText+'</span>'+
       '</div>'+
-      '<div style="display:flex;gap:18px;">'+
+      '<div class="flex gap-4xl">'+
         '<div style="flex:1;">'+
           '<div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.6 0.012 70);margin-bottom:9px;">Intervals</div>'+
-          '<div style="display:flex;align-items:center;gap:14px;">'+
+          '<div class="flex-align gap-2xl">'+
             stepperBtn(decAct, false, true, '−')+
             '<span style="font-family:\'Space Grotesk\';font-size:26px;font-weight:500;min-width:28px;text-align:center;color:oklch(0.3 0.012 70);">'+count+'</span>'+
             stepperBtn(incAct, addDisabled, true, '+')+
@@ -2206,7 +2206,7 @@
         '</div>'+
         '<div style="flex:1;">'+
           '<div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.6 0.012 70);margin-bottom:9px;">Length each</div>'+
-          '<div style="display:flex;align-items:center;gap:10px;height:44px;">'+
+          '<div class="flex-align gap-lg" style="height:44px;">'+
             '<span style="font-family:\'Space Grotesk\';font-size:26px;font-weight:500;color:oklch(0.3 0.012 70);font-variant-numeric:tabular-nums;">'+lenText+'</span>'+
             '<span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:oklch(0.62 0.012 70);">auto</span>'+
           '</div>'+
@@ -2273,7 +2273,7 @@
             '<div class="timeline-card" data-index="'+i+'" style="display:flex; align-items:center; gap:16px; border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; border-radius:14px; padding:12px 18px; background:'+co.tint+'; margin-bottom:8px; transition:transform 0.15s ease, box-shadow 0.15s ease;">'+
               '<div style="cursor:grab; color:oklch(0.6 0.012 70); font-size:18px; user-select:none; touch-action:none; padding:10px 8px; margin:-10px 0;" class="drag-handle">⋮⋮</div>'+
               '<span style="width:12px; height:12px; border-radius:50%; background:'+co.fill+'; flex-shrink:0;"></span>'+
-              '<div style="flex:1; display:flex; align-items:center; gap:8px;">'+
+              '<div class="flex-1 flex-align gap-md">'+
                 '<span style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:'+co.ink+';">'+co.name+'</span>'+
                 (s.intensity === 'break' ? '' : s.intensity === 'freeform' ? '<span style="font-family:\'Space Grotesk\'; font-size:12px; color:'+co.ink+'; background:oklch(1 0 0); padding:2px 8px; border-radius:10px; font-weight:500; white-space:nowrap;">your own pace</span>' : '<span style="font-family:\'Space Grotesk\'; font-size:12px; color:'+co.ink+'; background:oklch(1 0 0); padding:2px 8px; border-radius:10px; font-weight:500; white-space:nowrap;">'+s.rate+' strokes</span>')+
               '</div>'+
@@ -2285,7 +2285,7 @@
                 '<button data-act="incDur" data-idx="'+i+'" class="timeline-dur-btn" style="border:none; background:transparent; font-size:16px; cursor:pointer; color:oklch(0.4 0.012 70); font-weight:bold; width:22px; height:22px; display:flex; align-items:center; justify-content:center;">+</button>'+
               '</div>'+
 
-              '<div class="timeline-move-btn" style="display:flex; gap:4px;">'+
+              '<div class="timeline-move-btn" class="flex gap-xs">'+
                 '<button data-act="moveUp" data-idx="'+i+'" style="border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▲</button>'+
                 '<button data-act="moveDown" data-idx="'+i+'" style="border:1px solid '+co.fill.replace(')', ' / 0.15)')+'; background:oklch(1 0 0); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; color:oklch(0.4 0.012 70);">▼</button>'+
               '</div>'+
@@ -2328,14 +2328,14 @@
 
       return ''+
       '<div class="left-container" style="justify-content: flex-start; overflow: hidden; height: 100%; box-sizing: border-box; padding: 64px 60px 40px;">'+
-        '<div style="flex-shrink: 0; padding-bottom: 20px; width: 100%;">'+
+        '<div class="flex-shrink-0 mb-5xl w-full">'+
           '<div class="advance-brand" style="margin-bottom: 20px;">'+
             '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>'+
             '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
           '</div>'+
 
           '<div style="background:rgba(255,255,255,0.45); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.5); border-radius:16px; padding:16px 24px; display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px 0 rgba(31,38,135,0.05);">'+
-            '<div style="display:flex; justify-content:space-between; align-items:baseline;">'+
+            '<div class="flex-between" style="align-items:baseline;">'+
               '<div style="font-size:14px; font-weight:600; color:oklch(0.3 0.012 70);">Custom Timeline</div>'+
               '<div style="font-family:\'Space Grotesk\'; font-size:16px; font-variant-numeric:tabular-nums; color:oklch(0.4 0.012 70); font-weight:600;">'+
                 fmt(advTotal)+' / '+state.advancedSequence.length+' blocks'+
@@ -2351,7 +2351,7 @@
           '<!-- Left Column: Cards List -->'+
           '<div id="timeline-cards-column" style="flex:1; overflow-y:auto; padding-right:12px; display:flex; flex-direction:column; gap:8px; padding-bottom:24px; min-height:0;">'+
             warningHtml+
-            '<div class="timeline-cards-container" style="display:flex; flex-direction:column; gap:8px;">'+
+            '<div class="timeline-cards-container" class="flex-col gap-md">'+
               cardsHtml+
             '</div>'+
           '</div>'+
@@ -2395,11 +2395,11 @@
           '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>'+
           '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>'+
         '</div>'+
-        '<div class="setup-summary" style="display:flex;flex-direction:column;gap:24px;width:100%;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.5);border-radius:20px;padding:24px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.05);box-sizing:border-box;">'+
+        '<div class="setup-summary" class="flex-col gap-7xl w-full glass-card">'+
           '<div class="setup-metrics-row">'+
             '<div>'+
               '<div class="setup-time-val">'+v.setupTotalText+'</div>'+
-              '<div class="setup-time-label" style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">'+
+              '<div class="setup-time-label" class="mt-lg flex-center gap-xl flex-wrap">'+
                 '<span style="font-size:14px;letter-spacing:0.16em;text-transform:uppercase;color:oklch(0.3 0.012 70);white-space:nowrap;">Total session</span>'+
                 '<span style="font-family:\'Space Grotesk\';font-size:13px;color:oklch(0.35 0.022 255);background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.6);padding:3px 11px;border-radius:20px;white-space:nowrap;">Goal '+v.targetText+'</span>'+
               '</div>'+
@@ -2440,8 +2440,8 @@
       '<div class="left-container" style="background:transparent;overflow:hidden;">'+
         '<div style="position:absolute;left:0;right:0;bottom:0;height:'+v.phaseHeight+';background:'+v.phaseFill+';transition:background 0.4s ease;opacity:0.75;z-index:1;"></div>'+
         '<div class="active-inner" style="z-index:2;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'+
-            '<div style="display:flex;align-items:center;gap:14px;">'+
+          '<div class="flex-between" style="align-items:flex-start;">'+
+            '<div class="flex-align gap-2xl">'+
               '<span style="width:14px;height:14px;border-radius:50%;background:'+v.phaseInk+';"></span>'+
               '<span style="font-size:15px;letter-spacing:0.18em;text-transform:uppercase;color:oklch(0.4 0.012 70);">Interval '+v.phaseIdx+'</span>'+
             '</div>'+
@@ -2468,9 +2468,9 @@
               '</div>'
             )+
           '</div>'+
-          '<div style="display:flex;flex-direction:column;gap:20px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.5);border-radius:20px;padding:22px 24px;box-shadow:0 8px 32px 0 rgba(31,38,135,0.05);z-index:2;position:relative;">'+
+          '<div class="flex-col gap-5xl glass-card" style="z-index:2;position:relative;padding:22px 24px;">'+
             '<div>'+
-              '<div style="display:flex;justify-content:space-between;margin-bottom:9px;font-size:14px;letter-spacing:0.04em;color:oklch(0.45 0.022 255);">'+
+              '<div class="flex-between mb-lg" style="font-size:14px;letter-spacing:0.04em;color:oklch(0.45 0.022 255);">'+
                 '<span style="font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:0.08em;">Session</span>'+
                 '<span style="font-family:\'Space Grotesk\';font-variant-numeric:tabular-nums;font-weight:500;">'+v.elapsedText+' / '+v.totalText+'</span>'+
               '</div>'+
@@ -2479,7 +2479,7 @@
                 '<div style="position:absolute;top:-4px;bottom:-4px;left:'+v.overallPctText+';width:3px;background:#005B96;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,0.15);transform:translateX(-50%);"></div>'+
               '</div>'+
             '</div>'+
-            '<div style="display:flex;gap:12px;">'+
+            '<div class="flex gap-xl">'+
               '<button data-act="togglePause" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:16px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">'+v.pauseLabel+'</button>'+
               '<button data-act="skip" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:16px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">Skip</button>'+
               '<button data-act="stop" class="btn-danger" style="flex:0 0 auto;cursor:pointer;border:1px solid oklch(0.82 0.05 27);background:oklch(1 0 0);color:oklch(0.5 0.12 27);padding:16px 22px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">End</button>'+
@@ -2497,7 +2497,7 @@
         '<div style="font-size:16px;color:oklch(0.4 0.012 70);font-weight:500;">'+v.setupCount+' intervals · Cadence held!</div>'+
         
         '<div id="share-card-preview" style="margin-top:28px;background:oklch(1 0 0);border:1px solid oklch(0.9 0.016 230);border-radius:20px;padding:24px;width:100%;max-width:380px;box-shadow:0 8px 24px oklch(0.3 0.022 255 / 0.04);display:flex;flex-direction:column;gap:16px;text-align:left;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<div class="flex-between-align">'+
             '<span style="font-family:\'Space Grotesk\';font-weight:600;font-size:13px;letter-spacing:0.16em;color:#000000;">CREWCALL</span>'+
             '<span style="font-size:11px;color:oklch(0.55 0.012 70);text-transform:uppercase;letter-spacing:0.04em;">Rowing Stats</span>'+
           '</div>'+
@@ -2505,7 +2505,7 @@
             '<div style="font-size:24px;font-weight:600;color:oklch(0.3 0.012 70);">Workout complete!</div>'+
             '<div style="font-size:13px;color:oklch(0.55 0.012 70);margin-top:2px;">Cadence held, limits pushed.</div>'+
           '</div>'+
-          '<div style="display:flex;gap:20px;margin:4px 0;">'+
+          '<div class="flex gap-5xl" style="margin:4px 0;">'+
             '<div>'+
               '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:oklch(0.6 0.012 70);">Duration</div>'+
               '<div style="font-family:\'Space Grotesk\';font-size:20px;font-weight:600;color:oklch(0.3 0.012 70);">'+v.totalText+'</div>'+
@@ -2520,14 +2520,14 @@
           '</div>'+
         '</div>'+
 
-        '<div style="display:flex;flex-direction:column;gap:12px;margin-top:28px;width:100%;max-width:380px;">'+
+        '<div class="flex-col gap-xl mt-7xl w-full" style="max-width:380px;">'+
           '<button data-act="downloadCard" class="btn-start" style="width:100%;cursor:pointer;border:none;color:oklch(0.97 0.006 85);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;">'+
             '<span>📥</span>Save workout PNG'+
           '</button>'+
           '<button data-act="downloadConfig" class="btn-soft" style="width:100%;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;">'+
             '<span>💾</span>Save plan'+
           '</button>'+
-          '<div style="display:flex;gap:12px;width:100%;">'+
+          '<div class="flex gap-xl w-full">'+
             '<button data-act="restart" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Repeat</button>'+
             '<button data-act="stop" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Return to Home</button>'+
           '</div>'+
@@ -2548,7 +2548,7 @@
         '<div>'+
           '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.45 0.012 70);margin-bottom:14px;">1. Energy Level</div>'+
           '<div style="font-size:16px;font-weight:600;color:oklch(0.3 0.012 70);margin-bottom:16px;line-height:1.4;">How energized are you feeling right now?</div>'+
-          '<div style="display:flex;flex-direction:column;gap:12px;">'+
+          '<div class="flex-col gap-xl">'+
             '<button data-act="setBuilderAnswer" data-key="energy" data-val="low" style="text-align:left;cursor:pointer;border-radius:14px;padding:16px;transition:all 0.2s;display:flex;align-items:center;gap:16px;'+
               (answers.energy === 'low' ? 
                 'background:oklch(0.93 0.05 158);border:2px solid oklch(0.80 0.095 158);box-shadow:0 4px 12px oklch(0.80 0.095 158 / 0.15);' : 
@@ -2586,7 +2586,7 @@
         '<div>'+
           '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.45 0.012 70);margin-bottom:14px;">2. Fatigue & Soreness</div>'+
           '<div style="font-size:16px;font-weight:600;color:oklch(0.3 0.012 70);margin-bottom:16px;line-height:1.4;">Are you feeling tired, stiff, or sore?</div>'+
-          '<div style="display:flex;flex-direction:column;gap:12px;">'+
+          '<div class="flex-col gap-xl">'+
             '<button data-act="setBuilderAnswer" data-key="tired" data-val="yes" style="text-align:left;cursor:pointer;border-radius:14px;padding:16px;transition:all 0.2s;display:flex;align-items:center;gap:16px;'+
               (answers.tired === 'yes' ? 
                 'background:oklch(0.95 0.005 240);border:2px solid oklch(0.65 0.02 240);box-shadow:0 4px 12px oklch(0.65 0.02 240 / 0.15);' : 
@@ -2625,7 +2625,7 @@
         '<div>'+
           '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.45 0.012 70);margin-bottom:14px;">3. Goal & Duration</div>'+
           '<div style="font-size:16px;font-weight:600;color:oklch(0.3 0.012 70);margin-bottom:12px;line-height:1.4;">What is your focus and target time?</div>'+
-          '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">'+
+          '<div class="flex-col gap-lg mb-5xl">'+
             '<button data-act="setBuilderAnswer" data-key="goal" data-val="sweat" style="text-align:left;cursor:pointer;border-radius:12px;padding:12px 14px;transition:all 0.2s;display:flex;align-items:center;gap:12px;'+
               (answers.goal === 'sweat' ? 
                 'background:oklch(0.93 0.05 27);border:2px solid oklch(0.71 0.145 27);' : 
@@ -2658,7 +2658,7 @@
             '</button>'+
           '</div>'+
           '<div style="font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.5 0.012 70);margin-bottom:8px;">Target Workout Duration</div>'+
-          '<div style="display:flex;gap:8px;">'+
+          '<div class="flex gap-md">'+
             durHtml+
           '</div>'+
         '</div>';
@@ -2667,8 +2667,8 @@
       var pct = Math.round(((step + 1) / 3) * 100);
 
       return ''+
-      '<div style="display:flex;flex-direction:column;height:100%;padding:28px 24px;box-sizing:border-box;">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">'+
+      '<div class="flex-col h-full p-7xl box-border">'+
+        '<div class="flex-between-align mb-5xl">'+
           '<div>'+
             '<div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:oklch(0.58 0.012 70);font-weight:600;">Smart Session Builder</div>'+
             '<div style="font-size:22px;font-weight:700;color:oklch(0.3 0.012 70);margin-top:4px;letter-spacing:-0.01em;">Tailor your row</div>'+
@@ -2676,7 +2676,7 @@
           '<button data-act="closeBuilder" style="background:none;border:none;font-size:26px;cursor:pointer;color:oklch(0.5 0.012 70);padding:4px;line-height:1;">&times;</button>'+
         '</div>'+
         '<div style="margin-bottom:24px;">'+
-          '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;font-weight:600;color:oklch(0.5 0.012 70);">'+
+          '<div class="flex-between mb-sm" style="font-size:12px;font-weight:600;color:oklch(0.5 0.012 70);">'+
             '<span>Step '+(step + 1)+' of 3</span>'+
             '<span style="font-family:\'Space Grotesk\';">'+pct+'%</span>'+
           '</div>'+
@@ -2687,7 +2687,7 @@
         '<div style="flex:1;overflow-y:auto;padding-right:2px;animation:fadeIn 0.25s ease;">'+
           contentHtml+
         '</div>'+
-        '<div style="display:flex;gap:12px;margin-top:20px;border-top:1px solid oklch(0.95 0.012 85);padding-top:16px;">'+
+        '<div class="flex gap-xl mt-5xl" style="border-top:1px solid oklch(0.95 0.012 85);padding-top:var(--space-3xl);">'+
           (step > 0 ? 
             '<button data-act="prevBuilderStep" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Back</button>' 
             : ''
@@ -2701,14 +2701,14 @@
 
     if(v.isSetup){
       return ''+
-      '<div class="setup-builder-scroll" style="display:flex;flex-direction:column;height:100%;padding:28px 24px;overflow-y:auto;">'+
-        '<div style="display:flex;flex-direction:column;gap:16px;">'+
+      '<div class="setup-builder-scroll" class="flex-col h-full p-7xl overflow-y-auto">'+
+        '<div class="flex-col gap-3xl">'+
           '<div>'+
             '<div style="font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Build your session</div>'+
             '<div style="font-size:24px;font-weight:600;color:oklch(0.3 0.012 70);margin-top:8px;letter-spacing:-0.01em;">Set the time, stack the work.</div>'+
           '</div>'+
-          '<div style="display:flex;flex-direction:column;gap:10px;">'+
-            '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+          '<div class="flex-col gap-lg">'+
+            '<div class="flex gap-lg flex-wrap">'+
               '<button data-act="surprise" class="btn-surprise" style="cursor:pointer;border:1px solid oklch(0.8 0.05 27);background:oklch(1 0 0);color:oklch(0.48 0.13 27);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;letter-spacing:0.03em;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
                 '<span style="width:7px;height:7px;border-radius:50%;background:oklch(0.71 0.145 27);"></span>Surprise me'+
               '</button>'+
@@ -2719,7 +2719,7 @@
                 '<span>⚡</span>Advance'+
               '</button>'+
             '</div>'+
-            '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+            '<div class="flex gap-lg flex-wrap">'+
               '<button data-act="uploadConfigBtn" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.87 0.012 85);background:oklch(1 0 0);color:oklch(0.35 0.012 70);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;">'+
                 '<span>📂</span>Import plan'+
               '</button>'+
@@ -2729,12 +2729,12 @@
             '</div>'+
           '</div>'+
         '</div>'+
-        '<div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">'+
+        '<div class="flex-col gap-lg mt-5xl">'+
           '<div style="border:1px solid oklch(0.87 0.012 85);border-radius:14px;padding:12px 18px;background:oklch(0.965 0.012 85);display:flex;align-items:center;justify-content:space-between;gap:18px;">'+
             '<div>'+
               '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.4 0.012 70);">Session length</div>'+
             '</div>'+
-            '<div style="display:flex;align-items:center;gap:14px;">'+
+            '<div class="flex-align gap-2xl">'+
               stepperBtn('decTarget', v.decTargetDisabled, false, '−')+
               '<span style="font-family:\'Space Grotesk\';font-size:30px;font-weight:500;min-width:78px;text-align:center;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">'+v.targetText+'</span>'+
               stepperBtn('incTarget', v.incTargetDisabled, false, '+')+
@@ -2761,9 +2761,9 @@
     }
     if(v.showList){
       return ''+
-      '<div style="display:flex;flex-direction:column;height:100%;">'+
+      '<div class="flex-col h-full">'+
         '<div style="padding:24px 24px 16px;border-bottom:1px solid oklch(0.91 0.006 85);">'+
-          '<div style="display:flex;justify-content:space-between;align-items:baseline;">'+
+          '<div class="flex-between" style="align-items:baseline;">'+
             '<div style="font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:oklch(0.58 0.012 70);">Session plan</div>'+
             '<div style="font-family:\'Space Grotesk\';font-size:15px;font-variant-numeric:tabular-nums;color:oklch(0.5 0.012 70);">'+v.overallPctRoundedText+'</div>'+
           '</div>'+

@@ -2,6 +2,7 @@
 "use strict";
 
 import { state, COLORS, fmt, esc } from './state.js';
+import { render } from './render.js';
 
 export function goToAdvance() {
   state.enteringAdvance = true;
@@ -10,18 +11,21 @@ export function goToAdvance() {
     ? state.advancedSequence
     : [].concat(state.sequence);
   state.advancedEdited = false;
+  render();
 }
 
 export function exitAdvance() {
   state.mode = 'setup';
   state.enteringAdvance = false;
   state.insertIndex = null;
+  render();
 }
 
 export function resetAdvance() {
   state.advancedSequence = [];
   state.advancedEdited = false;
   state.insertIndex = null;
+  render();
 }
 
 export function addAdvancedBlock(intensity) {
@@ -33,14 +37,17 @@ export function addAdvancedBlock(intensity) {
   });
   state.advancedEdited = true;
   state.insertIndex = null;
+  render();
 }
 
 export function toggleInsertMenu(i) {
   state.insertIndex = (state.insertIndex === i) ? null : i;
+  render();
 }
 
 export function closeInsertMenu() {
   state.insertIndex = null;
+  render();
 }
 
 export function insertAdvancedBlock(idx, intensity) {
@@ -53,11 +60,13 @@ export function insertAdvancedBlock(idx, intensity) {
   state.advancedSequence.splice(idx, 0, newBlock);
   state.advancedEdited = true;
   state.insertIndex = null;
+  render();
 }
 
 export function deleteAdvancedBlock(idx) {
   state.advancedSequence.splice(idx, 1);
   state.advancedEdited = true;
+  render();
 }
 
 export function changeAdvancedRate(idx, delta) {
@@ -68,6 +77,7 @@ export function changeAdvancedRate(idx, delta) {
   var nr = Math.max(16, Math.min(40, cr + delta));
   s.rate = nr;
   state.advancedEdited = true;
+  render();
 }
 
 export function changeAdvancedDur(idx, delta) {
@@ -76,6 +86,7 @@ export function changeAdvancedDur(idx, delta) {
   var nd = Math.max(10, s.len + delta);
   s.len = nd;
   state.advancedEdited = true;
+  render();
 }
 
 export function moveAdvancedBlock(idx, dir) {
@@ -86,6 +97,7 @@ export function moveAdvancedBlock(idx, dir) {
   arr[idx] = arr[newIdx];
   arr[newIdx] = tmp;
   state.advancedEdited = true;
+  render();
 }
 
 export function jumpToAdvancedBlock(idx) {

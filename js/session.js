@@ -40,6 +40,7 @@ export function surprise() {
   }
   state.advancedSequence = seq;
   state.advancedEdited = true;
+  render();
 }
 
 function buildCueTimeline() {
@@ -182,6 +183,7 @@ export function pause() {
   state.mode = 'paused';
   state.baseElapsed = state.elapsed;
   if (state.raf) { cancelAnimationFrame(state.raf); state.raf = null; }
+  render();
   trackEvent('pause', { elapsed: Math.round(state.elapsed) });
 }
 

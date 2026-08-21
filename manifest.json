@@ -1,0 +1,51 @@
+{
+  "name": "CrewCall - Interval Rowing Coach",
+  "short_name": "CrewCall",
+  "description": "Set the time, stack the work. Smart interval rowing coach with auto-scaling, arrangement, and audio cues.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "theme_color": "#e7f2f8",
+  "background_color": "#e7f2f8",
+  "categories": ["sports", "health", "fitness", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "setup_screenshot.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "CrewCall session setup"
+    },
+    {
+      "src": "running_screenshot.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "CrewCall workout in progress"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
+}

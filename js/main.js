@@ -109,9 +109,10 @@ var ACTIONS = {
 };
 
 // Event delegation - catch all button clicks
-document.addEventListener('click', function(e) {
+document.addEventListener('pointerdown', function(e) {
   var el = e.target.closest('[data-act]');
   if (!el) return;
+  if (e.button !== 0) return;
   var act = el.getAttribute('data-act');
   var handler = ACTIONS[act];
   if (handler) {

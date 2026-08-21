@@ -140,8 +140,9 @@ export function canSetTarget(targetSec) {
 export function buildPreview() {
   var counts = curCounts();
   var L = computeLen(state.targetMin * 60, counts);
+  var config = state.config;
   return arrange(counts.high, counts.medium, counts.med, counts.low, counts.freeform).map(function(k) {
-    return { intensity: k, len: L[k] };
+    return { intensity: k, len: L[k], rate: config[k] != null ? config[k].rate : null };
   });
 }
 

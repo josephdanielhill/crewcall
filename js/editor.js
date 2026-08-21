@@ -1,7 +1,7 @@
 // Editor module - advanced timeline editor for CrewCall
 "use strict";
 
-import { state, COLORS, fmt, esc } from './state.js';
+import { state, COLORS, fmt, esc, buildPreview } from './state.js';
 import { render } from './render.js';
 
 export function goToAdvance() {
@@ -9,7 +9,9 @@ export function goToAdvance() {
   state.mode = 'advance';
   state.advancedSequence = state.advancedSequence.length > 0
     ? state.advancedSequence
-    : [].concat(state.sequence);
+    : state.sequence.length > 0
+      ? [].concat(state.sequence)
+      : buildPreview();
   state.advancedEdited = false;
   render();
 }

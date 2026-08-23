@@ -109,7 +109,10 @@ var ACTIONS = {
 };
 
 // Event delegation - catch all button clicks
-document.addEventListener('pointerdown', function(e) {
+// Uses click as primary (reliable across iOS, Android, desktop).
+// On iOS inside overflow-y:auto containers, pointerdown may not fire
+// due to scroll-interference heuristics — click always does.
+document.addEventListener('click', function(e) {
   var el = e.target.closest('[data-act]');
   if (!el) return;
   if (e.button !== 0) return;

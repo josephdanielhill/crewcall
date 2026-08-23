@@ -641,7 +641,7 @@
   .sidebar-toggle-mount {
     position: absolute;
     top: 0;
-    right: -44px;
+    right: 43%;
     bottom: 0;
     width: 0;
     pointer-events: none;
@@ -675,10 +675,13 @@
     transform: translate(-50%, -50%) scale(0.95);
   }
 
+  #app.sidebar-hidden .sidebar-toggle-mount {
+    right: 0;
+  }
   #app.sidebar-hidden .sidebar-toggle-btn {
-    left: auto;
-    right: 20px;
+    right: 10px;
     transform: translate(0, -50%);
+    left: auto;
   }
   #app.sidebar-hidden .sidebar-toggle-btn:hover {
     transform: translate(0, -50%) scale(1.08);
@@ -711,9 +714,9 @@
     </div>
 
     <div class="app-left-content" style="position: absolute; inset: 0; display: flex; flex-direction: column; z-index: 3;"></div>
-    <div class="sidebar-toggle-mount"></div>
   </div>
   <div class="app-right"></div>
+  <div class="sidebar-toggle-mount"></div>
   <div class="mobile-sheet-scrim" data-act="toggleSidebar"></div>
 </div>
 <input type="file" id="config-upload-input" accept=".json" style="display:none">

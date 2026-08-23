@@ -282,22 +282,116 @@ export function showToast(msg, isError) {
 }
 
 export function downloadShareCard() {
-  var app = document.getElementById('app');
-  // Use a canvas approach via html2canvas or manual rendering
-  var preview = app.querySelector('#share-card-preview');
-  if (!preview) return;
   trackEvent('download_card', {});
-  // Fall back: save the share-card section as HTML snippet
-  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:40px;font-family:"Space Grotesk",system-ui,sans-serif}</style></head><body>'+preview.outerHTML+'</body></html>';
-  var blob = new Blob([html], {type:'text/html'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'crewcall-workout-summary.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  var totalSec = state.totalDuration || 0;
+  var totalText = fmt(totalSec);
+  var count = state.sequence ? state.sequence.length : 0;
+  var W = 760, H = 400, R = 32, P = 48;
+  var canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  var cx = canvas.getContext('2d');
+
+  // Rounded rect helper
+  function rRect(x, y, w, h, r) {
+    cx.beginPath();
+    cx.moveTo(x + r, y);
+    cx.lineTo(x + w - r, y);
+    cx.quadraticCurveTo(x + w, y, x + w, y + r);
+    cx.lineTo(x + w, y + h - r);
+    cx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    cx.lineTo(x + r, y + h);
+    cx.quadraticCurveTo(x, y + h, x, y + h - r);
+    cx.lineTo(x, y + r);
+    cx.quadraticCurveTo(x, y, x + r, y);
+    cx.closePath();
+  }
+
+  // White card background
+  rRect(0, 0, W, H, R);
+  cx.fillStyle = '#ffffff';
+  cx.fill();
+  cx.strokeStyle = 'oklch(0.9 0.016 230)';
+  cx.lineWidth = 2;
+  rRect(0, 0, W, H, R);
+  cx.stroke();
+
+  // Header: CREWCALL
+  cx.fillStyle = '#000000';
+  cx.font = '700 26px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.textBaseline = 'top';
+  cx.textAlign = 'left';
+  cx.fillText('CREWCALL', P, P);
+
+  // Header: Rowing Stats
+  cx.fillStyle = 'oklch(0.55 0.012 70)';
+  cx.font = '400 22px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.textAlign = 'right';
+  cx.fillText('Rowing Stats', W - P, P + 6);
+
+  // Title
+  cx.fillStyle = 'oklch(0.3 0.012 70)';
+  cx.font = '700 48px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.textAlign = 'left';
+  cx.fillText('Workout complete!', P, 120);
+  cx.fillStyle = 'oklch(0.55 0.012 70)';
+  cx.font = '400 26px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.fillText('Cadence held, limits pushed.', P, 170);
+
+  // Stats row
+  var sx = P, sy = 240;
+  cx.fillStyle = 'oklch(0.6 0.012 70)';
+  cx.font = '600 18px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.fillText('DURATION', sx, sy);
+  cx.fillStyle = 'oklch(0.3 0.012 70)';
+  cx.font = '600 38px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.fillText(totalText, sx, sy + 34);
+
+  var mx = W * 0.5;
+  cx.fillStyle = 'oklch(0.6 0.012 70)';
+  cx.font = '600 18px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.fillText('INTERVALS', mx, sy);
+  cx.fillStyle = 'oklch(0.3 0.012 70)';
+  cx.font = '600 38px "Space Grotesk", "Hanken Grotesk", system-ui, sans-serif';
+  cx.fillText(String(count), mx, sy + 34);
+
+  // Color bar — preview segments
+  var seq = state.sequence || [];
+  var barY = 330, barH = 24, barW = W - P * 2;
+  if (seq.length > 0) {
+    rRect(P, barY, barW, barH, 12);
+    cx.save();
+    cx.clip();
+    var segTotal = 0;
+    seq.forEach(function(s) { segTotal += s.len; });
+    if (segTotal > 0) {
+      var xOff = P;
+      seq.forEach(function(s) {
+        var co = COLORS[s.intensity];
+        var sw = Math.round((s.len / segTotal) * barW);
+        cx.fillStyle = co.fill;
+        cx.fillRect(xOff, barY, Math.max(sw, 6), barH);
+        xOff += sw;
+      });
+    }
+    cx.restore();
+    cx.strokeStyle = 'oklch(0.9 0.016 230 / 0.5)';
+    cx.lineWidth = 1;
+    rRect(P, barY, barW, barH, 12);
+    cx.stroke();
+  }
+
+  // Export as PNG
+  canvas.toBlob(function(blob) {
+    var pngUrl = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = pngUrl;
+    a.download = 'crewcall-workout-summary.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(pngUrl);
+  }, 'image/png');
 }
 
 export function downloadConfig() {

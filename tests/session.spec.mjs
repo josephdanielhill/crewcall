@@ -166,9 +166,13 @@ test.describe('Session flow', () => {
     await clickAct(page, 'start');
     await waitForMode(page, 'running', 15000);
 
-    // Click End
-    await clickAct(page, 'stop');
-    await waitForMode(page, 'setup', 5000);
+    // Use evaluate to reliably click animated buttons
+    await page.evaluate(() => document.querySelector('[data-act="stop"]')?.click());
+    await page.waitForFunction(
+      (m) => document.getElementById('app')?.getAttribute('data-mode') === m,
+      'setup',
+      { timeout: 5000 }
+    );
     // Start button should be back
     await expect(page.locator('[data-act="start"]')).toBeAttached();
   });

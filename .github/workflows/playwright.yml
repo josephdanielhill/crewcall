@@ -27,12 +27,6 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install chromium
 
-      - name: Start dev server
-        run: |
-          npx serve -l 4173 --no-clipboard --single app.html &
-          sleep 2
-          curl -s -o /dev/null -w "%{http_code}" http://localhost:4173/app.html
-
       - name: Run Playwright tests
         run: npx playwright test --reporter=html,github
 

@@ -120,7 +120,7 @@ export function stepperBtn(act, disabled, soft, label) {
   var cls = soft ? 'btn-stepper-soft' : 'btn-stepper';
   var bg = soft ? 'oklch(0.985 0.005 85)' : 'oklch(1 0 0)';
   var border = soft ? 'oklch(0.86 0.01 85)' : 'oklch(0.84 0.01 85)';
-  return '<button data-act="' + act + '" class="' + cls + (disabled ? ' btn-disabled' : '') + '" style="width:44px;height:44px;cursor:pointer;border:1px solid ' + border + ';background:' + bg + ';border-radius:11px;font-size:22px;color:oklch(0.35 0.012 70);">' + label + '</button>';
+  return '<button data-act="' + act + '" class="' + cls + (disabled ? ' btn-disabled' : '') + '" style="width:44px;height:44px;cursor:pointer;touch-action:manipulation;border:1px solid ' + border + ';background:' + bg + ';border-radius:11px;font-size:22px;color:oklch(0.35 0.012 70);">' + label + '</button>';
 }
 
 export function intensityCard(label, dotColor, inkColor, badgeBg, badgeText, count, sub, decAct, incAct, addDisabled, lenText) {
@@ -569,7 +569,7 @@ export function renderRight(v) {
       '</div>' +
       '</div>' +
       '</div>' +
-      '<div class="flex-col gap-lg mt-5xl">' +
+      '<div class="flex-col gap-lg" style="margin-top:36px;">' +
       '<div style="border:1px solid oklch(0.87 0.012 85);border-radius:14px;padding:12px 18px;background:oklch(0.965 0.012 85);display:flex;align-items:center;justify-content:space-between;gap:18px;">' +
       '<div>' +
       '<div style="font-size:14px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:oklch(0.4 0.012 70);">Session length</div>' +

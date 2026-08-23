@@ -110,7 +110,7 @@ export function sidebarToggleBtn() {
     ? (hidden ? '<polyline points="18 9 12 15 6 9"></polyline>' : '<polyline points="18 15 12 9 6 15"></polyline>')
     : (hidden ? '<polyline points="15 18 9 12 15 6"></polyline>' : '<polyline points="9 18 15 12 9 6"></polyline>');
   return '' +
-    '<button data-act="toggleSidebar" class="sidebar-toggle-btn" aria-label="Toggle session plan">' +
+    '<button data-act="toggleSidebar" class="sidebar-toggle-btn" aria-label="Toggle session plan" aria-expanded="' + String(!hidden) + '">' +
     (mobile ? '<span>' + (hidden ? 'View plan' : 'Hide plan') + '</span>' : '') +
     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg>' +
     '</button>';

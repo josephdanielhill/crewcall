@@ -308,12 +308,12 @@ export function renderLeft(v) {
   }
   if (v.isSetup) {
     return '' +
-      '<div class="left-container">' +
+      '<div class="left-container" style="padding:64px 60px 40px;">' +
       '<div class="setup-brand">' +
       '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>' +
       '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>' +
       '</div>' +
-      '<div class="setup-summary flex-col gap-7xl w-full glass-card">' +
+      '<div class="setup-summary flex-col gap-7xl w-full glass-card" style="padding:24px 32px;">' +
       '<div class="setup-metrics-row">' +
       '<div>' +
       '<div class="setup-time-val">' + v.setupTotalText + '</div>' +
@@ -386,7 +386,7 @@ export function renderLeft(v) {
           '</div>'
       ) +
       '</div>' +
-      '<div class="flex-col gap-5xl glass-card" style="z-index:2;position:relative;padding:22px 24px;">' +
+      '<div class="flex-col gap-5xl glass-card" style="z-index:2;position:relative;padding:28px 32px;">' +
       '<div>' +
       '<div class="flex-between mb-lg" style="font-size:14px;letter-spacing:0.04em;color:oklch(0.45 0.022 255);">' +
       '<span style="font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:0.08em;">Session</span>' +

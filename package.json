@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/josephdanielhill/crewcall#readme",
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "playwright": "^1.62.1",
+    "serve": "^14.2.6",
     "vitest": "^4.1.11"
   }
 }

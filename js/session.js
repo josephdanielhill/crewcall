@@ -1,7 +1,7 @@
 // Session module - workout execution, timer, download/import
 "use strict";
 
-import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, SOUND_ENABLED, COUNTDOWN_BEEPS, COUNTDOWN_WINDOW, INTENSITY_FREQ, freqFor, fmt, arrange, curCounts, computeLen, minPresentLen, buildPreview, applyAutoBreaks, segIndexAt, segStart, esc } from './state.js';
+import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, SOUND_ENABLED, COUNTDOWN_BEEPS, COUNTDOWN_WINDOW, INTENSITY_FREQ, freqFor, fmt, arrange, curCounts, computeLen, minPresentLen, canSetTarget, buildPreview, applyAutoBreaks, segIndexAt, segStart, esc } from './state.js';
 import { ensureAudio, scheduleCountdown, transitionBeep, beep, completeBeep } from './audio.js';
 import { render } from './render.js';
 import { trackEvent } from './track.js';

@@ -503,9 +503,11 @@
     --shadow-lg: 0 -12px 30px oklch(0.05 0.02 255 / 0.5);
   }
 
-  /* Glass card — darker frost in dark mode */
+  /* Glass card — subtle light frost in dark mode */
   .glass-card {
-    background: rgba(30,30,40,0.6);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 }

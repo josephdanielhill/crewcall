@@ -641,7 +641,7 @@
   .sidebar-toggle-mount {
     position: absolute;
     top: 0;
-    right: 43%;
+    right: 0;
     bottom: 0;
     width: 0;
     pointer-events: none;
@@ -649,15 +649,17 @@
   }
   .sidebar-toggle-btn {
     position: absolute;
-    left: 0;
+    left: auto;
+    right: 10px;
     top: 50%;
-    transform: translate(-50%, -50%);
-    width: 88px;
+    transform: translate(0, -50%);
+    width: 44px;
     height: 88px;
-    border-radius: 16px;
+    border-radius: 0 16px 16px 0;
     background: oklch(1 0 0);
     border: 1px solid oklch(0.9 0.016 230);
-    box-shadow: 0 4px 12px oklch(0.3 0.022 255 / 0.12);
+    border-left: none;
+    box-shadow: 4px 0 12px oklch(0.3 0.022 255 / 0.12);
     cursor: pointer;
     pointer-events: auto;
     display: flex;
@@ -672,23 +674,51 @@
   }
   .sidebar-toggle-btn:hover {
     background: oklch(0.975 0.016 230);
-    transform: translate(-50%, -50%) scale(1.08);
+    transform: translate(0, -50%) scale(1.08);
   }
   .sidebar-toggle-btn:active {
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translate(0, -50%) scale(0.95);
   }
 
-  #app.sidebar-hidden .sidebar-toggle-mount {
-    right: 0;
+  /* Normal layout: button sits at boundary between left (57%) and right panels */
+  #app:not(.mode-advance):not(.sidebar-hidden) .sidebar-toggle-mount {
+    right: 43%;
   }
+  #app:not(.mode-advance):not(.sidebar-hidden) .sidebar-toggle-btn {
+    width: 88px;
+    height: 88px;
+    border-radius: 16px;
+    left: 0;
+    right: auto;
+    transform: translate(-50%, -50%);
+    border: 1px solid oklch(0.9 0.016 230);
+    border-left: 1px solid oklch(0.9 0.016 230);
+    box-shadow: 0 4px 12px oklch(0.3 0.022 255 / 0.12);
+  }
+  #app:not(.mode-advance):not(.sidebar-hidden) .sidebar-toggle-btn:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  #app:not(.mode-advance):not(.sidebar-hidden) .sidebar-toggle-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  /* Sidebar hidden or mode-advance: button at right edge, tab-shaped */
+  #app.mode-advance .sidebar-toggle-btn,
   #app.sidebar-hidden .sidebar-toggle-btn {
+    width: 44px;
+    height: 88px;
+    border-radius: 0 16px 16px 0;
+    left: auto;
     right: 10px;
     transform: translate(0, -50%);
-    left: auto;
+    border: 1px solid oklch(0.9 0.016 230);
+    border-left: none;
+    box-shadow: 4px 0 12px oklch(0.3 0.022 255 / 0.12);
   }
+  #app.mode-advance .sidebar-toggle-btn:hover,
   #app.sidebar-hidden .sidebar-toggle-btn:hover {
     transform: translate(0, -50%) scale(1.08);
   }
+  #app.mode-advance .sidebar-toggle-btn:active,
   #app.sidebar-hidden .sidebar-toggle-btn:active {
     transform: translate(0, -50%) scale(0.95);
   }

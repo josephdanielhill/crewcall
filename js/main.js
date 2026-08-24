@@ -112,15 +112,47 @@ var ACTIONS = {
   },
 };
 
-// Event delegation - catch all button clicks
-// Uses click as primary (reliable across iOS, Android, desktop).
-// On iOS inside overflow-y:auto containers, pointerdown may not fire
-// due to scroll-interference heuristics — click always does.
-document.addEventListener('click', function(e) {
+// Track the last processed action (pointerdown fires before click on the same
+// interaction — use this to prevent double-firing when both dispatch).
+var _lastAct = null;
+
+// Event delegation — primary: pointerdown
+// Uses pointerdown instead of click because render() replaces innerHTML every
+// animation frame (~60 Hz) during prep/running modes, which creates a race:
+// the DOM node the user pressed on is destroyed between mousedown and mouseup,
+// causing the browser to NOT dispatch a click event (different mousedown vs
+// mouseup target). pointerdown fires immediately on finger/pointer contact,
+// before any rAF-driven render() can replace the DOM.
+// We keep click as a secondary fallback for platforms where pointerdown is
+// suppressed by system heuristics (e.g. iOS scroll containers, older browsers).
+document.addEventListener('pointerdown', function(e) {
+  if (e.button !== 0) return;
   var el = e.target.closest('[data-act]');
   if (!el) return;
-  if (e.button !== 0) return;
   var act = el.getAttribute('data-act');
+  _lastAct = act;
+  console.log('[CrewCall] pointerdown data-act=' + act, el);
+  var handler = ACTIONS[act];
+  if (handler) {
+    try {
+      handler(el);
+      trackEvent('click_' + act, {});
+    } catch(err) {
+      console.error('[CrewCall] handler error for ' + act + ':', err);
+    }
+  } else {
+    console.warn('[CrewCall] no handler for data-act=' + act);
+  }
+});
+
+// Secondary — click fallback (skips if already handled by pointerdown).
+document.addEventListener('click', function(e) {
+  if (e.button !== 0) return;
+  var el = e.target.closest('[data-act]');
+  if (!el) return;
+  var act = el.getAttribute('data-act');
+  if (_lastAct === act) { _lastAct = null; return; }
+  _lastAct = null;
   console.log('[CrewCall] click data-act=' + act, el);
   var handler = ACTIONS[act];
   if (handler) {

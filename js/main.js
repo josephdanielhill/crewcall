@@ -106,6 +106,10 @@ var ACTIONS = {
   downloadCard: downloadShareCard,
   downloadConfig: downloadConfig,
   uploadConfigBtn: triggerUpload,
+  minimise: function() {
+    state.sidebarHidden = !state.sidebarHidden;
+    render();
+  },
 };
 
 // Event delegation - catch all button clicks
@@ -117,10 +121,17 @@ document.addEventListener('click', function(e) {
   if (!el) return;
   if (e.button !== 0) return;
   var act = el.getAttribute('data-act');
+  console.log('[CrewCall] click data-act=' + act, el);
   var handler = ACTIONS[act];
   if (handler) {
-    handler(el);
-    trackEvent('click_' + act, {});
+    try {
+      handler(el);
+      trackEvent('click_' + act, {});
+    } catch(err) {
+      console.error('[CrewCall] handler error for ' + act + ':', err);
+    }
+  } else {
+    console.warn('[CrewCall] no handler for data-act=' + act);
   }
 });
 

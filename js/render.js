@@ -401,6 +401,7 @@ export function renderLeft(v) {
       '<button data-act="togglePause" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:16px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">' + v.pauseLabel + '</button>' +
       '<button data-act="skip" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:16px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">Skip</button>' +
       '<button data-act="stop" class="btn-danger" style="flex:0 0 auto;cursor:pointer;border:1px solid oklch(0.82 0.05 27);background:oklch(1 0 0);color:oklch(0.5 0.12 27);padding:16px 22px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;">End</button>' +
+      '<button data-act="minimise" class="btn-soft" style="cursor:pointer;border:1px solid oklch(0.78 0.016 230);background:oklch(1 0 0);color:oklch(0.3 0.022 255);padding:16px 14px;border-radius:13px;font-size:13px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;" title="Minimise session panel">Minimise</button>' +
       '</div>' +
       '</div>' +
       '</div>' +

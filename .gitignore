@@ -1,2 +1,4 @@
 node_modules/
-package-lock.jsontest-results/
+package-lock.json
+test-results/
+playwright-report/

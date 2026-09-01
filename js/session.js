@@ -5,6 +5,7 @@ import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, SOUND_ENABLED, COUNTDOWN_
 import { ensureAudio, scheduleCountdown, transitionBeep, beep, completeBeep } from './audio.js';
 import { render } from './render.js';
 import { trackEvent } from './track.js';
+import { log, initLog, addLogEntry, setRating, deleteEntry, getEntry, exportLog } from './rowlog.js';
 
 var INTENSITY_ORDER = ['high', 'medium', 'med', 'low', 'break', 'freeform'];
 var ALT_STROKES = { high: 32, medium: 28, med: 26, low: 24, break: null, freeform: null };
@@ -459,6 +460,106 @@ export function importConfig(data) {
   render();
   trackEvent('import_config', {});
 }
+
+// ---------------------------------------------------------------
+// Row Log — log after a row, browse from the main menu, replay & rate
+// ---------------------------------------------------------------
+
+export function initRowLog() {
+  initLog(function() { render(); });
+}
+
+export function openRowLog() {
+  if (state.raf) { cancelAnimationFrame(state.raf); state.raf = null; }
+  if (prepRaf) { cancelAnimationFrame(prepRaf); prepRaf = null; }
+  state.mode = 'rowlog';
+  render();
+  trackEvent('open_row_log', {});
+}
+
+export function exitRowLog() {
+  state.mode = 'setup';
+  render();
+}
+
+export function logRow() {
+  if (!log.loaded) return;
+  var counts = curCounts();
+  var labelParts = [];
+  if (counts.high) labelParts.push('H' + counts.high);
+  if (counts.medium) labelParts.push('M+' + counts.medium);
+  if (counts.med) labelParts.push('M' + counts.med);
+  if (counts.low) labelParts.push('L' + counts.low);
+  if (counts.freeform) labelParts.push('F' + counts.freeform);
+  if (!labelParts.length) labelParts.push('Intervals');
+  var plan = {
+    targetMin: state.targetMin,
+    isAdvanced: state.isAdvancedWorkout && state.advancedSequence.length > 0,
+    advancedSequence: (state.isAdvancedWorkout && state.advancedSequence.length > 0) ? [].concat(state.advancedSequence) : undefined,
+    config: {
+      high: { count: state.config.high.count, len: state.config.high.len, rate: state.config.high.rate },
+      medium: { count: state.config.medium.count, len: state.config.medium.len, rate: state.config.medium.rate },
+      med: { count: state.config.med.count, len: state.config.med.len, rate: state.config.med.rate },
+      low: { count: state.config.low.count, len: state.config.low.len, rate: state.config.low.rate },
+      freeform: { count: state.config.freeform.count, len: state.config.freeform.len, rate: null }
+    }
+  };
+ addLogEntry({
+    durationSec: state.totalDuration,
+    intervals: state.sequence.length,
+    high: counts.high, medium: counts.medium, med: counts.med, low: counts.low, freeform: counts.freeform,
+    label: labelParts.join(' &middot; '),
+    plan: plan
+  });
+ showToast('Row logged to your device', false);
+ render();
+ trackEvent('log_row', {});
+}
+
+export function setLogRating(el) {
+  var id = el.getAttribute('data-id');
+  var rating = el.getAttribute('data-rating');
+  if (setRating(id, rating)) { render(); trackEvent('rate_row', { rating: rating }); }
+}
+
+export function deleteLogEntryFn(el) {
+  var id = el.getAttribute('data-id');
+  if (deleteEntry(id)) { showToast('Row removed', false); render(); }
+}
+
+export function replayLogEntry(el) {
+  var id = el.getAttribute('data-id');
+  var entry = getEntry(id);
+  if (!entry || !entry.plan) { showToast('No saved plan to replay', true); return; }
+  var p = entry.plan;
+  var c = p.config;
+  if (c) {
+    state.config.high.count = c.high.count; state.config.high.rate = c.high.rate;
+    state.config.medium.count = c.medium.count; state.config.medium.rate = c.medium.rate;
+    state.config.med.count = c.med.count; state.config.med.rate = c.med.rate;
+    state.config.low.count = c.low.count; state.config.low.rate = c.low.rate;
+    state.config.freeform.count = c.freeform.count;
+  }
+  if (p.targetMin) state.targetMin = p.targetMin;
+  if (p.isAdvanced && p.advancedSequence && p.advancedSequence.length > 0) {
+    state.advancedSequence = p.advancedSequence;
+    state.advancedEdited = true;
+  } else {
+    state.advancedSequence = [];
+    state.advancedEdited = false;
+  }
+  state.isAdvancedWorkout = !!p.isAdvanced;
+  state.mode = 'setup';
+  render();
+  showToast('Plan loaded — ready to row', false);
+  trackEvent('replay_row', {});
+}
+
+export function exportRowLog() {
+  exportLog();
+  trackEvent('export_row_log', {});
+}
+
 
 // Re-export changeTarget's dependency
 export { canSetTarget } from './state.js';

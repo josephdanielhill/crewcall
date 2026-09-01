@@ -511,3 +511,14 @@
     border: 1px solid rgba(255,255,255,0.10);
   }
 }
+/* ---- Row Log (BLD-839) ---- */
+.rowlog-rate.active {
+  background: oklch(0.9 0.05 85) !important;
+  border-color: oklch(0.55 0.06 27) !important;
+  box-shadow: inset 0 0 0 2px oklch(0.6 0.1 27 / 0.35);
+}
+@media (max-width:480px) {
+  .rowlog-screen .left-container {
+    padding: 40px 20px 28px !important;
+  }
+}

@@ -6,10 +6,11 @@ import { ensureAudio, scheduleCountdown, transitionBeep, beep } from './audio.js
 import { isMobile } from './track.js';
 
 import { buildPreview, applyAutoBreaks, curCounts, computeLen, canAdd, canSetTarget, segIndexAt, segStart } from './state.js';
+import { log, fmtDur, dateLabel } from './rowlog.js';
 
 export function renderVals() {
   var c = state.config, CO = COLORS;
-  var isSetup = state.mode === 'setup', isDone = state.mode === 'done';
+  var isSetup = state.mode === 'setup', isDone = state.mode === 'done', isRowLog = state.mode === 'rowlog';
   var isActive = state.mode === 'running' || state.mode === 'paused';
   var isAdvance = state.mode === 'advance';
   var isPrep = state.mode === 'prep';
@@ -83,7 +84,7 @@ export function renderVals() {
   }
 
   return {
-    isSetup: isSetup, isActive: isActive, isDone: isDone, showList: isActive || isDone || isPrep, isAdvance: isAdvance,
+    isSetup: isSetup, isActive: isActive, isDone: isDone, showList: isActive || isDone || isPrep, isAdvance: isAdvance, isRowLog: isRowLog,
     isPrep: isPrep, prepRemainText: prepRemainText, prepFirstLabel: prepFirstLabel, prepFirstInk: prepFirstInk, prepFirstFill: prepFirstFill,
     canStart: prev.length > 0, cannotStart: prev.length === 0,
     previewSegs: previewSegs, segViews: segViews,
@@ -188,7 +189,73 @@ export function renderInsertDivider(i) {
   }
 }
 
+function rowLogCard(e) {
+  var dl = dateLabel(e);
+  var upClass = e.rating === 'up' ? 'rowlog-rate active' : 'rowlog-rate';
+  var downClass = e.rating === 'down' ? 'rowlog-rate active' : 'rowlog-rate';
+  var chips = '';
+  if (e.breakdown) {
+    if (e.breakdown.high) chips += '<span style="background:oklch(0.93 0.05 27);color:oklch(0.42 0.14 27);">H ' + e.breakdown.high + '</span>';
+    if (e.breakdown.medium) chips += '<span style="background:oklch(0.93 0.05 190);color:oklch(0.34 0.12 190);">M+ ' + e.breakdown.medium + '</span>';
+    if (e.breakdown.med) chips += '<span style="background:oklch(0.94 0.04 230);color:oklch(0.36 0.12 230);">M ' + e.breakdown.med + '</span>';
+    if (e.breakdown.low) chips += '<span style="background:oklch(0.94 0.05 160);color:oklch(0.34 0.12 160);">L ' + e.breakdown.low + '</span>';
+    if (e.breakdown.freeform) chips += '<span style="background:oklch(0.94 0.015 70);color:oklch(0.42 0.04 70);">F ' + e.breakdown.freeform + '</span>';
+  }
+  var replayBtn = e.plan ? '<button data-act="replayLogEntry" data-id="' + e.id + '" style="flex:1;cursor:pointer;border:1px solid oklch(0.6 0.09 27);background:oklch(0.29 0.06 24);color:oklch(0.97 0.02 27);padding:9px 12px;border-radius:9px;font-size:13px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Replay</button>' : '<span style="flex:1;"></span>';
+  return '<div style="background:oklch(1 0 0);border:1px solid oklch(0.91 0.006 85);border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:11px;">' +
+    '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<span style="font-family:\'Space Grotesk\';font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">' + dl.date + '</span>' +
+      '<span style="font-size:12px;color:oklch(0.58 0.012 70);">' + dl.time + '</span>' +
+      '<span style="margin-left:auto;font-family:\'Space Grotesk\';font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">' + fmtDur(e.durationSec) + '</span>' +
+      '<span style="font-size:11px;color:oklch(0.55 0.012 70);">' + e.intervals + (e.intervals === 1 ? ' int' : ' ints') + '</span>' +
+    '</div>' +
+    (chips ? '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + chips + '<span style="background:oklch(0.95 0.012 85);color:oklch(0.5 0.012 70);">' + e.label + '</span></div>' : '') +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<button data-act="setLogRating" data-id="' + e.id + '" data-rating="up" class="' + upClass + '" title="Good row" style="font-size:17px;cursor:pointer;border:1px solid oklch(0.9 0.006 85);background:oklch(0.97 0.01 85);border-radius:9px;width:34px;height:34px;line-height:1;">&#128077;</button>' +
+      '<button data-act="setLogRating" data-id="' + e.id + '" data-rating="down" class="' + downClass + '" title="Tough row" style="font-size:17px;cursor:pointer;border:1px solid oklch(0.9 0.006 85);background:oklch(0.97 0.01 85);border-radius:9px;width:34px;height:34px;line-height:1;">&#128078;</button>' +
+      replayBtn +
+      '<button data-act="deleteLogEntryFn" data-id="' + e.id + '" style="cursor:pointer;border:1px solid oklch(0.88 0.04 85);background:oklch(0.98 0.01 85);color:oklch(0.6 0.09 27);border-radius:9px;width:34px;height:34px;font-size:15px;">&#128465;&#65039;</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderRowLogScreen() {
+  var entries = log.entries;
+  var empty = entries.length === 0;
+  var listHtml = '';
+  if (!empty) {
+    var cards = entries.map(rowLogCard);
+    listHtml = '<div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;width:100%;min-height:0;padding-right:6px;">' + cards.join('') + '</div>';
+  } else {
+    listHtml = '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;color:oklch(0.5 0.012 70);padding:24px;min-height:220px;">' +
+      '<div style="font-size:38px;">&#128203;</div>' +
+      '<div style="font-size:16px;font-weight:600;color:oklch(0.35 0.012 70);">No rows logged yet.</div>' +
+      '<div style="font-size:13px;line-height:1.5;max-width:300px;">Finish a session and tap <strong>Log this row</strong> on the end screen &#8212; it stores here with your intervals and timing.</div>' +
+      '</div>';
+  }
+  return '<div class="left-container" style="justify-content:flex-start;overflow:hidden;height:100%;box-sizing:border-box;padding:64px 52px 40px;">' +
+    '<div style="flex-shrink:0;margin-bottom:22px;width:100%;">' +
+    '<div style="margin-bottom:18px;">' +
+    '<a href="index.html" style="display:block;font-family:\'Space Grotesk\';font-weight:600;font-size:17px;letter-spacing:0.16em;color:#000000;text-decoration:none;">CREWCALL</a>' +
+    '<div style="margin-top:6px;font-size:15px;color:oklch(0.6 0.022 255);letter-spacing:0.02em;">Interval rowing coach</div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
+      '<div style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:oklch(0.5 0.012 70);font-weight:600;">Row Log</div>' +
+      '<span style="font-size:12px;color:oklch(0.55 0.012 70);">' + entries.length + (entries.length === 1 ? ' row' : ' rows') + '</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;margin-bottom:14px;">' +
+      '<button data-act="exportRowLog" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:11px 14px;border-radius:11px;font-size:13px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Save as JSON</button>' +
+      '<button data-act="exitRowLog" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:11px 14px;border-radius:11px;font-size:13px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Back</button>' +
+    '</div>' +
+    '</div>' +
+    listHtml +
+  '</div>';
+}
+
 export function renderLeft(v) {
+  if (v.isRowLog) {
+    return renderRowLogScreen();
+  }
   if (v.isAdvance) {
     var cardsHtml = "";
     if (state.advancedSequence.length === 0) {
@@ -331,13 +398,14 @@ export function renderLeft(v) {
       v.previewSegs.map(function(seg) { return '<div style="flex:' + seg.flex + ';background:' + seg.color + ';border-radius:3px;"></div>'; }).join('') +
       '</div>' +
       '</div>' +
-      '<div class="setup-cta">' +
+      '<div class="setup-cta flex-col gap-xl">' +
       (v.canStart ?
         '<button data-act="start" class="btn-start" style="display:flex;align-items:center;gap:16px;border:none;cursor:pointer;color:oklch(0.97 0.006 85);padding:22px 38px;border-radius:16px;font-size:19px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;animation:breathe 4.5s ease-in-out infinite;">' +
         '<span style="width:9px;height:9px;border-radius:50%;background:oklch(0.8 0.095 158);"></span>' +
         'Start session' +
         '</button>'
         : '<div style="font-size:16px;color:oklch(0.6 0.012 70);">Add at least one interval to begin &rarr;</div>') +
+      '<button data-act="openRowLog" class="btn-soft" style="display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:13px 24px;border-radius:14px;font-size:14px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;"><span>&#128203;</span>Row Log</button>' +
       '</div>' +
       '</div>';
   }
@@ -440,6 +508,7 @@ export function renderLeft(v) {
       '<div class="flex-col gap-xl mt-7xl w-full" style="max-width:380px;">' +
       '<button data-act="downloadCard" class="btn-start" style="width:100%;cursor:pointer;border:none;color:oklch(0.97 0.006 85);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;"><span>&#128229;</span>Save workout PNG</button>' +
       '<button data-act="downloadConfig" class="btn-soft" style="width:100%;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;"><span>&#128190;</span>Save plan</button>' +
+      '<button data-act="logRow" class="btn-soft" style="width:100%;cursor:pointer;border:1px solid oklch(0.55 0.09 27);background:oklch(0.29 0.06 24);color:oklch(0.97 0.02 27);padding:16px 24px;border-radius:13px;font-size:15px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:10px;"><span>&#128203;</span>Log this row</button>' +
       '<div class="flex gap-xl w-full">' +
       '<button data-act="restart" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Repeat</button>' +
       '<button data-act="stop" class="btn-soft" style="flex:1;cursor:pointer;border:1px solid oklch(0.78 0.012 70);background:oklch(1 0 0);color:oklch(0.3 0.012 70);padding:14px;border-radius:12px;font-size:14px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Return to Home</button>' +
@@ -663,7 +732,7 @@ export function render() {
 
   app.setAttribute('data-mode', state.mode);
 
-  if (state.mode !== 'setup') {
+  if (state.mode !== 'setup' && state.mode !== 'rowlog') {
     app.classList.add('session-active');
   } else {
     app.classList.remove('session-active');
@@ -699,7 +768,7 @@ export function render() {
     }
   }
 
-  if (state.mode !== 'advance' && rightEl) {
+  if (state.mode !== 'advance' && state.mode !== 'rowlog' && rightEl) {
     rightEl.innerHTML = renderRight(v);
   }
 

@@ -5,7 +5,7 @@ import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, INTENSITY_FREQ, fmt, arra
 import { ensureAudio, createBeepUrl, beep, transitionBeep, scheduleTransition, countBeep, scheduleCountdown, completeBeep } from './audio.js';
 import { render } from './render.js';
 import { goToAdvance, exitAdvance, resetAdvance, addAdvancedBlock, toggleInsertMenu, closeInsertMenu, insertAdvancedBlock, deleteAdvancedBlock, changeAdvancedRate, changeAdvancedDur, moveAdvancedBlock, jumpToAdvancedBlock } from './editor.js';
-import { build, runWorkout, start, startAdvanced, beginPrep, prepLoop, pause, resume, togglePause, skip, stop, finish, restart, change, changeTarget, showToast, downloadShareCard, downloadConfig, triggerUpload, importConfig, surprise } from './session.js';
+import { build, runWorkout, start, startAdvanced, beginPrep, prepLoop, pause, resume, togglePause, skip, stop, finish, restart, change, changeTarget, showToast, downloadShareCard, downloadConfig, triggerUpload, importConfig, surprise, initRowLog, openRowLog, exitRowLog, logRow, setLogRating, deleteLogEntryFn, replayLogEntry, exportRowLog } from './session.js';
 import { openBuilder, closeBuilder, setBuilderAnswer, nextBuilderStep, prevBuilderStep, generateSmartPlan } from './smart-builder.js';
 import { isMobile, trackEvent } from './track.js';
 
@@ -108,8 +108,16 @@ var ACTIONS = {
   uploadConfigBtn: triggerUpload,
   minimise: function() {
     state.sidebarHidden = !state.sidebarHidden;
+
     render();
   },
+  openRowLog: openRowLog,
+  exitRowLog: exitRowLog,
+  logRow: logRow,
+  setLogRating: setLogRating,
+  deleteLogEntryFn: deleteLogEntryFn,
+  replayLogEntry: replayLogEntry,
+  exportRowLog: exportRowLog,
 };
 
 // Track the last processed action (pointerdown fires before click on the same
@@ -264,6 +272,9 @@ observer.observe(document.getElementById('app'), { childList: true, subtree: tru
 
 // Initial render
 render();
+
+// Load persisted Row Log into memory (localStorage w/ IndexedDB fallback)
+initRowLog();
 
 // Load Fathom analytics (external - already in app.html)
 // The external script tag in app.html handles this

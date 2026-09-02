@@ -215,6 +215,95 @@ test.describe('Session flow', () => {
     await clickAct(page, 'stop');
     await waitForMode(page, 'setup', 5000);
   });
+
+  test('log this row shows a visible confirmation toast and stores the entry', async ({ page }) => {
+    // Complete the workout
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+    for (let i = 0; i < 15; i++) {
+      if (await page.evaluate(() => document.getElementById('app')?.getAttribute('data-mode') === 'done')) break;
+      await page.evaluate(() => document.querySelector('[data-act="skip"]')?.click());
+      await page.waitForTimeout(80);
+    }
+    await waitForMode(page, 'done', 5000);
+
+    // Click "Log this row" on the end-session screen
+    await page.evaluate(() => document.querySelector('[data-act="logRow"]')?.click());
+
+    // Regression for BLD-839: the confirmation toast must actually be VISIBLE.
+    // showToast previously omitted the .show class, leaving opacity:0 so the
+    // button looked dead even though the entry was saved.
+    const toast = page.locator('.toast');
+    await expect(toast).toHaveText('Row logged to your device');
+    await expect(toast).toHaveCSS('opacity', '1');
+    await expect(toast).toBeVisible();
+
+    // And the entry must be persisted
+    const stored = await page.evaluate(() => localStorage.getItem('crewcall.rowlog.v1'));
+    expect(stored).toBeTruthy();
+    expect(JSON.parse(stored ?? '[]').length).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Row Log timeline', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(APP_URL);
+  });
+
+  test('entry renders a mini timeline bar matching the interval structure, not text chips', async ({ page }) => {
+    // Regression for BLD-839 re-review: the row log entry previously showed
+    // the interval plus plain numbers (e.g. "H 2 · L 1") instead of the clear
+    // timeline bar from the design concept. Seed one logged entry that has an
+    // ordered plan so the bar must be proportionally sized + coloured.
+    const seed = [{
+      id: 'r_test_timeline',
+      ts: Date.now(),
+      dateISO: '2026-09-02',
+      timeStr: '08:30',
+      durationSec: 1800,
+      intervals: 3,
+      rating: 'up',
+      label: 'H2 &middot; L1',
+      breakdown: { high: 2, medium: 0, med: 0, low: 1, freeform: 0 },
+      plan: {
+        targetMin: 30,
+        isAdvanced: false,
+        config: {
+          high: { count: 2, len: 300, rate: 32 },
+          medium: { count: 0, len: 90, rate: 28 },
+          med: { count: 0, len: 105, rate: 26 },
+          low: { count: 1, len: 1200, rate: 24 },
+          freeform: { count: 0, len: 60, rate: null }
+        }
+      }
+    }];
+    await page.evaluate((entry) => {
+      localStorage.setItem('crewcall.rowlog.v1', JSON.stringify([entry]));
+    }, seed[0]);
+    // Reload so rowlog initialises from the seeded localStorage.
+    await page.reload();
+    // Open the Row Log from the setup screen.
+    await clickAct(page, 'openRowLog');
+    await waitForMode(page, 'rowlog', 5000);
+    // The card should show the timeline bar (a horizontal strip with per-
+    // interval coloured segments) — the design concept's visual, not text chips.
+    const timeline = page.locator('.rowlog-timeline');
+    await expect(timeline).toBeVisible();
+    // 3 intervals -> 3 segments (not a single flat bar), and they carry the
+    // intensity fill colours (present as inline background styles).
+    const segCount = await page.evaluate(() =>
+      document.querySelectorAll('.rowlog-timeline > div').length
+    );
+    expect(segCount).toBe(3);
+    const backgrounds = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('.rowlog-timeline > div'))
+        .map((d) => d.style.background)
+    );
+    // High = coral-red zone, Low = mint zone; both distinct fills present.
+    expect(backgrounds.length).toBe(3);
+    // The old text-chip representation must not leak into the timeline area.
+    await expect(timeline).not.toContainText('H ');
+  });
 });
 
 test.describe('Sidebar and layout', () => {

@@ -5,7 +5,7 @@ import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, fmt } from './state.js';
 import { ensureAudio, scheduleCountdown, transitionBeep, beep } from './audio.js';
 import { isMobile } from './track.js';
 
-import { buildPreview, applyAutoBreaks, curCounts, computeLen, canAdd, canSetTarget, segIndexAt, segStart } from './state.js';
+import { buildPreview, applyAutoBreaks, curCounts, computeLen, canAdd, canSetTarget, segIndexAt, segStart, arrange } from './state.js';
 import { log, fmtDur, dateLabel } from './rowlog.js';
 
 export function renderVals() {
@@ -189,27 +189,66 @@ export function renderInsertDivider(i) {
   }
 }
 
+// Rebuild the ordered interval sequence for a logged entry so the card can
+// render the same mini timeline bar as the design concept (proportional
+// coloured segments matching the interval structure).
+function rowLogTimelineSegments(e) {
+  if (e.plan && e.plan.isAdvanced && e.plan.advancedSequence && e.plan.advancedSequence.length) {
+    return e.plan.advancedSequence.map(function(s) {
+      return { intensity: s.intensity, len: s.len || 0 };
+    });
+  }
+  var counts = e.breakdown || {};
+  var order = [];
+  try {
+    order = arrange(counts.high || 0, counts.medium || 0, counts.med || 0, counts.low || 0, counts.freeform || 0);
+  } catch (err) { order = []; }
+  var lens = (e.plan && e.plan.config) ? e.plan.config : null;
+  var fallbackLen = Math.max(1, Math.round((e.durationSec || 0) / Math.max(1, e.intervals || order.length)));
+  return order.map(function(k) {
+    var len = lens && lens[k] ? lens[k].len : fallbackLen;
+    return { intensity: k, len: (len || fallbackLen) };
+  });
+}
+
+// Duration-segment timeline bar: renders each logged interval as a colored
+// segment on a single horizontal bar, proportionally sized to each interval's
+// length and coloured by intensity zone (matches the design concept).
+function rowLogTimelineBar(e) {
+  var segs = rowLogTimelineSegments(e);
+  if (!segs.length) return '';
+  var total = 0;
+  segs.forEach(function (s) { total += (s.len || 0); });
+  if (total <= 0) {
+    // No length data — fall back to equal-sized segments so the sequence
+    // structure is still visible.
+    total = segs.length;
+  }
+  var barHeight = 26;
+  var segments = segs.map(function (s) {
+    var co = COLORS[s.intensity] || COLORS.low;
+    var flex = Math.max(1, Math.round(((s.len || 1) / total) * 1000));
+    return '<div style="flex:' + flex + ';background:' + co.fill + ';border-left:2px solid #fafafa;height:' + barHeight + 'px;"></div>';
+  }).join('');
+  return '<div class="rowlog-timeline" style="display:flex;width:100%;height:' + barHeight + 'px;gap:0;background:oklch(0.93 0.005 85);border-radius:7px;overflow:hidden;">' + segments + '</div>';
+}
+
 function rowLogCard(e) {
   var dl = dateLabel(e);
   var upClass = e.rating === 'up' ? 'rowlog-rate active' : 'rowlog-rate';
   var downClass = e.rating === 'down' ? 'rowlog-rate active' : 'rowlog-rate';
-  var chips = '';
-  if (e.breakdown) {
-    if (e.breakdown.high) chips += '<span style="background:oklch(0.93 0.05 27);color:oklch(0.42 0.14 27);">H ' + e.breakdown.high + '</span>';
-    if (e.breakdown.medium) chips += '<span style="background:oklch(0.93 0.05 190);color:oklch(0.34 0.12 190);">M+ ' + e.breakdown.medium + '</span>';
-    if (e.breakdown.med) chips += '<span style="background:oklch(0.94 0.04 230);color:oklch(0.36 0.12 230);">M ' + e.breakdown.med + '</span>';
-    if (e.breakdown.low) chips += '<span style="background:oklch(0.94 0.05 160);color:oklch(0.34 0.12 160);">L ' + e.breakdown.low + '</span>';
-    if (e.breakdown.freeform) chips += '<span style="background:oklch(0.94 0.015 70);color:oklch(0.42 0.04 70);">F ' + e.breakdown.freeform + '</span>';
-  }
+  var timelineBar = rowLogTimelineBar(e);
   var replayBtn = e.plan ? '<button data-act="replayLogEntry" data-id="' + e.id + '" style="flex:1;cursor:pointer;border:1px solid oklch(0.6 0.09 27);background:oklch(0.29 0.06 24);color:oklch(0.97 0.02 27);padding:9px 12px;border-radius:9px;font-size:13px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">Replay</button>' : '<span style="flex:1;"></span>';
-  return '<div style="background:oklch(1 0 0);border:1px solid oklch(0.91 0.006 85);border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:11px;">' +
-    '<div style="display:flex;align-items:center;gap:12px;">' +
+  var metaLine = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
       '<span style="font-family:\'Space Grotesk\';font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">' + dl.date + '</span>' +
       '<span style="font-size:12px;color:oklch(0.58 0.012 70);">' + dl.time + '</span>' +
       '<span style="margin-left:auto;font-family:\'Space Grotesk\';font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;color:oklch(0.3 0.012 70);">' + fmtDur(e.durationSec) + '</span>' +
       '<span style="font-size:11px;color:oklch(0.55 0.012 70);">' + e.intervals + (e.intervals === 1 ? ' int' : ' ints') + '</span>' +
-    '</div>' +
-    (chips ? '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + chips + '<span style="background:oklch(0.95 0.012 85);color:oklch(0.5 0.012 70);">' + e.label + '</span></div>' : '') +
+    '</div>';
+  return '<div style="background:oklch(1 0 0);border:1px solid oklch(0.91 0.006 85);border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:11px;">' +
+    metaLine +
+    (e.label ? '<div style="font-size:12px;color:oklch(0.5 0.012 70);">' + e.label + '</div>' : '') +
+    timelineBar +
     '<div style="display:flex;align-items:center;gap:8px;">' +
       '<button data-act="setLogRating" data-id="' + e.id + '" data-rating="up" class="' + upClass + '" title="Good row" style="font-size:17px;cursor:pointer;border:1px solid oklch(0.9 0.006 85);background:oklch(0.97 0.01 85);border-radius:9px;width:34px;height:34px;line-height:1;">&#128077;</button>' +
       '<button data-act="setLogRating" data-id="' + e.id + '" data-rating="down" class="' + downClass + '" title="Tough row" style="font-size:17px;cursor:pointer;border:1px solid oklch(0.9 0.006 85);background:oklch(0.97 0.01 85);border-radius:9px;width:34px;height:34px;line-height:1;">&#128078;</button>' +

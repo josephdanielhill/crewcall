@@ -63,6 +63,32 @@ test.describe('Setup screen', () => {
     await clickAct(page, 'decTarget');
     await expect(targetSpan).toHaveText(initialText ?? '');
   });
+
+  test('Surprise me randomises the interval counts on the setup screen (BLD-983)', async ({ page }) => {
+    // Each intensity card shows its interval count in the badge span that sits
+    // between the − / + steppers (data-act="dec<Key>" + span).
+    const readCounts = () =>
+      page.evaluate(() =>
+        ['Hc', 'Mc', 'Mdc', 'Lc', 'Fc']
+          .map((s) => document.querySelector(`[data-act="dec${s}"] + span`)?.textContent ?? null)
+          .join('|')
+      );
+
+    const before = await readCounts();
+
+    // BLD-983 regression: the button previously wrote to the hidden Advanced
+    // timeline (state.advancedSequence) and produced no visible change on the
+    // main page. Clicking must now randomise the visible interval plan.
+    await clickAct(page, 'surprise');
+
+    // A confirmation toast must appear...
+    await expect(page.locator('.toast')).toHaveText('Surprise me — intervals randomised');
+
+    // ...and the on-screen interval counts must have changed (nothing happening
+    // was the bug).
+    const after = await readCounts();
+    expect(after).not.toBe(before);
+  });
 });
 
 test.describe('Session flow', () => {

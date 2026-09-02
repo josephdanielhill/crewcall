@@ -22,26 +22,46 @@ export function build() {
 }
 
 export function surprise() {
-  var intensityKeys = ['high', 'medium', 'med', 'low', 'freeform'];
-  var seq = [];
-  var totalLen = 0;
-  var target = state.targetMin * 60;
-  var accum = 0;
-  var allowed = intensityKeys.filter(function(k) { return k !== 'freeform' || Math.random() < 0.3; });
-  while (accum < target) {
-    var k = allowed[Math.floor(Math.random() * allowed.length)];
-    var blockLen = Math.round((15 + Math.random() * 90) / 5) * 5;
-    var rate = null;
-    if (k !== 'freeform' && k !== 'break') {
-      rate = Math.round(20 + Math.random() * 12);
+  // Randomise the main-page interval plan (BLD-983).
+  //
+  // The previous implementation wrote to state.advancedSequence, which is the
+  // Advanced editor's private timeline. That timeline is not rendered on the
+  // main setup screen, so clicking "Surprise me" appeared to do nothing.
+  // We now randomize the config counts that drive the main preview, rebuild
+  // the sequence, and re-render so the plan visibly changes and can be started.
+  var kinds = ['high', 'medium', 'med', 'low'];
+  var tgt = state.targetMin * 60;
+  var counts = { high: 0, medium: 0, med: 0, low: 0, freeform: 0 };
+  var want = 6 + Math.floor(Math.random() * 6);
+  var guard = 0;
+  while (counts.high + counts.medium + counts.med + counts.low < want && guard < 300) {
+    guard++;
+    var k = kinds[Math.floor(Math.random() * 4)];
+    if (counts[k] >= 12) continue;
+    var test = { high: counts.high, medium: counts.medium, med: counts.med, low: counts.low, freeform: 0 };
+    test[k]++;
+    var L = computeLen(tgt, test);
+    if (minPresentLen(L, test) >= MINLEN) {
+      counts = test;
+    } else {
+      break;
     }
-    seq.push({ intensity: k, len: blockLen, rate: rate });
-    accum += blockLen;
-    if (seq.length > 30) break;
   }
-  state.advancedSequence = seq;
-  state.advancedEdited = true;
+  if (counts.high + counts.medium + counts.med + counts.low === 0) {
+    counts.low = 2;
+  }
+  // Commit the randomized counts (and recomputed interval lengths) to the
+  // shared config so the setup screen preview + the sequence both reflect it.
+  var lens = computeLen(tgt, counts);
+  ['high', 'medium', 'med', 'low', 'freeform'].forEach(function(key) {
+    state.config[key].count = counts[key];
+    state.config[key].len = lens[key];
+  });
+  state.isAdvancedWorkout = false;
+  state.advancedEdited = false;
+  build();
   render();
+  showToast('Surprise me — intervals randomised');
 }
 
 function buildCueTimeline() {

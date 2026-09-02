@@ -215,6 +215,34 @@ test.describe('Session flow', () => {
     await clickAct(page, 'stop');
     await waitForMode(page, 'setup', 5000);
   });
+
+  test('log this row shows a visible confirmation toast and stores the entry', async ({ page }) => {
+    // Complete the workout
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+    for (let i = 0; i < 15; i++) {
+      if (await page.evaluate(() => document.getElementById('app')?.getAttribute('data-mode') === 'done')) break;
+      await page.evaluate(() => document.querySelector('[data-act="skip"]')?.click());
+      await page.waitForTimeout(80);
+    }
+    await waitForMode(page, 'done', 5000);
+
+    // Click "Log this row" on the end-session screen
+    await page.evaluate(() => document.querySelector('[data-act="logRow"]')?.click());
+
+    // Regression for BLD-839: the confirmation toast must actually be VISIBLE.
+    // showToast previously omitted the .show class, leaving opacity:0 so the
+    // button looked dead even though the entry was saved.
+    const toast = page.locator('.toast');
+    await expect(toast).toHaveText('Row logged to your device');
+    await expect(toast).toHaveCSS('opacity', '1');
+    await expect(toast).toBeVisible();
+
+    // And the entry must be persisted
+    const stored = await page.evaluate(() => localStorage.getItem('crewcall.rowlog.v1'));
+    expect(stored).toBeTruthy();
+    expect(JSON.parse(stored ?? '[]').length).toBeGreaterThan(0);
+  });
 });
 
 test.describe('Sidebar and layout', () => {

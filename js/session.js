@@ -276,7 +276,7 @@ export function showToast(msg, isError) {
   if (existing) existing.remove();
   if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
   var toast = document.createElement('div');
-  toast.className = 'toast' + (isError ? ' toast-error' : '');
+  toast.className = 'toast show' + (isError ? ' toast-error' : '');
   toast.textContent = msg;
   app.appendChild(toast);
   toastTimeout = setTimeout(function() { toast.remove(); toastTimeout = null; }, 3000);

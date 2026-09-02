@@ -67,7 +67,7 @@ jobs:
                   iss = d.get("data", {}).get("issue")
                   if not iss:
                       print(f"{ident}: not resolvable, skip"); continue
-                  body = "🎛️ **Test area (staging)** — ready to try\\n\\n🔗 " + TEST_URL + "\\n" + MARKER + " " + TEST_URL + "\\n"
+                  body = "🎛️ **Test area (staging)** — ready to try\n\n🔗 " + TEST_URL + "\n" + MARKER + " " + TEST_URL + "\n"
                   existing = next((c for c in iss["comments"]["nodes"] if MARKER in (c.get("body") or "")), None)
                   if existing:
                       res = gql('mutation{ commentUpdate(id:"%s", input:{ body:%s }){ success } }' % (existing["id"], json.dumps(body)))

@@ -119,9 +119,17 @@ export function scheduleTransition(newIntensity, when) {
   beepAt(freqFor(newIntensity), 0.12, when);
 }
 
+// BLD-1008 (2nd rework, Joseph's feedback): give each second of the countdown
+// its own DISTINCT tone so 5→4→3→2→1 descends audibly like a real countdown
+// (previously only two tones existed: 5,4 shared 500Hz and 3,2,1 shared 820Hz).
+// Each second maps to a unique descending pitch; the final second (1) is lower
+// and slightly longer for a clear "go" landing.
+var COUNTDOWN_FREQS = { 5: 880, 4: 784, 3: 698, 2: 587, 1: 494 };
+var COUNTDOWN_DURS  = { 5: 0.12, 4: 0.12, 3: 0.15, 2: 0.15, 1: 0.28 };
+
 export function countBeep(secondsRemaining) {
-  var freq = secondsRemaining <= 3 ? 820 : 500;
-  var dur = secondsRemaining <= 3 ? 0.25 : 0.1;
+  var freq = COUNTDOWN_FREQS[secondsRemaining] || 698;
+  var dur = COUNTDOWN_DURS[secondsRemaining] || 0.15;
   beep(freq, dur, 'sine');
   // Test-only hook (BLD-1008/1011): record countdown beep firings so Playwright
   // can assert exactly-once semantics across the t-5s window. Recorded even if

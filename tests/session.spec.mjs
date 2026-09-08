@@ -459,4 +459,39 @@ test.describe('Countdown beep (BLD-1008)', () => {
     await waitForMode(page, 'paused');
     expect(await beepCount(page)).toBe(3);
   });
+
+  test('countdown fires a DISTINCT, descending tone for each second 5→4→3→2→1 (BLD-1008 2nd rework)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+
+    // Only measure the active-cadence window, not the prep beeps.
+    await page.evaluate(() => { window.__crewcallCountdownBeeps = []; });
+
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+
+    const end = await page.evaluate(() => window.__crewcallState.ends[0]);
+
+    // Walk the full 5-second countdown window one integer second at a time.
+    const order = [];
+    for (let remaining = 5; remaining >= 1; remaining--) {
+      await page.evaluate((s) => window.__crewcallSeek(s), end - remaining);
+      const beeps = await page.evaluate(() => window.__crewcallCountdownBeeps || []);
+      order.push(beeps[beeps.length - 1]);
+    }
+
+    // Each of the five seconds must have fired exactly one beep.
+    expect(order.length).toBe(5);
+    // secondsRemaining must descend 5→4→3→2→1.
+    expect(order.map((b) => b.secondsRemaining)).toEqual([5, 4, 3, 2, 1]);
+    // Every second must have a UNIQUE frequency (distinct tone per second).
+    const freqs = order.map((b) => b.freq);
+    expect(new Set(freqs).size).toBe(5);
+    // The tones must DESCEND as the countdown progresses (urgency builds down).
+    for (let i = 1; i < freqs.length; i++) {
+      expect(freqs[i]).toBeLessThan(freqs[i - 1]);
+    }
+  });
 });

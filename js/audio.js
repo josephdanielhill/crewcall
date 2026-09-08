@@ -86,6 +86,13 @@ export function countBeep(secondsRemaining) {
   var freq = secondsRemaining <= 3 ? 820 : 500;
   var dur = secondsRemaining <= 3 ? 0.25 : 0.1;
   beep(freq, dur, 'sine');
+  // Test-only hook (BLD-1008/1011): record countdown beep firings so Playwright
+  // can assert exactly-once semantics across the t-5s window. Recorded even if
+  // the underlying audio early-returns (headless/unsupported), so the counter
+  // reflects the logic, not the audio backend.
+  if (typeof window !== 'undefined' && window.__crewcallCountdownBeeps) {
+    window.__crewcallCountdownBeeps.push({ freq: freq, dur: dur, secondsRemaining: secondsRemaining });
+  }
 }
 
 export function scheduleCountdown(tickCallback, doneCallback) {

@@ -1,0 +1,140 @@
+# Reusable per-PR/per-issue Cloudflare Pages PREVIEW workflow.
+# Gives each issue's feature branch its OWN isolated test URL, so multiple
+# "ready" issues don't collide on the single shared staging URL.
+#
+# Flip ONLY these per-repo knobs:
+#   1. build step(s) before deploy (Vite dist / next out / vinext pages-dist / none for plain static)
+#   2. publish dir after build (dist / out / pages-dist / . )
+#   3. --project-name <repo>-test
+#   4. SHARED_TEST_URL: https://<repo>-test.pages.dev  (the integration/staging URL)
+#
+# The wrangler-action@v3 `deployment-url` output is captured and posted to the
+# Linear ticket(s) referenced by the PR (title/body/branch/commit messages), so
+# each ticket carries ITS OWN preview URL, not just the shared staging one.
+name: Deploy Preview to Cloudflare Pages
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - staging
+  push:
+    branches:
+      - 'bld-*'
+      - 'feature/*'
+      - 'fix/*'
+      - 'feat/*'
+  workflow_dispatch:
+
+concurrency:
+  group: cf-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SHARED_TEST_URL: https://crewcall-test.pages.dev
+
+jobs:
+  preview:
+    name: Deploy preview to Cloudflare Pages
+    runs-on: ubuntu-latest
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Neutralize crewcall's committed Playwright package tree BEFORE the action.
+      # wrangler-action@v3 runs `npm i wrangler` into the repo root; reconciling
+      # wrangler into crewcall's existing package.json/package-lock.json + node_modules
+      # tree crashes npm's arborist with "Cannot read properties of null (reading
+      # 'edgesOut')" on the ubuntu-24.04 hosted image (recurring since 2026-09-06).
+      # Pure-static repos (reflectify etc., no package.json) never hit this. The
+      # deploy job doesn't run Playwright/vitest, so the toolchain is safe to drop
+      # here — wrangler then installs into a clean dir like the static repos do.
+      - name: Clean npm tree so wrangler installs cleanly
+        run: |
+          rm -f package.json package-lock.json
+          rm -rf node_modules
+
+      - name: Deploy preview to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy . --project-name crewcall-test --branch "${{ github.head_ref || github.ref_name }}"
+
+  post-linear:
+    name: Post issue preview URL to Linear
+    runs-on: ubuntu-latest
+    needs: preview
+    if: ${{ always() && needs.preview.result == 'success' }}
+    env:
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      PREVIEW_URL: ${{ needs.preview.outputs.preview_url }}
+      SHARED_TEST_URL: https://crewcall-test.pages.dev
+    steps:
+      - name: Post preview URL to tickets referenced by this PR
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+
+          API = "https://api.linear.app/graphql"
+          MARKER = "<!-- hermes-test-url -->"
+          KEY = os.environ.get("LINEAR_API_KEY", "")
+          PREVIEW = os.environ.get("PREVIEW_URL", "").strip()
+          SHARED = os.environ.get("SHARED_TEST_URL", "").strip()
+
+          # Collect BLD-XXXX from the PR: title, body, branch, and commit messages.
+          tickets = set()
+          ev_path = os.environ.get("GITHUB_EVENT_PATH", "")
+          try:
+              with open(ev_path) as f:
+                  ev = json.load(f)
+          except Exception as e:
+              print("could not read event:", e); ev = {}
+          pr = ev.get("pull_request") or {}
+          hay = " ".join(str(x) for x in [
+              pr.get("title", ""), pr.get("body", ""),
+              pr.get("head", {}).get("ref", ""), pr.get("base", {}).get("ref", ""),
+          ])
+          tickets.update(re.findall(r"\b(BLD-\d+)\b", hay, re.I))
+          for c in ev.get("commits") or []:
+              tickets.update(re.findall(r"\b(BLD-\d+)\b", c.get("message", ""), re.I))
+          tickets = {t.upper() for t in tickets}
+
+          if not KEY or not tickets:
+              print("no tickets referenced or no key; nothing to post")
+              raise SystemExit(0)
+          # Prefer the unique preview URL; fall back to the shared staging URL.
+          URL = (PREVIEW or SHARED).rstrip("/")
+
+          def gql(q):
+              req = urllib.request.Request(API, data=json.dumps({"query": q}).encode(),
+                  headers={"Authorization": KEY, "Content-Type": "application/json"})
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  return json.loads(r.read())
+
+          for ident in sorted(tickets):
+              try:
+                  d = gql('{ issue(id:"%s"){ id identifier title comments(first:50){ nodes{ id body } } } }' % ident)
+                  iss = d.get("data", {}).get("issue")
+                  if not iss:
+                      print(f"{ident}: not resolvable, skip"); continue
+                  label = "Preview (this PR)"
+                  marker_line = MARKER + " " + URL
+                  body = "🎛️ **Test area** — " + label + " — ready to try\n\n🔗 " + URL + "\n" + marker_line + "\n"
+                  existing = next((c for c in iss["comments"]["nodes"] if MARKER in (c.get("body") or "")), None)
+                  if existing:
+                      res = gql('mutation{ commentUpdate(id:"%s", input:{ body:%s }){ success } }' % (existing["id"], json.dumps(body)))
+                      action = "updated"
+                  else:
+                      res = gql('mutation{ commentCreate(input:{ issueId:"%s", body:%s }){ success } }' % (iss["id"], json.dumps(body)))
+                      action = "created"
+                  ok = bool(next(iter(res.get("data", {}).values()), {}).get("success"))
+                  print(f"{ident} — {iss['title'][:40]}: {action} -> {URL} ({ok})")
+              except Exception as e:
+                  print(f"{ident}: error {e}")
+
+          print("done.")
+          PY

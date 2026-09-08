@@ -365,3 +365,68 @@ test.describe('Sidebar and layout', () => {
     await expect(page.locator('#app')).not.toHaveClass(/sidebar-hidden/);
   });
 });
+
+test.describe('Countdown beep (BLD-1008)', () => {
+  // The active-cadence timer runs on real 30-60s+ intervals, which is far too
+  // slow for E2E. Install the test hooks (window.__crewcallTestSeek /
+  // __crewcallCountdownBeeps) via addInitScript so tests can deterministically
+  // advance the running timer and observe countdown-beep firings. The seek hook
+  // is only installed when __crewcallTestSeek is set, so production is untouched.
+  async function withCountdownHooks(page) {
+    await page.addInitScript(() => {
+      window.__crewcallTestSeek = true;
+      window.__crewcallCountdownBeeps = [];
+    });
+  }
+
+  async function beepCount(page) {
+    return page.evaluate(() => (window.__crewcallCountdownBeeps || []).length);
+  }
+
+  test('pre-session countdown fires exactly one beep in the last 5s (BLD-1010)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    // Prep is 10s; the countdown beep must fire once during the last 5s of it.
+    await waitForMode(page, 'running', 15000);
+    // Only the prep beep should have fired by the time running begins (the first
+    // active cadence is ~60s long, so no cadence beep can fire this early).
+    expect(await beepCount(page)).toBe(1);
+  });
+
+  test('active cadence: one beep in the t-5s window, none outside, no double-fire on pause/resume (BLD-1009/1011)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+
+    // Ignore the prep beep; we're only measuring the active-cadence window.
+    await page.evaluate(() => { window.__crewcallCountdownBeeps = []; });
+
+    // Pause so the real timer stops drifting, then drive elapsed deterministically.
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+
+    const end = await page.evaluate(() => window.__crewcallState.ends[0]);
+
+    // Outside the t-5s window: no countdown beep.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 8);
+    expect(await beepCount(page)).toBe(0);
+
+    // Enter the t-5s window: exactly one beep.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 3);
+    expect(await beepCount(page)).toBe(1);
+
+    // Deeper in the window: still exactly one (fires once per t-5s crossing).
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 1);
+    expect(await beepCount(page)).toBe(1);
+
+    // Resume, let it run near the boundary, then pause again: no double-fire.
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'running');
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+    expect(await beepCount(page)).toBe(1);
+  });
+});

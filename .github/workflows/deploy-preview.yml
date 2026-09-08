@@ -43,14 +43,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pin a stable Node LTS. wrangler-action shells out to the runner's default
-      # npm, which on Node 24 (ubuntu-24.04 hosted default) is npm 11 and hits the
-      # arborist "Cannot read properties of null (reading 'edgesOut')" crash on its
-      # internal `npm i wrangler`. Node 22 ships npm 10, which does not have that
-      # regression. (Recurring failure, e.g. BLD-1008 preview deploy 2026-09-08.)
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      # Pre-install wrangler ourselves so wrangler-action DETECTS it and skips its
+      # own `npm i wrangler` (which, on the ubuntu-24.04 hosted image since 2026-09-06,
+      # crashes with arborist "Cannot read properties of null (reading 'edgesOut')"
+      # when reconciling into crewcall's committed package-lock/node_modules Playwright
+      # tree). Install into a WRITABLE prefix with a FRESH cache dir to dodge the
+      # corrupted ~/.npm shared cache and /usr/local EACCES. The bin is added to PATH
+      # so wrangler-action's `npx --no-install wrangler --version` resolves it.
+      - name: Pre-install Wrangler (fresh cache, writable prefix)
+        run: |
+          npm install -g wrangler@3.90.0 \
+            --prefix "$RUNNER_TEMP/wrangler" \
+            --cache "$RUNNER_TEMP/npm-cache-wrangler" \
+            --no-audit --no-fund
+          echo "$RUNNER_TEMP/wrangler/bin" >> "$GITHUB_PATH"
 
       - name: Deploy preview to Cloudflare Pages
         id: deploy

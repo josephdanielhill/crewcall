@@ -43,6 +43,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Neutralize crewcall's committed Playwright package tree BEFORE the action.
+      # wrangler-action@v3 runs `npm i wrangler` into the repo root; reconciling
+      # wrangler into crewcall's existing package.json/package-lock.json + node_modules
+      # tree crashes npm's arborist with "Cannot read properties of null (reading
+      # 'edgesOut')" on the ubuntu-24.04 hosted image (recurring since 2026-09-06).
+      # Pure-static repos (reflectify etc., no package.json) never hit this. The
+      # deploy job doesn't run Playwright/vitest, so the toolchain is safe to drop
+      # here — wrangler then installs into a clean dir like the static repos do.
+      - name: Clean npm tree so wrangler installs cleanly
+        run: |
+          rm -f package.json package-lock.json
+          rm -rf node_modules
 
       - name: Deploy preview to Cloudflare Pages
         id: deploy

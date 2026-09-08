@@ -14,6 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Neutralize crewcall's committed Playwright package tree BEFORE the action.
+      # wrangler-action@v3 runs `npm i wrangler` into the repo root; reconciling
+      # against crewcall's package.json/package-lock/node_modules crashes npm's
+      # arborist with "Cannot read properties of null (reading 'edgesOut')" on the
+      # ubuntu-24.04 hosted image (recurring since 2026-09-06). This is a static
+      # site deploy (no build/test), so the toolchain is safe to drop here.
+      - name: Clean npm tree so wrangler installs cleanly
+        run: |
+          rm -f package.json package-lock.json
+          rm -rf node_modules
       - name: Deploy static site to Cloudflare Pages (test)
         uses: cloudflare/wrangler-action@v3
         with:

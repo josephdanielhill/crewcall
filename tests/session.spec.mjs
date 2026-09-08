@@ -383,15 +383,16 @@ test.describe('Countdown beep (BLD-1008)', () => {
     return page.evaluate(() => (window.__crewcallCountdownBeeps || []).length);
   }
 
-  test('pre-session countdown fires exactly one beep in the last 5s (BLD-1010)', async ({ page }) => {
+  test('pre-session countdown fires a beep each second in the last 5s (BLD-1010)', async ({ page }) => {
     await withCountdownHooks(page);
     await page.goto(APP_URL);
     await clickAct(page, 'start');
-    // Prep is 10s; the countdown beep must fire once during the last 5s of it.
+    // Prep is 10s; the countdown must beep once per second during the last 5s
+    // of it (t-5, t-4, t-3, t-2, t-1) = 5 beeps by the time running begins.
     await waitForMode(page, 'running', 15000);
-    // Only the prep beep should have fired by the time running begins (the first
-    // active cadence is ~60s long, so no cadence beep can fire this early).
-    expect(await beepCount(page)).toBe(1);
+    // Only the prep beeps should have fired by the time running begins (the
+    // first active cadence is ~60s long, so no cadence beep can fire this early).
+    expect(await beepCount(page)).toBe(5);
   });
 
   test('audio backend comes up: no fallback latch, context created (BLD-1008 rework regression)', async ({ page }) => {
@@ -413,13 +414,13 @@ test.describe('Countdown beep (BLD-1008)', () => {
     expect(audio.audioUnsupported).toBe(false);
   });
 
-  test('active cadence: one beep in the t-5s window, none outside, no double-fire on pause/resume (BLD-1009/1011)', async ({ page }) => {
+  test('active cadence: one beep per second in the t-5s window, none outside, no double-fire on same second (BLD-1009/1011)', async ({ page }) => {
     await withCountdownHooks(page);
     await page.goto(APP_URL);
     await clickAct(page, 'start');
     await waitForMode(page, 'running', 15000);
 
-    // Ignore the prep beep; we're only measuring the active-cadence window.
+    // Ignore the prep beeps; we're only measuring the active-cadence window.
     await page.evaluate(() => { window.__crewcallCountdownBeeps = []; });
 
     // Pause so the real timer stops drifting, then drive elapsed deterministically.
@@ -432,20 +433,30 @@ test.describe('Countdown beep (BLD-1008)', () => {
     await page.evaluate((s) => window.__crewcallSeek(s), end - 8);
     expect(await beepCount(page)).toBe(0);
 
-    // Enter the t-5s window: exactly one beep.
+    // Enter the window at t-3s: one beep fires (sec=3).
     await page.evaluate((s) => window.__crewcallSeek(s), end - 3);
     expect(await beepCount(page)).toBe(1);
 
-    // Deeper in the window: still exactly one (fires once per t-5s crossing).
-    await page.evaluate((s) => window.__crewcallSeek(s), end - 1);
+    // Same integer-second, later moment (remaining 2.9 -> ceil still 3):
+    // no double-fire on the same second.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 2.9);
     expect(await beepCount(page)).toBe(1);
 
-    // Resume, let it run near the boundary, then pause again: no double-fire.
+    // Next second boundary (t-2s): a second beep fires (descending countdown).
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 2);
+    expect(await beepCount(page)).toBe(2);
+
+    // Continue down to t-1s: third beep fires.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 1);
+    expect(await beepCount(page)).toBe(3);
+
+    // Resume, let it run near the boundary, then pause again: no double-fire
+    // on the same integer second.
     await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
     await waitForMode(page, 'running');
     await page.waitForTimeout(300);
     await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
     await waitForMode(page, 'paused');
-    expect(await beepCount(page)).toBe(1);
+    expect(await beepCount(page)).toBe(3);
   });
 });

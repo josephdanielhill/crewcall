@@ -394,6 +394,25 @@ test.describe('Countdown beep (BLD-1008)', () => {
     expect(await beepCount(page)).toBe(1);
   });
 
+  test('audio backend comes up: no fallback latch, context created (BLD-1008 rework regression)', async ({ page }) => {
+    // Regression for the rework bug: the pre-session beep used to fire before
+    // ensureAudio(), so state.actx was null and the resulting throw latched
+    // AUDIO_FALLBACK=true, silently killing every later beep (incl. the active
+    // cadence countdown beep). The old logic-level counter tests never caught
+    // this because they record firings regardless of the audio backend.
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    // Run through prep (10s) and into the active session where the cadence
+    // countdown beep fires. The audio backend must survive: context created,
+    // never latched into fallback/unsupported.
+    await waitForMode(page, 'running', 15000);
+    const audio = await page.evaluate(() => window.__crewcallAudioState());
+    expect(audio.actxCreated).toBe(true);
+    expect(audio.audioFallback).toBe(false);
+    expect(audio.audioUnsupported).toBe(false);
+  });
+
   test('active cadence: one beep in the t-5s window, none outside, no double-fire on pause/resume (BLD-1009/1011)', async ({ page }) => {
     await withCountdownHooks(page);
     await page.goto(APP_URL);

@@ -165,6 +165,12 @@ export function runWorkout() {
 export function start() {
   build();
   if (state.sequence.length === 0) return;
+  // BLD-1008 (rework): create the AudioContext here, inside the start user
+  // gesture, so the pre-session countdown beep (fired by prepLoop before
+  // runWorkout) has a live context instead of a null one that latched
+  // AUDIO_FALLBACK and silenced all later beeps. Creating within a gesture also
+  // satisfies the browser autoplay policy (context starts running).
+  ensureAudio();
   state.elapsed = 0;
   state.prepElapsed = 0;
   prepBeepFired = false;
@@ -189,6 +195,9 @@ export function startAdvanced() {
 var prepRaf = null;
 
 export function beginPrep() {
+  // BLD-1008 (rework): same as start() — create the context inside the gesture
+  // so the pre-session countdown beep has a live, running AudioContext.
+  ensureAudio();
   state.mode = 'prep';
   state.prepStart = performance.now();
   state.prepElapsed = 0;

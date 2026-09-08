@@ -6,13 +6,38 @@ import { state, SOUND_ENABLED, COUNTDOWN_BEEPS, COUNTDOWN_WINDOW, freqFor, AUDIO
 var beepCache = {};
 
 export function ensureAudio() {
-  if (state.actx && state.actx.state !== 'closed') return;
+  if (state.actx && state.actx.state !== 'closed') {
+    // Browsers auto-suspend contexts created/resumed outside a user gesture
+    // (autoplay policy). Try to resume so scheduled beeps actually sound.
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
+    return;
+  }
   try {
     state.actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
   } catch(e) {
     setAudioUnsupported(true);
     console.warn('Web Audio API not available');
   }
+}
+
+// BLD-1008 (rework): test-only hook so Playwright can assert the *audio backend*
+// actually came up (context created, no fallback latch) rather than only the
+// logic-level beep counter. Installed only when __crewcallTestSeek is set by the
+// test before app scripts load; a no-op in production.
+if (typeof window !== 'undefined' && window.__crewcallTestSeek) {
+  window.__crewcallAudioState = function() {
+    return {
+      actxCreated: !!state.actx,
+      actxState: state.actx ? state.actx.state : null,
+      audioFallback: AUDIO_FALLBACK,
+      audioUnsupported: AUDIO_UNSUPPORTED,
+    };
+  };
 }
 
 export function createBeepUrl(freq, dur, type) {
@@ -52,7 +77,17 @@ export async function getBeepUrl(freq, dur, type) {
 
 export function beep(freq, dur, type) {
   if (AUDIO_FALLBACK || AUDIO_UNSUPPORTED || !SOUND_ENABLED) return;
+  // BLD-1008 (rework): the pre-session beep used to fire before ensureAudio(),
+  // so state.actx was null and the resulting throw latched AUDIO_FALLBACK=true
+  // forever, silently killing every later beep (incl. the active-cadence
+  // countdown beep). Create/resume the context here so a null actx can never
+  // permanently disable audio, and autoplay-suspended contexts get resumed.
+  ensureAudio();
+  if (!state.actx || state.actx.state === 'closed') { setAudioUnsupported(true); return; }
   try {
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
     var osc = state.actx.createOscillator();
     var gain = state.actx.createGain();
     osc.type = type || 'square';
@@ -70,6 +105,8 @@ export function beep(freq, dur, type) {
 
 export function beepAt(freq, dur, when, type) {
   if (AUDIO_FALLBACK || AUDIO_UNSUPPORTED || !SOUND_ENABLED) return;
+  ensureAudio();
+  if (!state.actx || state.actx.state === 'closed') { setAudioUnsupported(true); return; }
   var delay = Math.max(0, when - state.actx.currentTime);
   setTimeout(function(){ beep(freq, dur, type); }, delay * 1000);
 }

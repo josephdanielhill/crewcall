@@ -2,7 +2,7 @@
 "use strict";
 
 import { state, COLORS, RATIOS, MINLEN, PREP_DURATION, SOUND_ENABLED, COUNTDOWN_BEEPS, COUNTDOWN_WINDOW, INTENSITY_FREQ, freqFor, fmt, arrange, curCounts, computeLen, minPresentLen, canSetTarget, buildPreview, applyAutoBreaks, segIndexAt, segStart, esc } from './state.js';
-import { ensureAudio, scheduleCountdown, transitionBeep, beep, completeBeep } from './audio.js';
+import { ensureAudio, scheduleCountdown, transitionBeep, beep, countBeep, completeBeep } from './audio.js';
 import { render } from './render.js';
 import { trackEvent } from './track.js';
 import { log, initLog, addLogEntry, setRating, deleteEntry, getEntry, exportLog } from './rowlog.js';
@@ -12,6 +12,13 @@ var ALT_STROKES = { high: 32, medium: 28, med: 26, low: 24, break: null, freefor
 
 var cueTimeline = [];
 var nextCueIdx = 0;
+
+// BLD-1008: per-second countdown beep for the t-5s window.
+// countdownBeepLast tracks the last integer second we beeped at (5,4,3,2,1) in
+// the active-cadence window; prepBeepLast does the same for the pre-session
+// countdown. -1 = disarmed (outside the window).
+var countdownBeepLast = -1;
+var prepBeepLast = -1;
 
 export function build() {
   state.sequence = applyAutoBreaks(buildPreview());
@@ -115,6 +122,35 @@ function processCue() {
   state.nextCueIdx = idx;
 }
 
+// BLD-1008/1009: descending countdown beep each second during the last
+// COUNTDOWN_WINDOW (5s) of each active cadence/interval before it switches,
+// anchored to cadence transitions (segment boundaries in session timer logic —
+// NOT the 60fps render loop). Fires at t-5, t-4, t-3, t-2, t-1 (one per second);
+// no beep on the final interval (session end).
+function processCountdownCue() {
+  if (!COUNTDOWN_BEEPS || !SOUND_ENABLED) return;
+  var e = state.elapsed;
+  var idx = segIndexAt(e);
+  if (idx < 0 || idx >= state.sequence.length) return;
+  // No countdown beep on the final interval-to-session-end.
+  if (idx === state.sequence.length - 1) {
+    countdownBeepLast = -1;
+    return;
+  }
+  var remaining = state.ends[idx] - e;
+  if (remaining > 0 && remaining <= COUNTDOWN_WINDOW) {
+    // Beep once per integer second as we descend 5 -> 4 -> 3 -> 2 -> 1.
+    var sec = Math.ceil(remaining);
+    if (sec !== countdownBeepLast) {
+      countdownBeepLast = sec;
+      countBeep(sec);
+    }
+  } else {
+    // Outside the window (fresh segment, or seek backwards): re-arm.
+    countdownBeepLast = -1;
+  }
+}
+
 export function runWorkout() {
   ensureAudio();
   buildCueTimeline();
@@ -132,8 +168,16 @@ export function runWorkout() {
 export function start() {
   build();
   if (state.sequence.length === 0) return;
+  // BLD-1008 (rework): create the AudioContext here, inside the start user
+  // gesture, so the pre-session countdown beep (fired by prepLoop before
+  // runWorkout) has a live context instead of a null one that latched
+  // AUDIO_FALLBACK and silenced all later beeps. Creating within a gesture also
+  // satisfies the browser autoplay policy (context starts running).
+  ensureAudio();
   state.elapsed = 0;
   state.prepElapsed = 0;
+  prepBeepLast = -1;
+  countdownBeepLast = -1;
   state.mode = 'prep';
   state.prepStart = performance.now();
   state.prepLastTick = null;
@@ -154,9 +198,13 @@ export function startAdvanced() {
 var prepRaf = null;
 
 export function beginPrep() {
+  // BLD-1008 (rework): same as start() — create the context inside the gesture
+  // so the pre-session countdown beep has a live, running AudioContext.
+  ensureAudio();
   state.mode = 'prep';
   state.prepStart = performance.now();
   state.prepElapsed = 0;
+  prepBeepLast = -1;
   render();
   prepLoop();
 }
@@ -169,10 +217,26 @@ export function prepLoop() {
   }
   state.prepLastTick = now;
   render();
+  // BLD-1008/1010: descending countdown beep each second in the last
+  // COUNTDOWN_WINDOW (5s) of the pre-session countdown, before the session
+  // starts. Same per-second boundary logic as the active-cadence beep.
+  if (COUNTDOWN_BEEPS && SOUND_ENABLED) {
+    var prepRemaining = PREP_DURATION - state.prepElapsed;
+    if (prepRemaining > 0 && prepRemaining <= COUNTDOWN_WINDOW) {
+      var sec = Math.ceil(prepRemaining);
+      if (sec !== prepBeepLast) {
+        prepBeepLast = sec;
+        countBeep(sec);
+      }
+    } else {
+      prepBeepLast = -1;
+    }
+  }
   if (state.prepElapsed >= PREP_DURATION) {
     state.mode = 'setup';
     state.prepElapsed = 0;
     state.prepLastTick = null;
+    prepBeepLast = -1;
     ensureAudio();
     runWorkout();
     return;
@@ -186,6 +250,7 @@ function loop() {
     var now = performance.now();
     state.elapsed = state.baseElapsed + (now - state.runStart) / 1000;
     processCue();
+    processCountdownCue();
     if (state.elapsed >= state.totalDuration) {
       finish();
       return;
@@ -583,3 +648,19 @@ export function exportRowLog() {
 
 // Re-export changeTarget's dependency
 export { canSetTarget } from './state.js';
+
+// BLD-1008/1011: test-only seek hook so Playwright can deterministically advance
+// the running timer and re-run cue + countdown-boundary processing without
+// waiting through real (30-60s+) intervals. Installed only when the test sets
+// window.__crewcallTestSeek = true via addInitScript before app scripts load.
+// No-op in normal use — never present in production.
+if (typeof window !== 'undefined' && window.__crewcallTestSeek) {
+  window.__crewcallState = state;
+  window.__crewcallSeek = function(sec) {
+    state.elapsed = sec;
+    state.baseElapsed = sec;
+    state.runStart = performance.now();
+    processCue();
+    processCountdownCue();
+  };
+}

@@ -6,13 +6,38 @@ import { state, SOUND_ENABLED, COUNTDOWN_BEEPS, COUNTDOWN_WINDOW, freqFor, AUDIO
 var beepCache = {};
 
 export function ensureAudio() {
-  if (state.actx && state.actx.state !== 'closed') return;
+  if (state.actx && state.actx.state !== 'closed') {
+    // Browsers auto-suspend contexts created/resumed outside a user gesture
+    // (autoplay policy). Try to resume so scheduled beeps actually sound.
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
+    return;
+  }
   try {
     state.actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
   } catch(e) {
     setAudioUnsupported(true);
     console.warn('Web Audio API not available');
   }
+}
+
+// BLD-1008 (rework): test-only hook so Playwright can assert the *audio backend*
+// actually came up (context created, no fallback latch) rather than only the
+// logic-level beep counter. Installed only when __crewcallTestSeek is set by the
+// test before app scripts load; a no-op in production.
+if (typeof window !== 'undefined' && window.__crewcallTestSeek) {
+  window.__crewcallAudioState = function() {
+    return {
+      actxCreated: !!state.actx,
+      actxState: state.actx ? state.actx.state : null,
+      audioFallback: AUDIO_FALLBACK,
+      audioUnsupported: AUDIO_UNSUPPORTED,
+    };
+  };
 }
 
 export function createBeepUrl(freq, dur, type) {
@@ -52,7 +77,17 @@ export async function getBeepUrl(freq, dur, type) {
 
 export function beep(freq, dur, type) {
   if (AUDIO_FALLBACK || AUDIO_UNSUPPORTED || !SOUND_ENABLED) return;
+  // BLD-1008 (rework): the pre-session beep used to fire before ensureAudio(),
+  // so state.actx was null and the resulting throw latched AUDIO_FALLBACK=true
+  // forever, silently killing every later beep (incl. the active-cadence
+  // countdown beep). Create/resume the context here so a null actx can never
+  // permanently disable audio, and autoplay-suspended contexts get resumed.
+  ensureAudio();
+  if (!state.actx || state.actx.state === 'closed') { setAudioUnsupported(true); return; }
   try {
+    if (state.actx.state === 'suspended') {
+      try { state.actx.resume(); } catch(e) { /* ignore */ }
+    }
     var osc = state.actx.createOscillator();
     var gain = state.actx.createGain();
     osc.type = type || 'square';
@@ -70,6 +105,8 @@ export function beep(freq, dur, type) {
 
 export function beepAt(freq, dur, when, type) {
   if (AUDIO_FALLBACK || AUDIO_UNSUPPORTED || !SOUND_ENABLED) return;
+  ensureAudio();
+  if (!state.actx || state.actx.state === 'closed') { setAudioUnsupported(true); return; }
   var delay = Math.max(0, when - state.actx.currentTime);
   setTimeout(function(){ beep(freq, dur, type); }, delay * 1000);
 }
@@ -82,10 +119,25 @@ export function scheduleTransition(newIntensity, when) {
   beepAt(freqFor(newIntensity), 0.12, when);
 }
 
+// BLD-1008 (2nd rework, Joseph's feedback): give each second of the countdown
+// its own DISTINCT tone so 5→4→3→2→1 descends audibly like a real countdown
+// (previously only two tones existed: 5,4 shared 500Hz and 3,2,1 shared 820Hz).
+// Each second maps to a unique descending pitch; the final second (1) is lower
+// and slightly longer for a clear "go" landing.
+var COUNTDOWN_FREQS = { 5: 880, 4: 784, 3: 698, 2: 587, 1: 494 };
+var COUNTDOWN_DURS  = { 5: 0.12, 4: 0.12, 3: 0.15, 2: 0.15, 1: 0.28 };
+
 export function countBeep(secondsRemaining) {
-  var freq = secondsRemaining <= 3 ? 820 : 500;
-  var dur = secondsRemaining <= 3 ? 0.25 : 0.1;
+  var freq = COUNTDOWN_FREQS[secondsRemaining] || 698;
+  var dur = COUNTDOWN_DURS[secondsRemaining] || 0.15;
   beep(freq, dur, 'sine');
+  // Test-only hook (BLD-1008/1011): record countdown beep firings so Playwright
+  // can assert exactly-once semantics across the t-5s window. Recorded even if
+  // the underlying audio early-returns (headless/unsupported), so the counter
+  // reflects the logic, not the audio backend.
+  if (typeof window !== 'undefined' && window.__crewcallCountdownBeeps) {
+    window.__crewcallCountdownBeeps.push({ freq: freq, dur: dur, secondsRemaining: secondsRemaining });
+  }
 }
 
 export function scheduleCountdown(tickCallback, doneCallback) {

@@ -365,3 +365,133 @@ test.describe('Sidebar and layout', () => {
     await expect(page.locator('#app')).not.toHaveClass(/sidebar-hidden/);
   });
 });
+
+test.describe('Countdown beep (BLD-1008)', () => {
+  // The active-cadence timer runs on real 30-60s+ intervals, which is far too
+  // slow for E2E. Install the test hooks (window.__crewcallTestSeek /
+  // __crewcallCountdownBeeps) via addInitScript so tests can deterministically
+  // advance the running timer and observe countdown-beep firings. The seek hook
+  // is only installed when __crewcallTestSeek is set, so production is untouched.
+  async function withCountdownHooks(page) {
+    await page.addInitScript(() => {
+      window.__crewcallTestSeek = true;
+      window.__crewcallCountdownBeeps = [];
+    });
+  }
+
+  async function beepCount(page) {
+    return page.evaluate(() => (window.__crewcallCountdownBeeps || []).length);
+  }
+
+  test('pre-session countdown fires a beep each second in the last 5s (BLD-1010)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    // Prep is 10s; the countdown must beep once per second during the last 5s
+    // of it (t-5, t-4, t-3, t-2, t-1) = 5 beeps by the time running begins.
+    await waitForMode(page, 'running', 15000);
+    // Only the prep beeps should have fired by the time running begins (the
+    // first active cadence is ~60s long, so no cadence beep can fire this early).
+    expect(await beepCount(page)).toBe(5);
+  });
+
+  test('audio backend comes up: no fallback latch, context created (BLD-1008 rework regression)', async ({ page }) => {
+    // Regression for the rework bug: the pre-session beep used to fire before
+    // ensureAudio(), so state.actx was null and the resulting throw latched
+    // AUDIO_FALLBACK=true, silently killing every later beep (incl. the active
+    // cadence countdown beep). The old logic-level counter tests never caught
+    // this because they record firings regardless of the audio backend.
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    // Run through prep (10s) and into the active session where the cadence
+    // countdown beep fires. The audio backend must survive: context created,
+    // never latched into fallback/unsupported.
+    await waitForMode(page, 'running', 15000);
+    const audio = await page.evaluate(() => window.__crewcallAudioState());
+    expect(audio.actxCreated).toBe(true);
+    expect(audio.audioFallback).toBe(false);
+    expect(audio.audioUnsupported).toBe(false);
+  });
+
+  test('active cadence: one beep per second in the t-5s window, none outside, no double-fire on same second (BLD-1009/1011)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+
+    // Ignore the prep beeps; we're only measuring the active-cadence window.
+    await page.evaluate(() => { window.__crewcallCountdownBeeps = []; });
+
+    // Pause so the real timer stops drifting, then drive elapsed deterministically.
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+
+    const end = await page.evaluate(() => window.__crewcallState.ends[0]);
+
+    // Outside the t-5s window: no countdown beep.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 8);
+    expect(await beepCount(page)).toBe(0);
+
+    // Enter the window at t-3s: one beep fires (sec=3).
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 3);
+    expect(await beepCount(page)).toBe(1);
+
+    // Same integer-second, later moment (remaining 2.9 -> ceil still 3):
+    // no double-fire on the same second.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 2.9);
+    expect(await beepCount(page)).toBe(1);
+
+    // Next second boundary (t-2s): a second beep fires (descending countdown).
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 2);
+    expect(await beepCount(page)).toBe(2);
+
+    // Continue down to t-1s: third beep fires.
+    await page.evaluate((s) => window.__crewcallSeek(s), end - 1);
+    expect(await beepCount(page)).toBe(3);
+
+    // Resume, let it run near the boundary, then pause again: no double-fire
+    // on the same integer second.
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'running');
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+    expect(await beepCount(page)).toBe(3);
+  });
+
+  test('countdown fires a DISTINCT, descending tone for each second 5→4→3→2→1 (BLD-1008 2nd rework)', async ({ page }) => {
+    await withCountdownHooks(page);
+    await page.goto(APP_URL);
+    await clickAct(page, 'start');
+    await waitForMode(page, 'running', 15000);
+
+    // Only measure the active-cadence window, not the prep beeps.
+    await page.evaluate(() => { window.__crewcallCountdownBeeps = []; });
+
+    await page.evaluate(() => document.querySelector('[data-act="togglePause"]')?.click());
+    await waitForMode(page, 'paused');
+
+    const end = await page.evaluate(() => window.__crewcallState.ends[0]);
+
+    // Walk the full 5-second countdown window one integer second at a time.
+    const order = [];
+    for (let remaining = 5; remaining >= 1; remaining--) {
+      await page.evaluate((s) => window.__crewcallSeek(s), end - remaining);
+      const beeps = await page.evaluate(() => window.__crewcallCountdownBeeps || []);
+      order.push(beeps[beeps.length - 1]);
+    }
+
+    // Each of the five seconds must have fired exactly one beep.
+    expect(order.length).toBe(5);
+    // secondsRemaining must descend 5→4→3→2→1.
+    expect(order.map((b) => b.secondsRemaining)).toEqual([5, 4, 3, 2, 1]);
+    // Every second must have a UNIQUE frequency (distinct tone per second).
+    const freqs = order.map((b) => b.freq);
+    expect(new Set(freqs).size).toBe(5);
+    // The tones must DESCEND as the countdown progresses (urgency builds down).
+    for (let i = 1; i < freqs.length; i++) {
+      expect(freqs[i]).toBeLessThan(freqs[i - 1]);
+    }
+  });
+});

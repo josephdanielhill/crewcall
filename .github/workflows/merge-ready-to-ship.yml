@@ -1,0 +1,42 @@
+name: Merge Ready-to-Ship (backstop)
+
+# INDEPENDENT merge backstop for the engineering pipeline. Runs on GitHub's
+# infrastructure on a schedule, so it keeps merging Ready to Ship tickets even
+# if the mini orchestrator's promotion cron is down. It only acts on tickets
+# whose repo is THIS repo. Idempotent: reuses the open staging->main promo PR
+# and re-arms auto-merge; only raises a new PR if none is open.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes
+  workflow_dispatch:          # allow manual trigger
+
+permissions:
+  contents: read
+  pull-requests: write        # to arm auto-merge / raise promo PRs
+  issues: write
+
+concurrency:
+  group: merge-ready-to-ship
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run merge backstop
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.event.repository.name }}
+          GITHUB_ORG: josephdanielhill
+        run: |
+          python3 .github/scripts/merge-ready-to-ship.py

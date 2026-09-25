@@ -7,8 +7,8 @@ name: Merge Ready-to-Ship (backstop)
 # and re-arms auto-merge; only raises a new PR if none is open.
 
 on:
-  schedule:
-    - cron: "0 * * * *"   # hourly
+  repository_dispatch:
+    types: [ready-to-ship]     # fired by the mini's Linear webhook when a ticket enters Ready to Ship
   workflow_dispatch:          # allow manual trigger
 
 permissions:

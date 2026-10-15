@@ -165,12 +165,18 @@ def find_ticket_pr(repo, ident):
 def arm_auto_merge(repo, pr_url, delete_branch=False):
     """Arm GitHub auto-merge on an open PR. Idempotent — re-arming an already
     armed PR is a no-op. NEVER --delete-branch for staging->main promo PRs
-    (the staging integration branch must survive)."""
+    (the staging integration branch must survive).
+
+    staging->main promos (delete_branch=False) merge with a MERGE COMMIT so the
+    individual Conventional Commits reach main and Release Please can derive the
+    semantic version bump; a squash here would hide them and never bump. Main-
+    direct feature PRs (delete_branch=True) keep squash."""
     num = pr_url_to_num(pr_url)
     if not num:
         return False, "no PR number"
+    strategy = "--squash" if delete_branch else "--merge"
     args = ["pr", "merge", str(num), "--repo", f"{GITHUB_ORG}/{repo}",
-            "--squash", "--auto"]
+            strategy, "--auto"]
     if delete_branch:
         args.append("--delete-branch")
     _, rc, err = gh(args)

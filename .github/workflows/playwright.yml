@@ -19,7 +19,10 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          # Node 24 ships npm 11. Node 20 ships npm 10, whose arborist fails with
+          # "Cannot read properties of null (reading 'edgesOut')" while resolving
+          # vitest's optional peer set (build-ideal-tree.js #loadPeerSet).
+          node-version: 24
 
       - name: Install dependencies
         run: npm install

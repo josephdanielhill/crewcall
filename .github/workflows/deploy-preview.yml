@@ -36,7 +36,6 @@ env:
 
 jobs:
   preview:
-    if: ${{ github.event_name != 'pull_request' || !startsWith(github.head_ref, 'release-please--') }}
     name: Deploy preview to Cloudflare Pages
     runs-on: ubuntu-latest
     outputs:

@@ -1,0 +1,25 @@
+name: zz-botpr-test
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  mk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: create bot-authored PR on a release-please-shaped branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          B="release-please--branches--main--components--botpr-test"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$B"
+          date > .botpr-test.txt
+          git add .botpr-test.txt
+          git commit -m "chore: bot pr test"
+          git push origin "$B"
+          gh pr create --base main --head "$B" --title "chore: bot PR test (close me)" --body "bot-authored test for BLD-1149" || true
